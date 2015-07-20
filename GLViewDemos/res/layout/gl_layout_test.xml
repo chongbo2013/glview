@@ -1,0 +1,44 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:glview="http://schemas.android.com/apk/res-auto"
+    glview:layout_width="match_parent"
+    glview:layout_height="match_parent"
+    glview:orientation="horizontal" >
+
+    <LinearLayout 
+        glview:layout_width="wrap_content"
+        glview:layout_height="wrap_content" 
+        glview:orientation="vertical">
+		<View
+		    glview:layout_width="wrap_content"
+		    glview:layout_height="wrap_content"
+		    glview:background="@drawable/button" />
+		<View
+		    glview:layout_width="wrap_content"
+		    glview:layout_height="wrap_content"
+		    glview:background="@drawable/button" />
+		<View
+		    glview:layout_width="wrap_content"
+		    glview:layout_height="wrap_content"
+			glview:background="@drawable/button" />
+    </LinearLayout>
+    
+    <LinearLayout 
+        glview:layout_width="wrap_content"
+        glview:layout_height="wrap_content" 
+        glview:orientation="vertical">
+		<View
+	        glview:layout_width="wrap_content"
+	        glview:layout_height="wrap_content"
+	        glview:background="@drawable/test_bitmap" />
+	    <View
+	        glview:layout_width="wrap_content"
+	        glview:layout_height="wrap_content"
+	        glview:background="@drawable/test_bitmap" />
+	    <View
+	        glview:layout_width="wrap_content"
+	        glview:layout_height="wrap_content"
+	        glview:background="@drawable/test_bitmap" />
+    </LinearLayout>
+
+</LinearLayout>

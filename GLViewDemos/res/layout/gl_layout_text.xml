@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:glview="http://schemas.android.com/apk/res-auto"
+    glview:layout_width="match_parent"
+    glview:layout_height="match_parent" >
+    
+    <TextView
+        glview:layout_width="300dp"
+        glview:layout_height="100dp"
+        glview:textColor="@color/red"
+        glview:textSize="24sp"
+        glview:text="hahahaha" />
+</FrameLayout>

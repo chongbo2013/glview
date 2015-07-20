@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">test</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="title_activity_slide_show">SlideShowActivity</string>
+    <string name="title_activity_ripple_shader">RippleShaderActivity</string>
+    <string name="title_activity_text_view">TextViewActivity</string>
+    <string name="title_activity_list_view">ListViewActivity</string>
+    <string name="title_activity_mesh">MeshActivity</string>
+    <string name="title_activity_test">TestActivity</string>
+    <string name="title_activity_rotate_view">RotateViewActivity</string>
+    <string name="title_activity_rotate_view1">RotateView1Activity</string>
+    <string name="title_activity_recycler_view">RecyclerViewActivity</string>
+    <string name="title_activity_recycler_view_grid">RecyclerViewGridActivity</string>
+    <string name="title_activity_hardware_layer">HardwareLayerActivity</string>
+    <string name="title_activity_transition">TransitionActivity</string>
+    <string name="title_activity_transition_scene">SceneTransitionActivity</string>
+    <string name="title_activity_path_motion">PathMotionActivity</string>
+
+</resources>

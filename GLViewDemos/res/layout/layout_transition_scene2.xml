@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:glview="http://schemas.android.com/apk/res-auto"
+    glview:id="@+id/scene"
+    glview:layout_width="match_parent"
+    glview:layout_height="match_parent" >
+	<ImageButton 
+	    glview:id="@+id/circel1"
+	    glview:layout_width="100dp"
+	    glview:layout_height="100dp"
+	    glview:onClick="goToScene1"
+	    glview:scaleType="fitXY"
+	    glview:src="@drawable/bitmap1" />
+	<ImageButton 
+	    glview:id="@+id/circel2"
+	    glview:layout_width="100dp"
+	    glview:layout_height="100dp"
+	    glview:layout_gravity="end"
+	    glview:onClick="goToScene1"
+	    glview:scaleType="fitXY"
+	    glview:src="@drawable/bitmap2" />
+	<ImageButton 
+	    glview:id="@+id/circel3"
+	    glview:layout_width="100dp"
+	    glview:layout_height="100dp"
+	    glview:layout_marginTop="100dp"
+	    glview:layout_gravity="bottom"
+	    glview:onClick="goToScene1"
+	    glview:scaleType="fitXY"
+	    glview:src="@drawable/bitmap3" />
+	<ImageButton 
+	    glview:id="@+id/circel4"
+	    glview:layout_width="100dp"
+	    glview:layout_height="100dp"
+	    glview:layout_gravity="bottom|end"
+	    glview:onClick="goToScene1"
+	    glview:scaleType="fitXY"
+	    glview:src="@drawable/bitmap4" />
+	
+		<ImageView 
+		    glview:layout_width="wrap_content"
+		    glview:layout_height="wrap_content"
+		    glview:layout_gravity="center"
+		    glview:src="@drawable/rect" />
+	
+</FrameLayout>

@@ -1,0 +1,51 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:glview="http://schemas.android.com/apk/res-auto"
+    glview:layout_width="match_parent"
+    glview:layout_height="match_parent" >
+
+    <Button
+        glview:id="@+id/button"
+        glview:layout_width="wrap_content"
+        glview:layout_height="wrap_content"
+        glview:onClick="click"
+        glview:text="Switch Layout" />
+
+    <FrameLayout
+        glview:id="@+id/container"
+        glview:layout_width="match_parent"
+        glview:layout_height="match_parent"
+        glview:layout_marginTop="50dp" >
+        
+        <ImageView
+            glview:id="@+id/image"
+            glview:layout_width="wrap_content"
+            glview:layout_height="wrap_content"
+            glview:src="@drawable/bitmap1"
+            glview:layout_gravity="bottom"
+            glview:visibility="gone" />
+
+        <TextView
+            glview:id="@+id/text1"
+            glview:layout_width="wrap_content"
+            glview:layout_height="wrap_content"
+            glview:textSize="40sp"
+            glview:text="Text1" />
+
+        <TextView
+            glview:id="@+id/text2"
+            glview:layout_width="wrap_content"
+            glview:layout_height="wrap_content"
+            glview:layout_marginTop="50dp"
+            glview:textSize="40sp"
+            glview:text="Text2" />
+
+        <TextView
+            glview:id="@+id/text3"
+            glview:layout_width="wrap_content"
+            glview:layout_height="wrap_content"
+            glview:layout_marginTop="100dp"
+            glview:textSize="40sp"
+            glview:text="Text3" />
+    </FrameLayout>
+
+</FrameLayout>

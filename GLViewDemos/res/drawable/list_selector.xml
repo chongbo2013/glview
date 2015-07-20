@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:glview="http://schemas.android.com/apk/res-auto" >
+    
+    <item glview:state_selected="true" glview:drawable="@color/red" />
+    <item glview:state_pressed="true" glview:drawable="@color/green" />
+    <item glview:state_focused="true" glview:drawable="@color/blue" />
+    <item glview:state_checked="true" glview:drawable="@color/white" />
+	<item glview:drawable="@android:color/transparent" />
+</selector>

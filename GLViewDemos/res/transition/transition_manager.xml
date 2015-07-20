@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<transitionManager xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:glview="http://schemas.android.com/apk/res-auto" >
+    <transition
+		glview:fromScene="@layout/layout_transition_scene1"
+		glview:toScene="@layout/layout_transition_scene2" />
+    <transition
+		glview:fromScene="@layout/layout_transition_scene2"
+		glview:toScene="@layout/layout_transition_scene1" />
+</transitionManager>

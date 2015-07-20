@@ -1,0 +1,7 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:glview="http://schemas.android.com/apk/res-auto"
+    glview:layout_width="match_parent"
+    glview:layout_height="match_parent"
+    glview:id="@+id/container" >
+    <include layout="@layout/layout_transition_scene1" />
+</FrameLayout>

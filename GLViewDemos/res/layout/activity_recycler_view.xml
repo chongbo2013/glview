@@ -1,0 +1,33 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:glview="http://schemas.android.com/apk/res-auto"
+    glview:id="@+id/root"
+    glview:layout_width="match_parent"
+    glview:layout_height="match_parent" >
+	
+    <Button 
+        glview:id="@+id/delete"
+        glview:layout_width="match_parent"
+        glview:layout_height="wrap_content"
+        glview:gravity="center"
+        glview:visibility="invisible"
+        glview:onClick="click"
+        glview:textSize="24sp"
+        glview:text="Delete" />
+    
+    <com.glview.support.v7.widget.RecyclerView
+        glview:id="@+id/recycler_view"
+        glview:layout_width="match_parent"
+        glview:layout_height="match_parent"
+        glview:clipChildren="true"
+        glview:layout_marginTop="30dp"
+        glview:layout_marginStart="20dp" >
+    </com.glview.support.v7.widget.RecyclerView>
+    
+    <Button glview:id="@+id/add"
+        glview:layout_width="wrap_content"
+        glview:layout_height="wrap_content"
+        glview:layout_gravity="bottom|center_horizontal"
+        glview:onClick="click"
+        glview:textSize="24sp"
+        glview:text="Add" />
+</FrameLayout>
