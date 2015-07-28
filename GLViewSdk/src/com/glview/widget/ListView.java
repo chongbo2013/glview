@@ -143,7 +143,7 @@ public class ListView extends AbsListView {
                 com.glview.R.styleable.ListView_entries);
         if (entries != null) {
             setAdapter(new ArrayAdapter<CharSequence>(context,
-                    android.R.layout.simple_list_item_1, entries));
+            		com.glview.R.layout.simple_list_item_1, entries));
         }
 
         final Drawable d = GLContext.get().getResources().getDrawable(a.getResourceId(com.glview.R.styleable.ListView_divider, 0));//a.getDrawable(com.glview.R.styleable.ListView_divider);

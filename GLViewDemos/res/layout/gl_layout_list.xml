@@ -7,7 +7,6 @@
     <ListView
         glview:layout_width="match_parent"
         glview:layout_height="wrap_content"
-        glview:layout_marginTop="200dp"
         glview:focusable="true"
         glview:listSelector="@drawable/list_selector"
         glview:entries="@array/list" />
