@@ -45,13 +45,15 @@ import android.view.SoundEffectConstants;
 import android.view.SurfaceView;
 import android.view.TextureView;
 import android.view.VelocityTracker;
-import android.view.ViewDebug;
 import android.view.View.OnCreateContextMenuListener;
 import android.view.View.OnDragListener;
 import android.view.View.OnGenericMotionListener;
 import android.view.View.OnHoverListener;
+import android.view.ViewDebug;
+import android.view.ViewParent;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.glview.animation.AnimatorInflater;
 import com.glview.animation.FloatProperty;
@@ -61,7 +63,6 @@ import com.glview.content.res.GLResources;
 import com.glview.graphics.Bitmap;
 import com.glview.graphics.Point;
 import com.glview.graphics.Rect;
-import com.glview.graphics.drawable.BitmapDrawable;
 import com.glview.graphics.drawable.ColorDrawable;
 import com.glview.graphics.drawable.Drawable;
 import com.glview.graphics.shader.BaseShader;
@@ -161,12 +162,12 @@ import com.glview.widget.ScrollBarDrawable;
 
 public class View implements KeyEvent.Callback, Drawable.Callback{
 	
-	/**
+	private static final boolean DBG = false;
+
+    /**
      * The logging tag used by this class with android.util.Log.
      */
     protected static final String VIEW_LOG_TAG = "View";
-    
-    private static final String TAG = "GLView";
 
 //    static final int FLAG_SET_MEASURED_SIZE = 2;
 
@@ -1924,77 +1925,6 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
     }
     
     /**
-     * Left position of this view relative to its parent.
-     *
-     * @return The left edge of this view, in pixels.
-     */
-    public final int getLeft() {
-        return mLeft;
-    }
-    
-    /**
-     * Sets the left position of this view relative to its parent. This method is meant to be called
-     * by the layout system and should not generally be called otherwise, because the property
-     * may be changed at any time by the layout.
-     *
-     * @param left The bottom of this view, in pixels.
-     */
-    public final void setLeft(int left) {
-        if (left != mLeft) {
-        	setFrame(left, mTop, mRight, mBottom);
-        	invalidate();
-        }
-    }
-    
-    public final void setTop(int top) {
-        if (top != mTop) {
-        	setFrame(mLeft, top, mRight, mBottom);
-        	invalidate();
-        }
-    }
-    
-    public final void setRight(int right) {
-        if (right != mRight) {
-        	setFrame(mLeft, mTop, right, mBottom);
-        	invalidate();
-        }
-    }
-    
-    public final void setBottom(int bottom) {
-        if (bottom != mBottom) {
-        	setFrame(mLeft, mTop, mRight, bottom);
-        	invalidate();
-        }
-    }
-    
-    /**
-     * Left position of this view relative to its parent.
-     *
-     * @return The left edge of this view, in pixels.
-     */
-    public final int getTop() {
-        return mTop;
-    }
-    
-    /**
-     * Left position of this view relative to its parent.
-     *
-     * @return The left edge of this view, in pixels.
-     */
-    public final int getRight() {
-        return mRight;
-    }
-    
-    /**
-     * Left position of this view relative to its parent.
-     *
-     * @return The left edge of this view, in pixels.
-     */
-    public final int getBottom() {
-        return mBottom;
-    }
-    
-    /**
      * Changes the selection state of this view. A view can be selected or not.
      * Note that selection is not the same as focus. Views are typically
      * selected in the context of an AdapterView like ListView or GridView;
@@ -3162,9 +3092,9 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
             invalidate();
 //            invalidateParentCaches();
             onScrollChanged(mScrollX, mScrollY, oldX, oldY);
-//            if (!awakenScrollBars()) {
-//                postInvalidateOnAnimation();
-//            }
+            if (!awakenScrollBars()) {
+                postInvalidateOnAnimation();
+            }
         }
     }
     
@@ -3181,6 +3111,11 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
      */
     protected void onScrollChanged(int l, int t, int oldl, int oldt) {
         mBackgroundSizeChanged = true;
+        
+        final AttachInfo ai = mAttachInfo;
+        if (ai != null) {
+            ai.mViewScrollChanged = true;
+        }
     }
 
     /**
@@ -3697,31 +3632,31 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
         boolean changed = false;
 
         // Common case is there are no scroll bars.
-//        if ((viewFlags & (SCROLLBARS_VERTICAL|SCROLLBARS_HORIZONTAL)) != 0) {
-//            if ((viewFlags & SCROLLBARS_VERTICAL) != 0) {
-//                final int offset = (viewFlags & SCROLLBARS_INSET_MASK) == 0
-//                        ? 0 : getVerticalScrollbarWidth();
-//                switch (mVerticalScrollbarPosition) {
-//                    case SCROLLBAR_POSITION_DEFAULT:
-//                        if (isLayoutRtl()) {
-//                            left += offset;
-//                        } else {
-//                            right += offset;
-//                        }
-//                        break;
-//                    case SCROLLBAR_POSITION_RIGHT:
-//                        right += offset;
-//                        break;
-//                    case SCROLLBAR_POSITION_LEFT:
-//                        left += offset;
-//                        break;
-//                }
-//            }
-//            if ((viewFlags & SCROLLBARS_HORIZONTAL) != 0) {
-//                bottom += (viewFlags & SCROLLBARS_INSET_MASK) == 0
-//                        ? 0 : getHorizontalScrollbarHeight();
-//            }
-//        }
+        if ((viewFlags & (SCROLLBARS_VERTICAL|SCROLLBARS_HORIZONTAL)) != 0) {
+            if ((viewFlags & SCROLLBARS_VERTICAL) != 0) {
+                final int offset = (viewFlags & SCROLLBARS_INSET_MASK) == 0
+                        ? 0 : getVerticalScrollbarWidth();
+                switch (mVerticalScrollbarPosition) {
+                    case SCROLLBAR_POSITION_DEFAULT:
+                        if (isLayoutRtl()) {
+                            left += offset;
+                        } else {
+                            right += offset;
+                        }
+                        break;
+                    case SCROLLBAR_POSITION_RIGHT:
+                        right += offset;
+                        break;
+                    case SCROLLBAR_POSITION_LEFT:
+                        left += offset;
+                        break;
+                }
+            }
+            if ((viewFlags & SCROLLBARS_HORIZONTAL) != 0) {
+                bottom += (viewFlags & SCROLLBARS_INSET_MASK) == 0
+                        ? 0 : getHorizontalScrollbarHeight();
+            }
+        }
 
         if (mPaddingLeft != left) {
             changed = true;
@@ -3763,7 +3698,7 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
      * @param bottom the bottom padding in pixels
      */
     public void setPaddingRelative(int start, int top, int end, int bottom) {
-//        resetResolvedPadding();
+        resetResolvedPadding();
 
         mUserPaddingStart = start;
         mUserPaddingEnd = end;
@@ -3798,7 +3733,7 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
                     try {
                         return mParent.canResolveLayoutDirection();
                     } catch (AbstractMethodError e) {
-                        Log.e(TAG, mParent.getClass().getSimpleName() +
+                        Log.e(VIEW_LOG_TAG, mParent.getClass().getSimpleName() +
                                 " does not fully implement ViewParent", e);
                     }
                 }
@@ -3838,7 +3773,7 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
                             mPrivateFlags2 |= PFLAG2_LAYOUT_DIRECTION_RESOLVED_RTL;
                         }
                     } catch (AbstractMethodError e) {
-                        Log.e(TAG, mParent.getClass().getSimpleName() +
+                        Log.e(VIEW_LOG_TAG, mParent.getClass().getSimpleName() +
                                 " does not fully implement ViewParent", e);
                     }
                     break;
@@ -3986,9 +3921,9 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
      * @return the left padding in pixels
      */
     public int getPaddingLeft() {
-//        if (!isPaddingResolved()) {
-//            resolvePadding();
-//        }
+        if (!isPaddingResolved()) {
+            resolvePadding();
+        }
         return mPaddingLeft;
     }
 
@@ -4000,9 +3935,9 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
      * @return the right padding in pixels
      */
     public int getPaddingRight() {
-//        if (!isPaddingResolved()) {
-//            resolvePadding();
-//        }
+        if (!isPaddingResolved()) {
+            resolvePadding();
+        }
     	return mPaddingRight;
     }
     
@@ -4014,9 +3949,9 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
      * @return the start padding in pixels
      */
     public int getPaddingStart() {
-//        if (!isPaddingResolved()) {
-//            resolvePadding();
-//        }
+        if (!isPaddingResolved()) {
+            resolvePadding();
+        }
         return (getLayoutDirection() == LAYOUT_DIRECTION_RTL) ?
                 mPaddingRight : mPaddingLeft;
     }
@@ -4029,9 +3964,9 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
      * @return the end padding in pixels
      */
     public int getPaddingEnd() {
-//        if (!isPaddingResolved()) {
-//            resolvePadding();
-//        }
+        if (!isPaddingResolved()) {
+            resolvePadding();
+        }
         return (getLayoutDirection() == LAYOUT_DIRECTION_RTL) ?
                 mPaddingLeft : mPaddingRight;
     }
@@ -4081,10 +4016,6 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
         mPrivateFlags3 |= PFLAG3_IS_LAID_OUT;
     }
     
-//    protected void layoutFinish(boolean sizeChanged){
-//    	
-//    }
-    
     /**
      * Assign a size and position to this view.
      *
@@ -4124,14 +4055,21 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
 			mPrivateFlags |= PFLAG_HAS_BOUNDS;
 
 			if (sizeChanged) {
-				onSizeChanged(newWidth, newHeight, oldWidth, oldHeight);
-			}
+                sizeChange(newWidth, newHeight, oldWidth, oldHeight);
+            }
 			
 			mBackgroundSizeChanged = true;
 		}
 		return changed;
 	}
-	
+
+	private void sizeChange(int newWidth, int newHeight, int oldWidth, int oldHeight) {
+        onSizeChanged(newWidth, newHeight, oldWidth, oldHeight);
+        if (mOverlay != null) {
+            mOverlay.getOverlayView().setRight(newWidth);
+            mOverlay.getOverlayView().setBottom(newHeight);
+        }
+    }
 
 	/**
 	 * This is called during layout when the size of this view has changed. If
@@ -5216,7 +5154,7 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
     // This is for debugging only.
     // Dump the view hierarchy into log.
     void dumpTree(String prefix) {
-        Log.d(TAG, prefix + getClass().getSimpleName());
+        Log.d(VIEW_LOG_TAG, prefix + getClass().getSimpleName());
         if(this instanceof ViewGroup){
 			ViewGroup parent = (ViewGroup)this;
 			int childCount = parent.mChildrenCount;
@@ -5640,10 +5578,6 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
 
             onFocusChanged(false, 0, null);
             refreshDrawableState();
-
-//            if (AccessibilityManager.getInstance(mContext).isEnabled()) {
-//                notifyAccessibilityStateChanged();
-//            }
         }
     }
     
@@ -5979,9 +5913,9 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
         
         if ((changed & VISIBILITY_MASK) != 0) {
             // If the view is invisible, cleanup its display list to free up resources
-            /*if (newVisibility != VISIBLE) {
+            if (newVisibility != VISIBLE) {
                 cleanupDraw();
-            }*/
+            }
 
             if (mParent != null) {
                 mParent.onChildVisibilityChanged(this,
@@ -5999,29 +5933,69 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
      * <strong>Note:</strong> When a View clears focus the framework is trying
      * to give focus to the first focusable View from the top. Hence, if this
      * View is the first from the top that can take focus, then all callbacks
-     * related to clearing focus will be invoked after wich the framework will
+     * related to clearing focus will be invoked after which the framework will
      * give focus to this view.
      * </p>
      */
     public void clearFocus() {
+        if (DBG) {
+            System.out.println(this + " clearFocus()");
+        }
 
+        clearFocusInternal(null, true, true);
+    }
+
+    /**
+     * Clears focus from the view, optionally propagating the change up through
+     * the parent hierarchy and requesting that the root view place new focus.
+     *
+     * @param propagate whether to propagate the change up through the parent
+     *            hierarchy
+     * @param refocus when propagate is true, specifies whether to request the
+     *            root view place new focus
+     */
+    void clearFocusInternal(View focused, boolean propagate, boolean refocus) {
         if ((mPrivateFlags & PFLAG_FOCUSED) != 0) {
             mPrivateFlags &= ~PFLAG_FOCUSED;
 
-            if (mParent != null) {
+            if (propagate && mParent != null) {
                 mParent.clearChildFocus(this);
             }
 
             onFocusChanged(false, 0, null);
-
             refreshDrawableState();
-            
-//            ensureInputFocusOnFirstFocusable();
-//
-//            if (AccessibilityManager.getInstance(mContext).isEnabled()) {
-//                notifyAccessibilityStateChanged();
-//            }
+
+            if (propagate && (!refocus || !rootViewRequestFocus())) {
+                notifyGlobalFocusCleared(this);
+            }
         }
+    }
+    
+    void notifyGlobalFocusCleared(View oldFocus) {
+        if (oldFocus != null && mAttachInfo != null) {
+            mAttachInfo.mTreeObserver.dispatchOnGlobalFocusChange(oldFocus, null);
+        }
+    }
+
+    boolean rootViewRequestFocus() {
+        final View root = getRootView();
+        return root != null && root.requestFocus();
+    }
+
+    /**
+     * Called internally by the view system when a new view is getting focus.
+     * This is what clears the old focus.
+     * <p>
+     * <b>NOTE:</b> The parent view's focused child must be updated manually
+     * after calling this method. Otherwise, the view hierarchy may be left in
+     * an inconstent state.
+     */
+    void unFocus(View focused) {
+        if (DBG) {
+            System.out.println(this + " unFocus()");
+        }
+
+        clearFocusInternal(focused, false, false);
     }
     
     /**
@@ -6156,16 +6130,18 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
         if ((mPrivateFlags & PFLAG_FOCUSED) == 0) {
             mPrivateFlags |= PFLAG_FOCUSED;
 
+            View oldFocus = (mAttachInfo != null) ? getRootView().findFocus() : null;
+
             if (mParent != null) {
                 mParent.requestChildFocus(this, this);
             }
 
+            if (mAttachInfo != null) {
+                mAttachInfo.mTreeObserver.dispatchOnGlobalFocusChange(oldFocus, this);
+            }
+
             onFocusChanged(true, direction, previouslyFocusedRect);
             refreshDrawableState();
-
-//            if (AccessibilityManager.getInstance(mContext).isEnabled()) {
-//                notifyAccessibilityStateChanged();
-//            }
         }
     }
     
@@ -6384,7 +6360,7 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
                         return true;
                     }
                 } catch (AbstractMethodError e) {
-                    Log.e(TAG, "ViewParent " + p + " does not implement interface " +
+                    Log.e(VIEW_LOG_TAG, "ViewParent " + p + " does not implement interface " +
                             "method onStartNestedScroll", e);
                     // Allow the search upward to continue
                 }
@@ -7191,7 +7167,7 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
                 mTransientStateCount - 1;
         if (mTransientStateCount < 0) {
             mTransientStateCount = 0;
-            Log.e(TAG, "hasTransientState decremented below 0: " +
+            Log.e(VIEW_LOG_TAG, "hasTransientState decremented below 0: " +
                     "unmatched pair of setHasTransientState calls");
         } else if ((hasTransientState && mTransientStateCount == 1) ||
                 (!hasTransientState && mTransientStateCount == 0)) {
@@ -7202,7 +7178,7 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
                 try {
                     mParent.childHasTransientStateChanged(this, hasTransientState);
                 } catch (AbstractMethodError e) {
-                    Log.e(TAG, mParent.getClass().getSimpleName() +
+                    Log.e(VIEW_LOG_TAG, mParent.getClass().getSimpleName() +
                             " does not fully implement ViewParent", e);
                 }
             }
@@ -8288,6 +8264,11 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
          */
         boolean mHasSystemUiListeners;
         
+        /**
+         * Set to true if a view has been scrolled.
+         */
+        boolean mViewScrollChanged;
+        
         View mRootView;
         
         /**
@@ -8842,6 +8823,232 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
     }
     
     /**
+     * Top position of this view relative to its parent.
+     *
+     * @return The top of this view, in pixels.
+     */
+    public final int getTop() {
+        return mTop;
+    }
+
+    /**
+     * Sets the top position of this view relative to its parent. This method is meant to be called
+     * by the layout system and should not generally be called otherwise, because the property
+     * may be changed at any time by the layout.
+     *
+     * @param top The top of this view, in pixels.
+     */
+    public final void setTop(int top) {
+        if (top != mTop) {
+            // Double-invalidation is necessary to capture view's old and new areas
+            invalidate(true);
+
+            int width = mRight - mLeft;
+            int oldHeight = mBottom - mTop;
+
+            mTop = top;
+            mRenderNode.setTop(mTop);
+
+            sizeChange(width, mBottom - mTop, width, oldHeight);
+            
+            invalidate(true);
+
+            mBackgroundSizeChanged = true;
+            invalidateParentIfNeeded();
+        }
+    }
+
+    /**
+     * Bottom position of this view relative to its parent.
+     *
+     * @return The bottom of this view, in pixels.
+     */
+    public final int getBottom() {
+        return mBottom;
+    }
+
+    /**
+     * Sets the bottom position of this view relative to its parent. This method is meant to be
+     * called by the layout system and should not generally be called otherwise, because the
+     * property may be changed at any time by the layout.
+     *
+     * @param bottom The bottom of this view, in pixels.
+     */
+    public final void setBottom(int bottom) {
+        if (bottom != mBottom) {
+            // Double-invalidation is necessary to capture view's old and new areas
+            invalidate(true);
+
+            int width = mRight - mLeft;
+            int oldHeight = mBottom - mTop;
+
+            mBottom = bottom;
+            mRenderNode.setBottom(mBottom);
+
+            sizeChange(width, mBottom - mTop, width, oldHeight);
+
+            invalidate(true);
+
+            mBackgroundSizeChanged = true;
+            invalidateParentIfNeeded();
+        }
+    }
+
+    /**
+     * Left position of this view relative to its parent.
+     *
+     * @return The left edge of this view, in pixels.
+     */
+    public final int getLeft() {
+        return mLeft;
+    }
+
+    /**
+     * Sets the left position of this view relative to its parent. This method is meant to be called
+     * by the layout system and should not generally be called otherwise, because the property
+     * may be changed at any time by the layout.
+     *
+     * @param left The left of this view, in pixels.
+     */
+    public final void setLeft(int left) {
+        if (left != mLeft) {
+            // Double-invalidation is necessary to capture view's old and new areas
+            invalidate(true);
+
+            int oldWidth = mRight - mLeft;
+            int height = mBottom - mTop;
+
+            mLeft = left;
+            mRenderNode.setLeft(left);
+
+            sizeChange(mRight - mLeft, height, oldWidth, height);
+
+            invalidate(true);
+
+            mBackgroundSizeChanged = true;
+            invalidateParentIfNeeded();
+        }
+    }
+
+    /**
+     * Right position of this view relative to its parent.
+     *
+     * @return The right edge of this view, in pixels.
+     */
+    public final int getRight() {
+        return mRight;
+    }
+
+    /**
+     * Sets the right position of this view relative to its parent. This method is meant to be called
+     * by the layout system and should not generally be called otherwise, because the property
+     * may be changed at any time by the layout.
+     *
+     * @param right The right of this view, in pixels.
+     */
+    public final void setRight(int right) {
+        if (right != mRight) {
+            // Double-invalidation is necessary to capture view's old and new areas
+            invalidate(true);
+
+            int oldWidth = mRight - mLeft;
+            int height = mBottom - mTop;
+
+            mRight = right;
+            mRenderNode.setRight(mRight);
+
+            sizeChange(mRight - mLeft, height, oldWidth, height);
+
+            invalidate(true);
+            
+            mBackgroundSizeChanged = true;
+            invalidateParentIfNeeded();
+        }
+    }
+    
+    /**
+     * The visual x position of this view, in pixels. This is equivalent to the
+     * {@link #setTranslationX(float) translationX} property plus the current
+     * {@link #getLeft() left} property.
+     *
+     * @return The visual x position of this view, in pixels.
+     */
+    public float getX() {
+        return mLeft + getTranslationX();
+    }
+
+    /**
+     * Sets the visual x position of this view, in pixels. This is equivalent to setting the
+     * {@link #setTranslationX(float) translationX} property to be the difference between
+     * the x value passed in and the current {@link #getLeft() left} property.
+     *
+     * @param x The visual x position of this view, in pixels.
+     */
+    public void setX(float x) {
+        setTranslationX(x - mLeft);
+    }
+
+    /**
+     * The visual y position of this view, in pixels. This is equivalent to the
+     * {@link #setTranslationY(float) translationY} property plus the current
+     * {@link #getTop() top} property.
+     *
+     * @return The visual y position of this view, in pixels.
+     */
+    public float getY() {
+        return mTop + getTranslationY();
+    }
+
+    /**
+     * Sets the visual y position of this view, in pixels. This is equivalent to setting the
+     * {@link #setTranslationY(float) translationY} property to be the difference between
+     * the y value passed in and the current {@link #getTop() top} property.
+     *
+     * @param y The visual y position of this view, in pixels.
+     */
+    public void setY(float y) {
+        setTranslationY(y - mTop);
+    }
+    
+    /**
+     * The visual z position of this view, in pixels. This is equivalent to the
+     * {@link #setTranslationZ(float) translationZ} property plus the current
+     * {@link #getElevation() elevation} property.
+     *
+     * @return The visual z position of this view, in pixels.
+     */
+    @ViewDebug.ExportedProperty(category = "drawing")
+    public float getZ() {
+        return /*getElevation() + */getTranslationZ();
+    }
+
+    /**
+     * Sets the visual z position of this view, in pixels. This is equivalent to setting the
+     * {@link #setTranslationZ(float) translationZ} property to be the difference between
+     * the x value passed in and the current {@link #getElevation() elevation} property.
+     *
+     * @param z The visual z position of this view, in pixels.
+     */
+    public void setZ(float z) {
+        setTranslationZ(z/* - getElevation()*/);
+    }
+    
+    /**
+     * Used to indicate that the parent of this view should be invalidated. This functionality
+     * is used to force the parent to rebuild its display list (when hardware-accelerated),
+     * which is necessary when various parent-managed properties of the view change, such as
+     * alpha, translationX/Y, scrollX/Y, scaleX/Y, and rotation/X/Y. This method will propagate
+     * an invalidation event to the parent.
+     *
+     * @hide
+     */
+    protected void invalidateParentIfNeeded() {
+        if (mParent != null) {
+            ((View) mParent).invalidate(true);
+        }
+    }
+    
+    /**
      * The horizontal location of this view relative to its {@link #getLeft() left} position.
      * This position is post-layout, in addition to wherever the object's
      * layout placed it.
@@ -8901,10 +9108,38 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
     	}
     }
     
+    /**
+     * The amount that the view is scaled in x around the pivot point, as a proportion of
+     * the view's unscaled width. A value of 1, the default, means that no scaling is applied.
+     *
+     * <p>By default, this is 1.0f.
+     *
+     * @see #getPivotX()
+     * @see #getPivotY()
+     * @return The scaling factor.
+     */
+    public float getScaleX() {
+        return mRenderNode.getScaleX();
+    }
+    
     public void setScaleX(float scaleX) {
     	if (mRenderNode.setScaleX(scaleX)) {
     		invalidateViewProperty();
     	}
+    }
+    
+    /**
+     * The amount that the view is scaled in y around the pivot point, as a proportion of
+     * the view's unscaled height. A value of 1, the default, means that no scaling is applied.
+     *
+     * <p>By default, this is 1.0f.
+     *
+     * @see #getPivotX()
+     * @see #getPivotY()
+     * @return The scaling factor.
+     */
+    public float getScaleY() {
+        return mRenderNode.getScaleY();
     }
     
     public void setScaleY(float scaleY) {
@@ -8918,20 +9153,60 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
     	setScaleY(scale);
     }
     
+    /**
+     * The degrees that the view is rotated around the pivot point.
+     *
+     * @see #setRotation(float)
+     * @see #getPivotX()
+     * @see #getPivotY()
+     *
+     * @return The degrees of rotation.
+     */
+    public float getRotation() {
+        return mRenderNode.getRotation();
+    }
+    
     public void setRotation(float rotation) {
     	if (mRenderNode.setRotation(rotation)) {
     		invalidateViewProperty();
     	}
     }
     
-    public void setRotationX(float rotationX) {
-    	if (mRenderNode.setRotationX(rotationX)) {
-    		invalidateViewProperty();
-    	}
+    /**
+     * The degrees that the view is rotated around the vertical axis through the pivot point.
+     *
+     * @see #getPivotX()
+     * @see #getPivotY()
+     * @see #setRotationY(float)
+     *
+     * @return The degrees of Y rotation.
+     */
+    public float getRotationY() {
+        return mRenderNode.getRotationY();
     }
     
     public void setRotationY(float rotationY) {
     	if (mRenderNode.setRotationY(rotationY)) {
+    		invalidateViewProperty();
+    	}
+    }
+    
+
+    /**
+     * The degrees that the view is rotated around the horizontal axis through the pivot point.
+     *
+     * @see #getPivotX()
+     * @see #getPivotY()
+     * @see #setRotationX(float)
+     *
+     * @return The degrees of X rotation.
+     */
+    public float getRotationX() {
+        return mRenderNode.getRotationX();
+    }
+    
+    public void setRotationX(float rotationX) {
+    	if (mRenderNode.setRotationX(rotationX)) {
     		invalidateViewProperty();
     	}
     }
@@ -9395,6 +9670,134 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
         @Override
         public Float get(View object) {
             return object.getTranslationZ();
+        }
+    };
+    
+    /**
+     * A Property wrapper around the <code>x</code> functionality handled by the
+     * {@link View#setX(float)} and {@link View#getX()} methods.
+     */
+    public static final Property<View, Float> X = new FloatProperty<View>("x") {
+        @Override
+        public void setValue(View object, float value) {
+            object.setX(value);
+        }
+
+        @Override
+        public Float get(View object) {
+            return object.getX();
+        }
+    };
+
+    /**
+     * A Property wrapper around the <code>y</code> functionality handled by the
+     * {@link View#setY(float)} and {@link View#getY()} methods.
+     */
+    public static final Property<View, Float> Y = new FloatProperty<View>("y") {
+        @Override
+        public void setValue(View object, float value) {
+            object.setY(value);
+        }
+
+        @Override
+        public Float get(View object) {
+            return object.getY();
+        }
+    };
+
+    /**
+     * A Property wrapper around the <code>z</code> functionality handled by the
+     * {@link View#setZ(float)} and {@link View#getZ()} methods.
+     */
+    public static final Property<View, Float> Z = new FloatProperty<View>("z") {
+        @Override
+        public void setValue(View object, float value) {
+            object.setZ(value);
+        }
+
+        @Override
+        public Float get(View object) {
+            return object.getZ();
+        }
+    };
+
+    /**
+     * A Property wrapper around the <code>rotation</code> functionality handled by the
+     * {@link View#setRotation(float)} and {@link View#getRotation()} methods.
+     */
+    public static final Property<View, Float> ROTATION = new FloatProperty<View>("rotation") {
+        @Override
+        public void setValue(View object, float value) {
+            object.setRotation(value);
+        }
+
+        @Override
+        public Float get(View object) {
+            return object.getRotation();
+        }
+    };
+
+    /**
+     * A Property wrapper around the <code>rotationX</code> functionality handled by the
+     * {@link View#setRotationX(float)} and {@link View#getRotationX()} methods.
+     */
+    public static final Property<View, Float> ROTATION_X = new FloatProperty<View>("rotationX") {
+        @Override
+        public void setValue(View object, float value) {
+            object.setRotationX(value);
+        }
+
+        @Override
+        public Float get(View object) {
+            return object.getRotationX();
+        }
+    };
+
+    /**
+     * A Property wrapper around the <code>rotationY</code> functionality handled by the
+     * {@link View#setRotationY(float)} and {@link View#getRotationY()} methods.
+     */
+    public static final Property<View, Float> ROTATION_Y = new FloatProperty<View>("rotationY") {
+        @Override
+        public void setValue(View object, float value) {
+            object.setRotationY(value);
+        }
+
+        @Override
+        public Float get(View object) {
+            return object.getRotationY();
+        }
+    };
+
+    /**
+     * A Property wrapper around the <code>scaleX</code> functionality handled by the
+     * {@link View#setScaleX(float)} and {@link View#getScaleX()} methods.
+     */
+    public static final Property<View, Float> SCALE_X = new FloatProperty<View>("scaleX") {
+        @Override
+        public void setValue(View object, float value) {
+            object.setScaleX(value);
+        }
+
+        @Override
+        public Float get(View object) {
+            return object.getScaleX();
+        }
+    };
+
+    /**
+     * A Property wrapper around the <code>scaleY</code> functionality handled by the
+     * {@link View#setScaleY(float)} and {@link View#getScaleY()} methods.
+     */
+    public static final Property<View, Float> SCALE_Y = new FloatProperty<View>("scaleY") {
+        @Override
+        public void setValue(View object, float value) {
+            object.setScaleY(value);
+        }
+
+        @Override
+        public Float get(View object) {
+            return object.getScaleY();
         }
     };
 }

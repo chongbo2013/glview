@@ -224,6 +224,7 @@ final public class GLRootView extends SurfaceView
 			mView.dispatchDetachedFromWindow();
 		}
 		mView = view;
+		mAttachInfo.mRootView = view;
 		if (mAttatched) {
 			attachToRoot();
 		}
@@ -331,11 +332,19 @@ final public class GLRootView extends SurfaceView
             mAttachInfo.mTreeObserver.dispatchOnGlobalLayout();
         }
 		
-		if (!mAttachInfo.mTreeObserver.dispatchOnPreDraw()) {
+		boolean cancelDraw = mAttachInfo.mTreeObserver.dispatchOnPreDraw();
+		if (!cancelDraw) {
+			if (mAttachInfo.mViewScrollChanged) {
+	            mAttachInfo.mViewScrollChanged = false;
+	            mAttachInfo.mTreeObserver.dispatchOnScrollChanged();
+	        }
 			mAttachInfo.mTreeObserver.dispatchOnDraw();
 			if (mView != null) {
 				getRenderer().draw(mView);
 			}
+		} else {
+			// Try again
+			scheduleRender();
 		}
 		
 		if (mRenderMode == RENDERMODE_CONTINUOUSLY) {

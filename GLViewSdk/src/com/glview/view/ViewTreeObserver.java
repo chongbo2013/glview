@@ -19,29 +19,25 @@ package com.glview.view;
 import java.util.ArrayList;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import android.annotation.SuppressLint;
-import android.graphics.Region;
-
-import com.glview.graphics.Rect;
-
 /**
  * A view tree observer is used to register listeners that can be notified of global
  * changes in the view tree. Such global events include, but are not limited to,
  * layout of the whole tree, beginning of the drawing pass, touch mode change....
  *
  * A ViewTreeObserver should never be instantiated by applications as it is provided
- * by the views hierarchy. Refer to {@link com.View.image.view.GLView#getViewTreeObserver()}
+ * by the views hierarchy. Refer to {@link android.view.View#getViewTreeObserver()}
  * for more information.
  */
 public final class ViewTreeObserver {
     // Recursive listeners use CopyOnWriteArrayList
+    private CopyOnWriteArrayList<OnWindowFocusChangeListener> mOnWindowFocusListeners;
+    private CopyOnWriteArrayList<OnWindowAttachListener> mOnWindowAttachListeners;
     private CopyOnWriteArrayList<OnGlobalFocusChangeListener> mOnGlobalFocusListeners;
     private CopyOnWriteArrayList<OnTouchModeChangeListener> mOnTouchModeChangeListeners;
 
     // Non-recursive listeners use CopyOnWriteArray
     // Any listener invoked from ViewRootImpl.performTraversals() should not be recursive
     private CopyOnWriteArray<OnGlobalLayoutListener> mOnGlobalLayoutListeners;
-    private CopyOnWriteArray<OnComputeInternalInsetsListener> mOnComputeInternalInsetsListeners;
     private CopyOnWriteArray<OnScrollChangedListener> mOnScrollChangedListeners;
     private CopyOnWriteArray<OnPreDrawListener> mOnPreDrawListeners;
 
@@ -49,6 +45,36 @@ public final class ViewTreeObserver {
     private ArrayList<OnDrawListener> mOnDrawListeners;
 
     private boolean mAlive = true;
+
+    /**
+     * Interface definition for a callback to be invoked when the view hierarchy is
+     * attached to and detached from its window.
+     */
+    public interface OnWindowAttachListener {
+        /**
+         * Callback method to be invoked when the view hierarchy is attached to a window
+         */
+        public void onWindowAttached();
+
+        /**
+         * Callback method to be invoked when the view hierarchy is detached from a window
+         */
+        public void onWindowDetached();
+    }
+
+    /**
+     * Interface definition for a callback to be invoked when the view hierarchy's window
+     * focus state changes.
+     */
+    public interface OnWindowFocusChangeListener {
+        /**
+         * Callback method to be invoked when the window focus changes in the view tree.
+         *
+         * @param hasFocus Set to true if the window is gaining focus, false if it is
+         * losing focus.
+         */
+        public void onWindowFocusChanged(boolean hasFocus);
+    }
 
     /**
      * Interface definition for a callback to be invoked when the focus state within
@@ -91,9 +117,9 @@ public final class ViewTreeObserver {
          *
          * @return Return true to proceed with the current drawing pass, or false to cancel.
          *
-         * @see com.View.image.view.GLView#onMeasure
-         * @see com.View.image.view.GLView#onLayout
-         * @see com.View.image.view.GLView#onDraw
+         * @see android.view.View#onMeasure
+         * @see android.view.View#onLayout
+         * @see android.view.View#onDraw
          */
         public boolean onPreDraw();
     }
@@ -112,9 +138,9 @@ public final class ViewTreeObserver {
          * <p>An {@link OnDrawListener} listener <strong>cannot be added or removed</strong>
          * from this method.</p>
          *
-         * @see com.View.image.view.GLView#onMeasure
-         * @see com.View.image.view.GLView#onLayout
-         * @see com.View.image.view.GLView#onDraw
+         * @see android.view.View#onMeasure
+         * @see android.view.View#onLayout
+         * @see android.view.View#onDraw
          */
         public void onDraw();
     }
@@ -144,126 +170,9 @@ public final class ViewTreeObserver {
     }
 
     /**
-     * Parameters used with OnComputeInternalInsetsListener.
-     * 
-     * We are not yet ready to commit to this API and support it, so
-     * @hide
-     */
-    public final static class InternalInsetsInfo {
-        /**
-         * Offsets from the frame of the window at which the content of
-         * windows behind it should be placed.
-         */
-        public final Rect contentInsets = new Rect();
-
-        /**
-         * Offsets from the frame of the window at which windows behind it
-         * are visible.
-         */
-        public final Rect visibleInsets = new Rect();
-
-        /**
-         * Touchable region defined relative to the origin of the frame of the window.
-         * Only used when {@link #setTouchableInsets(int)} is called with
-         * the option {@link #TOUCHABLE_INSETS_REGION}.
-         */
-        public final Region touchableRegion = new Region();
-
-        /**
-         * Option for {@link #setTouchableInsets(int)}: the entire window frame
-         * can be touched.
-         */
-        public static final int TOUCHABLE_INSETS_FRAME = 0;
-
-        /**
-         * Option for {@link #setTouchableInsets(int)}: the area inside of
-         * the content insets can be touched.
-         */
-        public static final int TOUCHABLE_INSETS_CONTENT = 1;
-
-        /**
-         * Option for {@link #setTouchableInsets(int)}: the area inside of
-         * the visible insets can be touched.
-         */
-        public static final int TOUCHABLE_INSETS_VISIBLE = 2;
-
-        /**
-         * Option for {@link #setTouchableInsets(int)}: the area inside of
-         * the provided touchable region in {@link #touchableRegion} can be touched.
-         */
-        public static final int TOUCHABLE_INSETS_REGION = 3;
-
-        /**
-         * Set which parts of the window can be touched: either
-         * {@link #TOUCHABLE_INSETS_FRAME}, {@link #TOUCHABLE_INSETS_CONTENT},
-         * {@link #TOUCHABLE_INSETS_VISIBLE}, or {@link #TOUCHABLE_INSETS_REGION}.
-         */
-        public void setTouchableInsets(int val) {
-            mTouchableInsets = val;
-        }
-
-        int mTouchableInsets;
-
-        void reset() {
-            contentInsets.setEmpty();
-            visibleInsets.setEmpty();
-            touchableRegion.setEmpty();
-            mTouchableInsets = TOUCHABLE_INSETS_FRAME;
-        }
-
-        @Override
-        public int hashCode() {
-            int result = contentInsets != null ? contentInsets.hashCode() : 0;
-            result = 31 * result + (visibleInsets != null ? visibleInsets.hashCode() : 0);
-            result = 31 * result + (touchableRegion != null ? touchableRegion.hashCode() : 0);
-            result = 31 * result + mTouchableInsets;
-            return result;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            InternalInsetsInfo other = (InternalInsetsInfo)o;
-            return mTouchableInsets == other.mTouchableInsets &&
-                    contentInsets.equals(other.contentInsets) &&
-                    visibleInsets.equals(other.visibleInsets) &&
-                    touchableRegion.equals(other.touchableRegion);
-        }
-
-        void set(InternalInsetsInfo other) {
-            contentInsets.set(other.contentInsets);
-            visibleInsets.set(other.visibleInsets);
-            touchableRegion.set(other.touchableRegion);
-            mTouchableInsets = other.mTouchableInsets;
-        }
-    }
-
-    /**
-     * Interface definition for a callback to be invoked when layout has
-     * completed and the client can compute its interior insets.
-     * 
-     * We are not yet ready to commit to this API and support it, so
-     * @hide
-     */
-    public interface OnComputeInternalInsetsListener {
-        /**
-         * Callback method to be invoked when layout has completed and the
-         * client can compute its interior insets.
-         *
-         * @param inoutInfo Should be filled in by the implementation with
-         * the information about the insets of the window.  This is called
-         * with whatever values the previous OnComputeInternalInsetsListener
-         * returned, if there are multiple such listeners in the window.
-         */
-        public void onComputeInternalInsets(InternalInsetsInfo inoutInfo);
-    }
-
-    /**
      * Creates a new ViewTreeObserver. This constructor should not be called
      */
-    public ViewTreeObserver() {
+    ViewTreeObserver() {
     }
 
     /**
@@ -274,6 +183,22 @@ public final class ViewTreeObserver {
      * @param observer The ViewTreeObserver whose listeners must be added to this observer
      */
     void merge(ViewTreeObserver observer) {
+        if (observer.mOnWindowAttachListeners != null) {
+            if (mOnWindowAttachListeners != null) {
+                mOnWindowAttachListeners.addAll(observer.mOnWindowAttachListeners);
+            } else {
+                mOnWindowAttachListeners = observer.mOnWindowAttachListeners;
+            }
+        }
+
+        if (observer.mOnWindowFocusListeners != null) {
+            if (mOnWindowFocusListeners != null) {
+                mOnWindowFocusListeners.addAll(observer.mOnWindowFocusListeners);
+            } else {
+                mOnWindowFocusListeners = observer.mOnWindowFocusListeners;
+            }
+        }
+
         if (observer.mOnGlobalFocusListeners != null) {
             if (mOnGlobalFocusListeners != null) {
                 mOnGlobalFocusListeners.addAll(observer.mOnGlobalFocusListeners);
@@ -306,14 +231,6 @@ public final class ViewTreeObserver {
             }
         }
 
-        if (observer.mOnComputeInternalInsetsListeners != null) {
-            if (mOnComputeInternalInsetsListeners != null) {
-                mOnComputeInternalInsetsListeners.addAll(observer.mOnComputeInternalInsetsListeners);
-            } else {
-                mOnComputeInternalInsetsListeners = observer.mOnComputeInternalInsetsListeners;
-            }
-        }
-
         if (observer.mOnScrollChangedListeners != null) {
             if (mOnScrollChangedListeners != null) {
                 mOnScrollChangedListeners.addAll(observer.mOnScrollChangedListeners);
@@ -323,6 +240,76 @@ public final class ViewTreeObserver {
         }
 
         observer.kill();
+    }
+
+    /**
+     * Register a callback to be invoked when the view hierarchy is attached to a window.
+     *
+     * @param listener The callback to add
+     *
+     * @throws IllegalStateException If {@link #isAlive()} returns false
+     */
+    public void addOnWindowAttachListener(OnWindowAttachListener listener) {
+        checkIsAlive();
+
+        if (mOnWindowAttachListeners == null) {
+            mOnWindowAttachListeners
+                    = new CopyOnWriteArrayList<OnWindowAttachListener>();
+        }
+
+        mOnWindowAttachListeners.add(listener);
+    }
+
+    /**
+     * Remove a previously installed window attach callback.
+     *
+     * @param victim The callback to remove
+     *
+     * @throws IllegalStateException If {@link #isAlive()} returns false
+     *
+     * @see #addOnWindowAttachListener(android.view.ViewTreeObserver.OnWindowAttachListener)
+     */
+    public void removeOnWindowAttachListener(OnWindowAttachListener victim) {
+        checkIsAlive();
+        if (mOnWindowAttachListeners == null) {
+            return;
+        }
+        mOnWindowAttachListeners.remove(victim);
+    }
+
+    /**
+     * Register a callback to be invoked when the window focus state within the view tree changes.
+     *
+     * @param listener The callback to add
+     *
+     * @throws IllegalStateException If {@link #isAlive()} returns false
+     */
+    public void addOnWindowFocusChangeListener(OnWindowFocusChangeListener listener) {
+        checkIsAlive();
+
+        if (mOnWindowFocusListeners == null) {
+            mOnWindowFocusListeners
+                    = new CopyOnWriteArrayList<OnWindowFocusChangeListener>();
+        }
+
+        mOnWindowFocusListeners.add(listener);
+    }
+
+    /**
+     * Remove a previously installed window focus change callback.
+     *
+     * @param victim The callback to remove
+     *
+     * @throws IllegalStateException If {@link #isAlive()} returns false
+     *
+     * @see #addOnWindowFocusChangeListener(android.view.ViewTreeObserver.OnWindowFocusChangeListener)
+     */
+    public void removeOnWindowFocusChangeListener(OnWindowFocusChangeListener victim) {
+        checkIsAlive();
+        if (mOnWindowFocusListeners == null) {
+            return;
+        }
+        mOnWindowFocusListeners.remove(victim);
     }
 
     /**
@@ -447,7 +434,7 @@ public final class ViewTreeObserver {
     /**
      * <p>Register a callback to be invoked when the view tree is about to be drawn.</p>
      * <p><strong>Note:</strong> this method <strong>cannot</strong> be invoked from
-     * {@link com.aliyun.image.view.ViewTreeObserver.OnDrawListener#onDraw()}.</p>
+     * {@link android.view.ViewTreeObserver.OnDrawListener#onDraw()}.</p>
      *
      * @param listener The callback to add
      *
@@ -466,7 +453,7 @@ public final class ViewTreeObserver {
     /**
      * <p>Remove a previously installed pre-draw callback.</p>
      * <p><strong>Note:</strong> this method <strong>cannot</strong> be invoked from
-     * {@link com.aliyun.image.view.ViewTreeObserver.OnDrawListener#onDraw()}.</p>
+     * {@link android.view.ViewTreeObserver.OnDrawListener#onDraw()}.</p>
      *
      * @param victim The callback to remove
      *
@@ -550,48 +537,6 @@ public final class ViewTreeObserver {
         mOnTouchModeChangeListeners.remove(victim);
     }
 
-    /**
-     * Register a callback to be invoked when the invoked when it is time to
-     * compute the window's internal insets.
-     *
-     * @param listener The callback to add
-     *
-     * @throws IllegalStateException If {@link #isAlive()} returns false
-     * 
-     * We are not yet ready to commit to this API and support it, so
-     * @hide
-     */
-    public void addOnComputeInternalInsetsListener(OnComputeInternalInsetsListener listener) {
-        checkIsAlive();
-
-        if (mOnComputeInternalInsetsListeners == null) {
-            mOnComputeInternalInsetsListeners =
-                    new CopyOnWriteArray<OnComputeInternalInsetsListener>();
-        }
-
-        mOnComputeInternalInsetsListeners.add(listener);
-    }
-
-    /**
-     * Remove a previously installed internal insets computation callback
-     *
-     * @param victim The callback to remove
-     *
-     * @throws IllegalStateException If {@link #isAlive()} returns false
-     *
-     * @see #addOnComputeInternalInsetsListener(OnComputeInternalInsetsListener)
-     * 
-     * We are not yet ready to commit to this API and support it, so
-     * @hide
-     */
-    public void removeOnComputeInternalInsetsListener(OnComputeInternalInsetsListener victim) {
-        checkIsAlive();
-        if (mOnComputeInternalInsetsListeners == null) {
-            return;
-        }
-        mOnComputeInternalInsetsListeners.remove(victim);
-    }
-
     private void checkIsAlive() {
         if (!mAlive) {
             throw new IllegalStateException("This ViewTreeObserver is not alive, call "
@@ -620,6 +565,41 @@ public final class ViewTreeObserver {
      */
     private void kill() {
         mAlive = false;
+    }
+
+    /**
+     * Notifies registered listeners that window has been attached/detached.
+     */
+    final void dispatchOnWindowAttachedChange(boolean attached) {
+        // NOTE: because of the use of CopyOnWriteArrayList, we *must* use an iterator to
+        // perform the dispatching. The iterator is a safe guard against listeners that
+        // could mutate the list by calling the various add/remove methods. This prevents
+        // the array from being modified while we iterate it.
+        final CopyOnWriteArrayList<OnWindowAttachListener> listeners
+                = mOnWindowAttachListeners;
+        if (listeners != null && listeners.size() > 0) {
+            for (OnWindowAttachListener listener : listeners) {
+                if (attached) listener.onWindowAttached();
+                else listener.onWindowDetached();
+            }
+        }
+    }
+
+    /**
+     * Notifies registered listeners that window focus has changed.
+     */
+    final void dispatchOnWindowFocusChange(boolean hasFocus) {
+        // NOTE: because of the use of CopyOnWriteArrayList, we *must* use an iterator to
+        // perform the dispatching. The iterator is a safe guard against listeners that
+        // could mutate the list by calling the various add/remove methods. This prevents
+        // the array from being modified while we iterate it.
+        final CopyOnWriteArrayList<OnWindowFocusChangeListener> listeners
+                = mOnWindowFocusListeners;
+        if (listeners != null && listeners.size() > 0) {
+            for (OnWindowFocusChangeListener listener : listeners) {
+                listener.onWindowFocusChanged(hasFocus);
+            }
+        }
     }
 
     /**
@@ -663,6 +643,13 @@ public final class ViewTreeObserver {
     }
 
     /**
+     * Returns whether there are listeners for on pre-draw events.
+     */
+    final boolean hasOnPreDrawListeners() {
+        return mOnPreDrawListeners != null && mOnPreDrawListeners.size() > 0;
+    }
+
+    /**
      * Notifies registered listeners that the drawing pass is about to start. If a
      * listener returns true, then the drawing pass is canceled and rescheduled. This can
      * be called manually if you are forcing the drawing on a View or a hierarchy of Views
@@ -691,9 +678,7 @@ public final class ViewTreeObserver {
     /**
      * Notifies registered listeners that the drawing pass is about to start.
      */
-    
-    @SuppressLint("WrongCall")
-	public final void dispatchOnDraw() {
+    public final void dispatchOnDraw() {
         if (mOnDrawListeners != null) {
             final ArrayList<OnDrawListener> listeners = mOnDrawListeners;
             int numListeners = listeners.size();
@@ -733,38 +718,6 @@ public final class ViewTreeObserver {
                 int count = access.size();
                 for (int i = 0; i < count; i++) {
                     access.get(i).onScrollChanged();
-                }
-            } finally {
-                listeners.end();
-            }
-        }
-    }
-
-    /**
-     * Returns whether there are listeners for computing internal insets.
-     */
-    final boolean hasComputeInternalInsetsListeners() {
-        final CopyOnWriteArray<OnComputeInternalInsetsListener> listeners =
-                mOnComputeInternalInsetsListeners;
-        return (listeners != null && listeners.size() > 0);
-    }
-
-    /**
-     * Calls all listeners to compute the current insets.
-     */
-    final void dispatchOnComputeInternalInsets(InternalInsetsInfo inoutInfo) {
-        // NOTE: because of the use of CopyOnWriteArrayList, we *must* use an iterator to
-        // perform the dispatching. The iterator is a safe guard against listeners that
-        // could mutate the list by calling the various add/remove methods. This prevents
-        // the array from being modified while we iterate it.
-        final CopyOnWriteArray<OnComputeInternalInsetsListener> listeners =
-                mOnComputeInternalInsetsListeners;
-        if (listeners != null && listeners.size() > 0) {
-            CopyOnWriteArray.Access<OnComputeInternalInsetsListener> access = listeners.start();
-            try {
-                int count = access.size();
-                for (int i = 0; i < count; i++) {
-                    access.get(i).onComputeInternalInsets(inoutInfo);
                 }
             } finally {
                 listeners.end();
@@ -834,6 +787,8 @@ public final class ViewTreeObserver {
             mStart = false;
             if (mDataCopy != null) {
                 mData = mDataCopy;
+                mAccess.mData.clear();
+                mAccess.mSize = 0;
             }
             mDataCopy = null;
         }
