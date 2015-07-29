@@ -1348,7 +1348,6 @@ public abstract class ViewGroup extends View{
 		   mTransition.removeChild(this, child);
        }
 
-	   View childParent = child.mParent;
        boolean clearChildFocus = false;
        if (child == mFocused) {
            child.unFocus();
@@ -1370,7 +1369,9 @@ public abstract class ViewGroup extends View{
 
        if (clearChildFocus) {
            clearChildFocus(child);
-           ensureInputFocusOnChildRemoved(childParent, child);
+           if (!rootViewRequestFocus()) {
+               notifyGlobalFocusCleared(this);
+           }
        }
        
        onViewRemoved(child);
@@ -1568,10 +1569,6 @@ public abstract class ViewGroup extends View{
        return mTransition;
    }
    
-   protected void ensureInputFocusOnChildRemoved(View childParent, View removedChild){
-	   if(mParent != null) mParent.ensureInputFocusOnChildRemoved(childParent, removedChild);
-   }
-   
    public void removeAllViewsInLayout() {
        final int count = mChildrenCount;
        if (count <= 0) {
@@ -1616,6 +1613,9 @@ public abstract class ViewGroup extends View{
 
        if (clearChildFocus != null) {
            clearChildFocus(clearChildFocus);
+           if (!rootViewRequestFocus()) {
+               notifyGlobalFocusCleared(focused);
+           }
        }
    }
    
@@ -2662,12 +2662,12 @@ public abstract class ViewGroup extends View{
      *        FOCUS_RIGHT, or 0 for not applicable.
      */
     public View focusSearch(View focused, int direction) {
-//        if (isRootNamespace()) {
-//            // root namespace means we should consider ourselves the top of the
-//            // tree for focus searching; otherwise we could be focus searching
-//            // into other tabs.  see LocalActivityManager and TabHost for more info
-//            return FocusFinder.getInstance().findNextFocus(this, focused, direction);
-//        } else
+        if (isRootNamespace()) {
+            // root namespace means we should consider ourselves the top of the
+            // tree for focus searching; otherwise we could be focus searching
+            // into other tabs.  see LocalActivityManager and TabHost for more info
+            return FocusFinder.getInstance().findNextFocus(this, focused, direction);
+        } else
         if (mParent != null) {
             return mParent.focusSearch(focused, direction);
         }

@@ -1,0 +1,53 @@
+<LinearLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:glview="http://schemas.android.com/apk/res-auto"
+    glview:layout_width="match_parent"
+    glview:layout_height="match_parent"
+    glview:gravity="center"
+    glview:orientation="horizontal" >
+
+    <Button 
+        glview:layout_width="wrap_content"
+        glview:layout_height="wrap_content"
+        glview:textSize="@dimen/text_size_1"
+        glview:padding="10dp"
+        glview:elevation="10dp"
+        glview:background="@android:color/darker_gray"
+        glview:layout_marginStart="20dp"
+        glview:stateListAnimator="@animator/state_list"
+        glview:focusable="true"
+        glview:text="Text1" />
+    <Button 
+        glview:layout_width="wrap_content"
+        glview:layout_height="wrap_content"
+        glview:textSize="@dimen/text_size_1"
+        glview:padding="10dp"
+        glview:elevation="10dp"
+        glview:background="@android:color/darker_gray"
+        glview:layout_marginStart="20dp"
+        glview:stateListAnimator="@animator/state_list1"
+        glview:focusable="true"
+        glview:text="Text2" />
+    <Button 
+        glview:layout_width="wrap_content"
+        glview:layout_height="wrap_content"
+        glview:textSize="@dimen/text_size_1"
+        glview:padding="10dp"
+        glview:elevation="10dp"
+        glview:background="@android:color/darker_gray"
+        glview:layout_marginStart="20dp"
+        glview:stateListAnimator="@animator/state_list2"
+        glview:focusable="true"
+        glview:text="Text3" />
+    <Button 
+        glview:layout_width="wrap_content"
+        glview:layout_height="wrap_content"
+        glview:textSize="@dimen/text_size_1"
+        glview:padding="10dp"
+        glview:elevation="10dp"
+        glview:background="@android:color/darker_gray"
+        glview:layout_marginStart="20dp"
+        glview:stateListAnimator="@animator/state_list3"
+        glview:focusable="true"
+        glview:text="Text4" />
+</LinearLayout>

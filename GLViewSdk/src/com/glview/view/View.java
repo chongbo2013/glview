@@ -649,6 +649,8 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
     
     /** {@hide} */
     static final int PFLAG_SELECTED                    = 0x00000004;
+    /** {@hide} */
+    static final int PFLAG_IS_ROOT_NAMESPACE           = 0x00000008;
     
     /** {@hide} */
     static final int PFLAG_HAS_BOUNDS                  = 0x00000010;
@@ -3326,6 +3328,29 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
     }
     
     /**
+     * {@hide}
+     *
+     * @param isRoot true if the view belongs to the root namespace, false
+     *        otherwise
+     */
+    public void setIsRootNamespace(boolean isRoot) {
+        if (isRoot) {
+            mPrivateFlags |= PFLAG_IS_ROOT_NAMESPACE;
+        } else {
+            mPrivateFlags &= ~PFLAG_IS_ROOT_NAMESPACE;
+        }
+    }
+
+    /**
+     * {@hide}
+     *
+     * @return true if the view belongs to the root namespace, false otherwise
+     */
+    public boolean isRootNamespace() {
+        return (mPrivateFlags&PFLAG_IS_ROOT_NAMESPACE) != 0;
+    }
+    
+    /**
      * Look for a child view with the given id.  If this view has the given
      * id, return this view.
      *
@@ -5555,6 +5580,21 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
         } else {
             return null;
         }
+    }
+    
+    /**
+     * This method is the last chance for the focused view and its ancestors to
+     * respond to an arrow key. This is called when the focused view did not
+     * consume the key internally, nor could the view system find a new view in
+     * the requested direction to give focus to.
+     *
+     * @param focused The currently focused view.
+     * @param direction The direction focus wants to move. One of FOCUS_UP,
+     *        FOCUS_DOWN, FOCUS_LEFT, and FOCUS_RIGHT.
+     * @return True if the this view consumed this unhandled move.
+     */
+    public boolean dispatchUnhandledMove(View focused, int direction) {
+        return false;
     }
     
     /**

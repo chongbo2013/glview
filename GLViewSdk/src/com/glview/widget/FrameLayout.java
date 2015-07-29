@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
-import android.widget.FrameLayout.LayoutParams;
 
 import com.glview.content.GLContext;
 import com.glview.graphics.Rect;
@@ -16,8 +15,6 @@ import com.glview.view.View;
 import com.glview.view.ViewGroup;
 
 public class FrameLayout extends ViewGroup{
-	
-	private final static String TAG = "GLFrameLayout";
 	
     boolean mMeasureAllChildren = false;
     private static final int DEFAULT_CHILD_GRAVITY = Gravity.TOP | Gravity.START;

@@ -75,22 +75,27 @@
         <activity
             android:name=".demos.HardwareLayerActivity"
             android:label="@string/title_activity_hardware_layer"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" >
+            android:theme="@android:style/Theme.Black.NoTitleBar" >
         </activity>
         <activity
             android:name=".demos.transition.TransitionActivity"
             android:label="@string/title_activity_transition"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" >
+            android:theme="@android:style/Theme.Black.NoTitleBar" >
         </activity>
         <activity
             android:name=".demos.transition.SceneTransitionActivity"
             android:label="@string/title_activity_transition_scene"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" >
+            android:theme="@android:style/Theme.Black.NoTitleBar" >
         </activity>
         <activity
             android:name=".demos.PathMotionActivity"
             android:label="@string/title_activity_path_motion"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" >
+            android:theme="@android:style/Theme.Black.NoTitleBar" >
+        </activity>
+        <activity
+            android:name=".demos.StateListActivity"
+            android:label="@string/title_activity_state_list"
+            android:theme="@android:style/Theme.Black.NoTitleBar" >
         </activity>
     </application>
 

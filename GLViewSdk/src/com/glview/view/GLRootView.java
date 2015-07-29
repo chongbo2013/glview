@@ -28,7 +28,6 @@ import com.glview.thread.Message;
 import com.glview.view.View.AttachInfo;
 import com.glview.view.ViewGroup.LayoutParams;
 import com.glview.view.animation.AnimationUtils;
-import com.glview.widget.FrameLayout;
 
 /**
  * @hide
@@ -77,7 +76,8 @@ final public class GLRootView extends SurfaceView
 	
 	boolean mAttatched = false;
 	
-	protected View mView = null;
+	// This is the top-level view of the window, containing the window decor.
+    private ViewGroup mDecor;
     
     private int mRenderMode = RENDERMODE_WHEN_DIRTY;
     
@@ -211,7 +211,10 @@ final public class GLRootView extends SurfaceView
 	
 	void attachContentView(int resId) {
 		if (resId > 0) {
-			View v = LayoutInflater.from(getContext()).inflate(resId, new FrameLayout(getContext()), false);
+			if (mDecor == null) {
+				installDecor();
+			}
+			View v = LayoutInflater.from(getContext()).inflate(resId, mDecor, false);
 			if (v != null) {
 				attachContentView(v);
 			}
@@ -219,22 +222,32 @@ final public class GLRootView extends SurfaceView
 	}
 	
 	void attachContentView(View view) {
-		if (view == mView) return;
-		if (mView != null && mView.isAttachedToWindow()) {
-			mView.dispatchDetachedFromWindow();
+		if (mDecor == null) {
+			installDecor();
+		} else {
+			mDecor.removeAllViews();
 		}
-		mView = view;
+		mDecor.addView(view);
 		mAttachInfo.mRootView = view;
-		if (mAttatched) {
-			attachToRoot();
-		}
 		dispatchAttach();
 	}
 	
 	void dispatchAttach() {
 		for (Callback callback : mCallbacks) {
-			callback.onAttached(mView);
+			callback.onAttached(mDecor);
 		}
+	}
+	
+	private void installDecor() {
+        if (mDecor == null) {
+            mDecor = new DecorView(getContext());
+            mDecor.setDescendantFocusability(ViewGroup.FOCUS_AFTER_DESCENDANTS);
+            mDecor.setIsRootNamespace(true);
+            mAttachInfo.mRootView = mDecor;
+            if (mAttatched) {
+    			attachToRoot();
+    		}
+        }
 	}
 	
 	public void addCallback(Callback callback) {
@@ -248,14 +261,14 @@ final public class GLRootView extends SurfaceView
 	}
 	
 	void detachFromRoot() {
-		if (mView != null && mView.isAttachedToWindow()) {
-			mView.dispatchDetachedFromWindow();
+		if (mDecor != null && mDecor.isAttachedToWindow()) {
+			mDecor.dispatchDetachedFromWindow();
 		}
 	}
 	
 	void attachToRoot() {
-		if (mView != null && !mView.isAttachedToWindow()) {
-			mView.dispatchAttachedToWindow(mAttachInfo, 0);
+		if (mDecor != null && !mDecor.isAttachedToWindow()) {
+			mDecor.dispatchAttachedToWindow(mAttachInfo, 0);
 			requestLayoutGLContentView();
 		}
 	}
@@ -339,8 +352,8 @@ final public class GLRootView extends SurfaceView
 	            mAttachInfo.mTreeObserver.dispatchOnScrollChanged();
 	        }
 			mAttachInfo.mTreeObserver.dispatchOnDraw();
-			if (mView != null) {
-				getRenderer().draw(mView);
+			if (mDecor != null) {
+				getRenderer().draw(mDecor);
 			}
 		} else {
 			// Try again
@@ -360,13 +373,13 @@ final public class GLRootView extends SurfaceView
             mAttachInfo.mKeepScreenOn = false;
             mAttachInfo.mSystemUiVisibility = 0;
             mAttachInfo.mHasSystemUiListeners = false;
-            mView.dispatchCollectViewAttributes(mAttachInfo, 0);
+            mDecor.dispatchCollectViewAttributes(mAttachInfo, 0);
             mAttachInfo.mSystemUiVisibility &= ~mAttachInfo.mDisabledSystemUiVisibility;
             if (mAttachInfo.mKeepScreenOn != oldScreenOn
                     || mAttachInfo.mSystemUiVisibility != getSystemUiVisibility()) {
             	removeCallbacks(mViewAttributesRunnable);
             	post(mViewAttributesRunnable);
-            	mView.dispatchSystemUiVisibilityChanged(mAttachInfo.mSystemUiVisibility);
+            	mDecor.dispatchSystemUiVisibilityChanged(mAttachInfo.mSystemUiVisibility);
             }
         }
         return false;
@@ -390,7 +403,7 @@ final public class GLRootView extends SurfaceView
 
 	public void requestLayoutGLContentView() {
 		checkThread();
-		if (mView == null) return;
+		if (mDecor == null) return;
         // "View" system will invoke onLayout() for initialization(bug ?), we
         // have to ignore it since the GLThread is not ready yet.
         mFlags |= FLAG_NEED_LAYOUT;
@@ -400,7 +413,7 @@ final public class GLRootView extends SurfaceView
 	@Override
 	public boolean dispatchTouchEvent(MotionEvent event) {
 		if (!isEnabled()) return false;
-		if (mView != null) {
+		if (mDecor != null) {
 			MotionEvent me = MotionEvent.obtain(event);
 			me.offsetLocation(getLeft(), getTop());
 			mInputEventTask.mInputEvent = me;
@@ -416,7 +429,7 @@ final public class GLRootView extends SurfaceView
 	@Override
 	public boolean dispatchKeyEvent(KeyEvent event) {
 		if (!isEnabled()) return false;
-		if (mView != null) {
+		if (mDecor != null) {
 			mInputEventTask.mInputEvent = event;
 			mGLHandler.postAndWait(mInputEventTask);
 			return mInputEventTask.mResult;
@@ -428,20 +441,6 @@ final public class GLRootView extends SurfaceView
 	protected void onFocusChanged(final boolean gainFocus, final int direction,
 			Rect previouslyFocusedRect) {
 		super.onFocusChanged(gainFocus, direction, previouslyFocusedRect);
-		if (mView != null) {
-			mGLHandler.postAndWait(new Task() {
-				@Override
-				public void doTask() {
-					if (mView != null) {
-						if (gainFocus) {
-							mView.requestFocus(direction);
-						} else {
-							mView.clearFocus();
-						}
-					}
-				}
-			});
-		}
 	}
 	
 	private void layoutContentPane() {
@@ -450,13 +449,13 @@ final public class GLRootView extends SurfaceView
         int w = getWidth();
         int h = getHeight();
         
-        if (mView != null 
-        		&& mView.getVisibility() != View.GONE 
+        if (mDecor != null 
+        		&& mDecor.getVisibility() != View.GONE 
         		&& w != 0 && h != 0) {
         	
         	int rootWidthSpec;
         	int rootHeightSpec;
-        	LayoutParams lp = mView.getLayoutParams();
+        	LayoutParams lp = mDecor.getLayoutParams();
         	if (lp != null) {
         		if (lp.width == LayoutParams.FILL_PARENT || lp.width == LayoutParams.MATCH_PARENT) {
         			rootWidthSpec = MeasureSpec.makeMeasureSpec(w, MeasureSpec.EXACTLY);
@@ -476,18 +475,18 @@ final public class GLRootView extends SurfaceView
         		rootWidthSpec = MeasureSpec.makeMeasureSpec(w, MeasureSpec.EXACTLY);
         		rootHeightSpec = MeasureSpec.makeMeasureSpec(h, MeasureSpec.EXACTLY);
         	}
-        	mView.measure(rootWidthSpec, rootHeightSpec);
-        	mView.layout(0, 0, mView.getMeasuredWidth(), getMeasuredHeight());
+        	mDecor.measure(rootWidthSpec, rootHeightSpec);
+        	mDecor.layout(0, 0, mDecor.getMeasuredWidth(), getMeasuredHeight());
         }
     } 
 	
 	public View getContentPane() {
-		return mView;
+		return mDecor;
 	}
 	
 	public void recomputeViewAttributes(View child) {
 		checkThread();
-        if (mView == child) {
+        if (mDecor == child) {
             mAttachInfo.mRecomputeGlobalAttributes = true;
             scheduleRender();
         }
@@ -498,11 +497,11 @@ final public class GLRootView extends SurfaceView
 		boolean mResult;
 		@Override
 		public void doTask() {
-			if (mView != null && mInputEvent != null) {
+			if (mDecor != null && mInputEvent != null) {
 				if (mInputEvent instanceof KeyEvent) {
-					mResult = mView.dispatchKeyEvent((KeyEvent) mInputEvent);
+					mResult = mDecor.dispatchKeyEvent((KeyEvent) mInputEvent);
 				} else if (mInputEvent instanceof MotionEvent) {
-					mResult = mView.dispatchTouchEvent((MotionEvent) mInputEvent);
+					mResult = mDecor.dispatchTouchEvent((MotionEvent) mInputEvent);
 				} else {
 					mResult = false;
 				}
@@ -715,8 +714,65 @@ final public class GLRootView extends SurfaceView
 		public void doTask() {
 			mAttachInfo.mInTouchMode = mIsInTouchMode;
 			mAttachInfo.mTreeObserver.dispatchOnTouchModeChanged(mIsInTouchMode);
+			if (mIsInTouchMode) {
+				enterTouchMode();
+			} else {
+				leaveTouchMode();
+			}
 		}
 	}
+	
+	private boolean enterTouchMode() {
+        if (mDecor != null && mDecor.hasFocus()) {
+            // note: not relying on mFocusedView here because this could
+            // be when the window is first being added, and mFocused isn't
+            // set yet.
+            final View focused = mDecor.findFocus();
+            if (focused != null && !focused.isFocusableInTouchMode()) {
+                // There's nothing to focus. Clear and propagate through the
+                // hierarchy, but don't attempt to place new focus.
+                focused.clearFocusInternal(null, true, false);
+                return true;
+            }
+        }
+        return false;
+    }
+	
+	private boolean leaveTouchMode() {
+        if (mDecor != null) {
+            if (mDecor.hasFocus()) {
+                View focusedView = mDecor.findFocus();
+                if (!(focusedView instanceof ViewGroup)) {
+                    // some view has focus, let it keep it
+                    return false;
+                } else if (((ViewGroup) focusedView).getDescendantFocusability() !=
+                        ViewGroup.FOCUS_AFTER_DESCENDANTS) {
+                    // some view group has focus, and doesn't prefer its children
+                    // over itself for focus, so let them keep it.
+                    return false;
+                }
+            }
+
+            // find the best view to give focus to in this brave new non-touch-mode
+            // world
+            final View focused = focusSearch(null, View.FOCUS_DOWN);
+            if (focused != null) {
+                return focused.requestFocus(View.FOCUS_DOWN);
+            }
+        }
+        return false;
+    }
+	
+	/**
+     * {@inheritDoc}
+     */
+    public View focusSearch(View focused, int direction) {
+        checkThread();
+        if (!(mDecor instanceof ViewGroup)) {
+            return null;
+        }
+        return FocusFinder.getInstance().findNextFocus((ViewGroup) mDecor, focused, direction);
+    }
 	
 	@Override
 	public void onWindowFocusChanged(boolean hasWindowFocus) {
@@ -732,8 +788,8 @@ final public class GLRootView extends SurfaceView
 		@Override
 		public void doTask() {
 			mAttachInfo.mHasWindowFocus = mHasWindowFocus;
-			if (mView != null) {
-				mView.dispatchWindowFocusChanged(mHasWindowFocus);
+			if (mDecor != null) {
+				mDecor.dispatchWindowFocusChanged(mHasWindowFocus);
 			}
 		}
 	}
@@ -751,8 +807,8 @@ final public class GLRootView extends SurfaceView
 		int mVisibility;
 		@Override
 		public void doTask() {
-			if (mView != null) {
-				mView.dispatchWindowVisibilityChanged(mVisibility);
+			if (mDecor != null) {
+				mDecor.dispatchWindowVisibilityChanged(mVisibility);
 			}
 		}
 	}

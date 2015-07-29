@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:glview="http://schemas.android.com/apk/res-auto" >
+
+   	<item glview:state_focused="true" glview:state_pressed="false">
+   	    <set
+   	        glview:duration="@android:integer/config_longAnimTime">  
+   	        <objectAnimator glview:propertyName="translationZ"  
+	                        glview:valueTo="0"  
+	                        glview:valueType="floatType"/>
+	        <objectAnimator glview:propertyName="scaleX"  
+	                        glview:valueTo="1.2"  
+	                        glview:valueType="floatType"/>
+	        <objectAnimator glview:propertyName="scaleY"  
+	                        glview:valueTo="1.2"  
+	                        glview:valueType="floatType"/> 
+	    </set>
+   	</item>
+   	<item glview:state_focused="false">
+   	    <set
+   	        glview:duration="@android:integer/config_longAnimTime">  
+   	        <objectAnimator glview:propertyName="translationZ"  
+	                        glview:valueTo="0"  
+	                        glview:valueType="floatType"/>
+	        <objectAnimator glview:propertyName="scaleX"  
+	                        glview:valueTo="1"  
+	                        glview:valueType="floatType"/>  
+           	<objectAnimator glview:propertyName="scaleY"  
+	                        glview:valueTo="1"  
+	                        glview:valueType="floatType"/>  
+	    </set>
+   	</item>
+   	
+   	<item glview:state_focused="true" glview:state_pressed="true">
+   	    <set
+   	        glview:duration="@android:integer/config_longAnimTime">  
+   	        <objectAnimator glview:propertyName="translationZ"  
+	                        glview:valueTo="50"  
+	                        glview:valueType="floatType"/>
+	    </set>
+   	</item>
+</selector>

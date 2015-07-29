@@ -17,5 +17,6 @@
     <string name="title_activity_transition">TransitionActivity</string>
     <string name="title_activity_transition_scene">SceneTransitionActivity</string>
     <string name="title_activity_path_motion">PathMotionActivity</string>
+    <string name="title_activity_state_list">StateListActivity</string>
 
 </resources>
