@@ -73,6 +73,7 @@ import com.glview.hwui.GLPaint;
 import com.glview.hwui.RenderNode;
 import com.glview.thread.Handler;
 import com.glview.util.LayoutDirection;
+import com.glview.util.Predicate;
 import com.glview.util.Property;
 import com.glview.view.animation.Animation;
 import com.glview.view.animation.AnimationUtils;
@@ -202,6 +203,36 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
      * {@hide}
      */
     AttachInfo mAttachInfo;
+    
+    /**
+     * When this view has focus and the next focus is {@link #FOCUS_LEFT},
+     * the user may specify which view to go to next.
+     */
+    private int mNextFocusLeftId = View.NO_ID;
+
+    /**
+     * When this view has focus and the next focus is {@link #FOCUS_RIGHT},
+     * the user may specify which view to go to next.
+     */
+    private int mNextFocusRightId = View.NO_ID;
+
+    /**
+     * When this view has focus and the next focus is {@link #FOCUS_UP},
+     * the user may specify which view to go to next.
+     */
+    private int mNextFocusUpId = View.NO_ID;
+
+    /**
+     * When this view has focus and the next focus is {@link #FOCUS_DOWN},
+     * the user may specify which view to go to next.
+     */
+    private int mNextFocusDownId = View.NO_ID;
+
+    /**
+     * When this view has focus and the next focus is {@link #FOCUS_FORWARD},
+     * the user may specify which view to go to next.
+     */
+    int mNextFocusForwardId = View.NO_ID;
     
     private PerformClick mPerformClick;
     private CheckForLongPress mPendingCheckForLongPress;
@@ -940,6 +971,11 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
     protected int mPaddingLeft, mPaddingTop, mPaddingRight, mPaddingBottom;
     
     /**
+     * Predicate for matching a view by its id.
+     */
+    private MatchIdPredicate mMatchIdPredicate;
+    
+    /**
      * Cache the paddingRight set by the user to append to the scrollbar's size.
      *
      * @hide
@@ -1588,7 +1624,7 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
         float sy = 1f;
         boolean transformSet = false;
 
-//        int scrollbarStyle = SCROLLBARS_INSIDE_OVERLAY;
+        int scrollbarStyle = SCROLLBARS_INSIDE_OVERLAY;
         int overScrollMode = mOverScrollMode;
         boolean initializeScrollbars = false;
 
@@ -1715,15 +1751,15 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
                     viewFlagMasks |= KEEP_SCREEN_ON;
                 }
 			} else if (attr == com.glview.R.styleable.View_nextFocusLeft) {
-				// mNextFocusLeftId = a.getResourceId(attr, View.NO_ID);
+				 mNextFocusLeftId = a.getResourceId(attr, View.NO_ID);
 			} else if (attr == com.glview.R.styleable.View_nextFocusRight) {
-				// mNextFocusRightId = a.getResourceId(attr, View.NO_ID);
+				 mNextFocusRightId = a.getResourceId(attr, View.NO_ID);
 			} else if (attr == com.glview.R.styleable.View_nextFocusUp) {
-				// mNextFocusUpId = a.getResourceId(attr, View.NO_ID);
+				 mNextFocusUpId = a.getResourceId(attr, View.NO_ID);
 			} else if (attr == com.glview.R.styleable.View_nextFocusDown) {
-				// mNextFocusDownId = a.getResourceId(attr, View.NO_ID);
+				 mNextFocusDownId = a.getResourceId(attr, View.NO_ID);
 			} else if (attr == com.glview.R.styleable.View_nextFocusForward) {
-				// mNextFocusForwardId = a.getResourceId(attr, View.NO_ID);
+				 mNextFocusForwardId = a.getResourceId(attr, View.NO_ID);
 			} else if (attr == com.glview.R.styleable.View_minWidth) {
 				mMinWidth = a.getDimensionPixelSize(attr, 0);
 			} else if (attr == com.glview.R.styleable.View_minHeight) {
@@ -1833,6 +1869,27 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
         }
         
 		a.recycle();
+		
+		// Needs to be called after mViewFlags is set
+        if (scrollbarStyle != SCROLLBARS_INSIDE_OVERLAY) {
+            recomputePadding();
+        }
+
+        if (x != 0 || y != 0) {
+            scrollTo(x, y);
+        }
+
+        if (transformSet) {
+            setTranslationX(tx);
+            setTranslationY(ty);
+            setTranslationZ(tz);
+//            setElevation(elevation);
+            setRotation(rotation);
+            setRotationX(rotationX);
+            setRotationY(rotationY);
+            setScaleX(sx);
+            setScaleY(sy);
+        }
     }
 
     /**
@@ -3374,6 +3431,91 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
             return this;
         }
         return null;
+    }
+    
+    /**
+     * {@hide}
+     * @param tag the tag of the view to be found
+     * @return the view of specified tag, null if cannot be found
+     */
+    protected View findViewWithTagTraversal(Object tag) {
+        if (tag != null && tag.equals(mTag)) {
+            return this;
+        }
+        return null;
+    }
+    
+    /**
+     * {@hide}
+     * @param predicate The predicate to evaluate.
+     * @param childToSkip If not null, ignores this child during the recursive traversal.
+     * @return The first view that matches the predicate or null.
+     */
+    protected View findViewByPredicateTraversal(Predicate<View> predicate, View childToSkip) {
+        if (predicate.apply(this)) {
+            return this;
+        }
+        return null;
+    }
+    
+    /**
+     * Look for a child view with the given tag.  If this view has the given
+     * tag, return this view.
+     *
+     * @param tag The tag to search for, using "tag.equals(getTag())".
+     * @return The View that has the given tag in the hierarchy or null
+     */
+    public final View findViewWithTag(Object tag) {
+        if (tag == null) {
+            return null;
+        }
+        return findViewWithTagTraversal(tag);
+    }
+
+    /**
+     * {@hide}
+     * Look for a child view that matches the specified predicate.
+     * If this view matches the predicate, return this view.
+     *
+     * @param predicate The predicate to evaluate.
+     * @return The first view that matches the predicate or null.
+     */
+    public final View findViewByPredicate(Predicate<View> predicate) {
+        return findViewByPredicateTraversal(predicate, null);
+    }
+
+    /**
+     * {@hide}
+     * Look for a child view that matches the specified predicate,
+     * starting with the specified view and its descendents and then
+     * recusively searching the ancestors and siblings of that view
+     * until this view is reached.
+     *
+     * This method is useful in cases where the predicate does not match
+     * a single unique view (perhaps multiple views use the same id)
+     * and we are trying to find the view that is "closest" in scope to the
+     * starting view.
+     *
+     * @param start The view to start from.
+     * @param predicate The predicate to evaluate.
+     * @return The first view that matches the predicate or null.
+     */
+    public final View findViewByPredicateInsideOut(View start, Predicate<View> predicate) {
+        View childToSkip = null;
+        for (;;) {
+            View view = start.findViewByPredicateTraversal(predicate, childToSkip);
+            if (view != null || start == this) {
+                return view;
+            }
+
+            ViewGroup parent = start.getParent();
+            if (parent == null || !(parent instanceof View)) {
+                return null;
+            }
+
+            childToSkip = start;
+            start = (View) parent;
+        }
     }
     
     /**
@@ -5190,6 +5332,57 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
     }
     
     /**
+     * If a user manually specified the next view id for a particular direction,
+     * use the root to look up the view.
+     * @param root The root view of the hierarchy containing this view.
+     * @param direction One of FOCUS_UP, FOCUS_DOWN, FOCUS_LEFT, FOCUS_RIGHT, FOCUS_FORWARD,
+     * or FOCUS_BACKWARD.
+     * @return The user specified next view, or null if there is none.
+     */
+    View findUserSetNextFocus(View root, int direction) {
+        switch (direction) {
+            case FOCUS_LEFT:
+                if (mNextFocusLeftId == View.NO_ID) return null;
+                return findViewInsideOutShouldExist(root, mNextFocusLeftId);
+            case FOCUS_RIGHT:
+                if (mNextFocusRightId == View.NO_ID) return null;
+                return findViewInsideOutShouldExist(root, mNextFocusRightId);
+            case FOCUS_UP:
+                if (mNextFocusUpId == View.NO_ID) return null;
+                return findViewInsideOutShouldExist(root, mNextFocusUpId);
+            case FOCUS_DOWN:
+                if (mNextFocusDownId == View.NO_ID) return null;
+                return findViewInsideOutShouldExist(root, mNextFocusDownId);
+            case FOCUS_FORWARD:
+                if (mNextFocusForwardId == View.NO_ID) return null;
+                return findViewInsideOutShouldExist(root, mNextFocusForwardId);
+            case FOCUS_BACKWARD: {
+                if (mID == View.NO_ID) return null;
+                final int id = mID;
+                return root.findViewByPredicateInsideOut(this, new Predicate<View>() {
+                    @Override
+                    public boolean apply(View t) {
+                        return t.mNextFocusForwardId == id;
+                    }
+                });
+            }
+        }
+        return null;
+    }
+
+    private View findViewInsideOutShouldExist(View root, int id) {
+        if (mMatchIdPredicate == null) {
+            mMatchIdPredicate = new MatchIdPredicate();
+        }
+        mMatchIdPredicate.mId = id;
+        View result = root.findViewByPredicateInsideOut(this, mMatchIdPredicate);
+        if (result == null) {
+            Log.w(VIEW_LOG_TAG, "couldn't find view with id " + id);
+        }
+        return result;
+    }
+    
+    /**
      * Find and return all focusable views that are descendants of this view,
      * possibly including this view if it is focusable itself.
      *
@@ -5683,6 +5876,164 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
         if (focusableInTouchMode) {
             setFlags(FOCUSABLE, FOCUSABLE_MASK);
         }
+    }
+    
+    /**
+     * Returns whether the screen should remain on, corresponding to the current
+     * value of {@link #KEEP_SCREEN_ON}.
+     *
+     * @return Returns true if {@link #KEEP_SCREEN_ON} is set.
+     *
+     * @see #setKeepScreenOn(boolean)
+     *
+     * @attr ref android.R.styleable#View_keepScreenOn
+     */
+    public boolean getKeepScreenOn() {
+        return (mViewFlags & KEEP_SCREEN_ON) != 0;
+    }
+
+    /**
+     * Controls whether the screen should remain on, modifying the
+     * value of {@link #KEEP_SCREEN_ON}.
+     *
+     * @param keepScreenOn Supply true to set {@link #KEEP_SCREEN_ON}.
+     *
+     * @see #getKeepScreenOn()
+     *
+     * @attr ref android.R.styleable#View_keepScreenOn
+     */
+    public void setKeepScreenOn(boolean keepScreenOn) {
+        setFlags(keepScreenOn ? KEEP_SCREEN_ON : 0, KEEP_SCREEN_ON);
+    }
+
+    /**
+     * Gets the id of the view to use when the next focus is {@link #FOCUS_LEFT}.
+     * @return The next focus ID, or {@link #NO_ID} if the framework should decide automatically.
+     *
+     * @attr ref android.R.styleable#View_nextFocusLeft
+     */
+    public int getNextFocusLeftId() {
+        return mNextFocusLeftId;
+    }
+
+    /**
+     * Sets the id of the view to use when the next focus is {@link #FOCUS_LEFT}.
+     * @param nextFocusLeftId The next focus ID, or {@link #NO_ID} if the framework should
+     * decide automatically.
+     *
+     * @attr ref android.R.styleable#View_nextFocusLeft
+     */
+    public void setNextFocusLeftId(int nextFocusLeftId) {
+        mNextFocusLeftId = nextFocusLeftId;
+    }
+
+    /**
+     * Gets the id of the view to use when the next focus is {@link #FOCUS_RIGHT}.
+     * @return The next focus ID, or {@link #NO_ID} if the framework should decide automatically.
+     *
+     * @attr ref android.R.styleable#View_nextFocusRight
+     */
+    public int getNextFocusRightId() {
+        return mNextFocusRightId;
+    }
+
+    /**
+     * Sets the id of the view to use when the next focus is {@link #FOCUS_RIGHT}.
+     * @param nextFocusRightId The next focus ID, or {@link #NO_ID} if the framework should
+     * decide automatically.
+     *
+     * @attr ref android.R.styleable#View_nextFocusRight
+     */
+    public void setNextFocusRightId(int nextFocusRightId) {
+        mNextFocusRightId = nextFocusRightId;
+    }
+
+    /**
+     * Gets the id of the view to use when the next focus is {@link #FOCUS_UP}.
+     * @return The next focus ID, or {@link #NO_ID} if the framework should decide automatically.
+     *
+     * @attr ref android.R.styleable#View_nextFocusUp
+     */
+    public int getNextFocusUpId() {
+        return mNextFocusUpId;
+    }
+
+    /**
+     * Sets the id of the view to use when the next focus is {@link #FOCUS_UP}.
+     * @param nextFocusUpId The next focus ID, or {@link #NO_ID} if the framework should
+     * decide automatically.
+     *
+     * @attr ref android.R.styleable#View_nextFocusUp
+     */
+    public void setNextFocusUpId(int nextFocusUpId) {
+        mNextFocusUpId = nextFocusUpId;
+    }
+
+    /**
+     * Gets the id of the view to use when the next focus is {@link #FOCUS_DOWN}.
+     * @return The next focus ID, or {@link #NO_ID} if the framework should decide automatically.
+     *
+     * @attr ref android.R.styleable#View_nextFocusDown
+     */
+    public int getNextFocusDownId() {
+        return mNextFocusDownId;
+    }
+
+    /**
+     * Sets the id of the view to use when the next focus is {@link #FOCUS_DOWN}.
+     * @param nextFocusDownId The next focus ID, or {@link #NO_ID} if the framework should
+     * decide automatically.
+     *
+     * @attr ref android.R.styleable#View_nextFocusDown
+     */
+    public void setNextFocusDownId(int nextFocusDownId) {
+        mNextFocusDownId = nextFocusDownId;
+    }
+
+    /**
+     * Gets the id of the view to use when the next focus is {@link #FOCUS_FORWARD}.
+     * @return The next focus ID, or {@link #NO_ID} if the framework should decide automatically.
+     *
+     * @attr ref android.R.styleable#View_nextFocusForward
+     */
+    public int getNextFocusForwardId() {
+        return mNextFocusForwardId;
+    }
+
+    /**
+     * Sets the id of the view to use when the next focus is {@link #FOCUS_FORWARD}.
+     * @param nextFocusForwardId The next focus ID, or {@link #NO_ID} if the framework should
+     * decide automatically.
+     *
+     * @attr ref android.R.styleable#View_nextFocusForward
+     */
+    public void setNextFocusForwardId(int nextFocusForwardId) {
+        mNextFocusForwardId = nextFocusForwardId;
+    }
+
+    /**
+     * Returns the visibility of this view and all of its ancestors
+     *
+     * @return True if this view and all of its ancestors are {@link #VISIBLE}
+     */
+    public boolean isShown() {
+        View current = this;
+        //noinspection ConstantConditions
+        do {
+            if ((current.mViewFlags & VISIBILITY_MASK) != VISIBLE) {
+                return false;
+            }
+            ViewGroup parent = current.mParent;
+            if (parent == null) {
+                return false; // We are not attached to the view root
+            }
+            if (!(parent instanceof View)) {
+                return true;
+            }
+            current = (View) parent;
+        } while (current != null);
+
+        return false;
     }
 
     /**
@@ -9840,4 +10191,13 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
             return object.getScaleY();
         }
     };
+    
+    private class MatchIdPredicate implements Predicate<View> {
+        public int mId;
+
+        @Override
+        public boolean apply(View view) {
+            return (view.mID == mId);
+        }
+    }
 }
