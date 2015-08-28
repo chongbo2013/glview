@@ -13,6 +13,8 @@ import android.util.Log;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.SurfaceView;
+import android.view.TextureView;
 
 import com.glview.R;
 import com.glview.animation.LayoutTransition;
@@ -3047,9 +3049,17 @@ public abstract class ViewGroup extends View{
          */
         public LayoutParams(Context c, AttributeSet attrs) {
             TypedArray a = c.obtainStyledAttributes(attrs, com.glview.R.styleable.ViewGroup_Layout);
-            setBaseAttributes(a,
-            		com.glview.R.styleable.ViewGroup_Layout_layout_width,
-                    com.glview.R.styleable.ViewGroup_Layout_layout_height);
+            try {
+            	setBaseAttributes(a,
+            			com.glview.R.styleable.ViewGroup_Layout_layout_width,
+            			com.glview.R.styleable.ViewGroup_Layout_layout_height);
+            } catch (Throwable tr) {
+            	a.recycle();
+            	a = c.obtainStyledAttributes(attrs, com.glview.AndroidR.styleable.ViewGroup_Layout);
+            	setBaseAttributes(a,
+            			com.glview.AndroidR.styleable.ViewGroup_Layout_layout_width,
+            			com.glview.AndroidR.styleable.ViewGroup_Layout_layout_height);
+            }
             a.recycle();
         }
 
@@ -3245,12 +3255,23 @@ public abstract class ViewGroup extends View{
             super();
 
             TypedArray a = c.obtainStyledAttributes(attrs, com.glview.R.styleable.ViewGroup_MarginLayout);
-            setBaseAttributes(a,
-                    com.glview.R.styleable.ViewGroup_MarginLayout_layout_width,
-                    com.glview.R.styleable.ViewGroup_MarginLayout_layout_height);
+            TypedArray androidA = c.obtainStyledAttributes(attrs, com.glview.AndroidR.styleable.ViewGroup_MarginLayout);
+            try {
+            	setBaseAttributes(a,
+            			com.glview.R.styleable.ViewGroup_MarginLayout_layout_width,
+            			com.glview.R.styleable.ViewGroup_MarginLayout_layout_height);
+            } catch (Throwable tr) {
+            	setBaseAttributes(androidA,
+            			com.glview.AndroidR.styleable.ViewGroup_Layout_layout_width,
+            			com.glview.AndroidR.styleable.ViewGroup_Layout_layout_height);
+            }
 
             int margin = a.getDimensionPixelSize(
             		com.glview.R.styleable.ViewGroup_MarginLayout_layout_margin, -1);
+            if (margin < 0) {
+            	margin = androidA.getDimensionPixelSize(
+                		com.glview.AndroidR.styleable.ViewGroup_MarginLayout_layout_margin, -1);
+            }
             if (margin >= 0) {
                 leftMargin = margin;
                 topMargin = margin;
@@ -3261,12 +3282,22 @@ public abstract class ViewGroup extends View{
                 		com.glview.R.styleable.ViewGroup_MarginLayout_layout_marginLeft,
                         UNDEFINED_MARGIN);
                 if (leftMargin == UNDEFINED_MARGIN) {
+                	leftMargin = androidA.getDimensionPixelSize(
+                    		com.glview.AndroidR.styleable.ViewGroup_MarginLayout_layout_marginLeft,
+                            UNDEFINED_MARGIN);
+                }
+                if (leftMargin == UNDEFINED_MARGIN) {
                     mMarginFlags |= LEFT_MARGIN_UNDEFINED_MASK;
                     leftMargin = DEFAULT_MARGIN_RESOLVED;
                 }
                 rightMargin = a.getDimensionPixelSize(
                 		com.glview.R.styleable.ViewGroup_MarginLayout_layout_marginRight,
                         UNDEFINED_MARGIN);
+                if (rightMargin == UNDEFINED_MARGIN) {
+                	rightMargin = androidA.getDimensionPixelSize(
+                    		com.glview.AndroidR.styleable.ViewGroup_MarginLayout_layout_marginRight,
+                            UNDEFINED_MARGIN);
+                }
                 if (rightMargin == UNDEFINED_MARGIN) {
                     mMarginFlags |= RIGHT_MARGIN_UNDEFINED_MASK;
                     rightMargin = DEFAULT_MARGIN_RESOLVED;
@@ -3275,17 +3306,37 @@ public abstract class ViewGroup extends View{
                 topMargin = a.getDimensionPixelSize(
                 		com.glview.R.styleable.ViewGroup_MarginLayout_layout_marginTop,
                         DEFAULT_MARGIN_RESOLVED);
+                if (topMargin == UNDEFINED_MARGIN) {
+                	topMargin = androidA.getDimensionPixelSize(
+                    		com.glview.AndroidR.styleable.ViewGroup_MarginLayout_layout_marginTop,
+                            UNDEFINED_MARGIN);
+                }
                 bottomMargin = a.getDimensionPixelSize(
                 		com.glview.R.styleable.ViewGroup_MarginLayout_layout_marginBottom,
                         DEFAULT_MARGIN_RESOLVED);
-
+                if (bottomMargin == UNDEFINED_MARGIN) {
+                	bottomMargin = androidA.getDimensionPixelSize(
+                    		com.glview.AndroidR.styleable.ViewGroup_MarginLayout_layout_marginBottom,
+                            UNDEFINED_MARGIN);
+                }
+                
+                startMargin = a.getDimensionPixelSize(
+                		com.glview.R.styleable.ViewGroup_MarginLayout_layout_marginStart,
+                        DEFAULT_MARGIN_RELATIVE);
+                endMargin = a.getDimensionPixelSize(
+                		com.glview.R.styleable.ViewGroup_MarginLayout_layout_marginEnd,
+                        DEFAULT_MARGIN_RELATIVE);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-	                startMargin = a.getDimensionPixelSize(
-	                		com.glview.R.styleable.ViewGroup_MarginLayout_layout_marginStart,
-	                        DEFAULT_MARGIN_RELATIVE);
-	                endMargin = a.getDimensionPixelSize(
-	                		com.glview.R.styleable.ViewGroup_MarginLayout_layout_marginEnd,
-	                        DEFAULT_MARGIN_RELATIVE);
+                	if (startMargin == DEFAULT_MARGIN_RELATIVE) {
+                		startMargin = androidA.getDimensionPixelSize(
+                				com.glview.AndroidR.styleable.ViewGroup_MarginLayout_layout_marginStart,
+                				DEFAULT_MARGIN_RELATIVE);
+                	}
+                	if (endMargin == DEFAULT_MARGIN_RELATIVE) {
+                		endMargin = androidA.getDimensionPixelSize(
+                				com.glview.AndroidR.styleable.ViewGroup_MarginLayout_layout_marginEnd,
+                				DEFAULT_MARGIN_RELATIVE);
+                	}
                 }
 
                 if (isMarginRelative()) {
@@ -3293,12 +3344,13 @@ public abstract class ViewGroup extends View{
                 }
             }
 
-            final boolean hasRtlSupport = true;//c.getApplicationInfo().hasRtlSupport();
+            final boolean hasRtlSupport = true;
 
             // Layout direction is LTR by default
             mMarginFlags |= LAYOUT_DIRECTION_LTR;
 
             a.recycle();
+            androidA.recycle();
         }
 
         /**

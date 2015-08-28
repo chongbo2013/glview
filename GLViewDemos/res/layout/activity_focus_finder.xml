@@ -1,0 +1,59 @@
+<LinearLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:glview="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    glview:gravity="center"
+    glview:orientation="horizontal" >
+
+    <LinearLayout 
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        glview:orientation="vertical" >
+        <Button 
+	        android:layout_width="wrap_content"
+	        android:layout_height="300dp"
+	        glview:textSize="@dimen/text_size_1"
+	        glview:padding="10dp"
+	        glview:elevation="10dp"
+	        glview:background="@drawable/btn_default"
+	        glview:focusable="true"
+	        glview:clickable="true"
+	        glview:text="Text1" />
+    </LinearLayout>
+    <LinearLayout 
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        glview:orientation="vertical" >
+        <Button 
+	        android:layout_width="wrap_content"
+	        android:layout_height="100dp"
+	        glview:textSize="@dimen/text_size_1"
+	        glview:padding="10dp"
+	        glview:elevation="10dp"
+	        glview:background="@drawable/btn_default"
+	        glview:focusable="true"
+	        glview:clickable="true"
+	        glview:text="Text2" />
+        <Button 
+	        android:layout_width="wrap_content"
+	        android:layout_height="100dp"
+	        glview:textSize="@dimen/text_size_1"
+	        glview:padding="10dp"
+	        glview:elevation="10dp"
+	        glview:background="@drawable/btn_default"
+	        glview:focusable="true"
+	        glview:clickable="true"
+	        glview:text="Text3" />
+        <Button 
+	        android:layout_width="wrap_content"
+	        android:layout_height="100dp"
+	        glview:textSize="@dimen/text_size_1"
+	        glview:padding="10dp"
+	        glview:elevation="10dp"
+	        glview:background="@drawable/btn_default"
+	        glview:focusable="true"
+	        glview:clickable="true"
+	        glview:text="Text4" />
+    </LinearLayout>
+</LinearLayout>

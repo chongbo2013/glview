@@ -18,5 +18,7 @@
     <string name="title_activity_transition_scene">SceneTransitionActivity</string>
     <string name="title_activity_path_motion">PathMotionActivity</string>
     <string name="title_activity_state_list">StateListActivity</string>
+    <string name="title_activity_focus_finder">FocusFinderActivity</string>
+    <string name="title_activity_focus_finder2">FocusFinder2Activity</string>
 
 </resources>

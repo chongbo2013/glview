@@ -1249,12 +1249,19 @@ public class LinearLayout extends ViewGroup{
          */
         public LayoutParams(Context c, AttributeSet attrs) {
             super(c, attrs);
+            
+            TypedArray androidA =
+                    c.obtainStyledAttributes(attrs, com.glview.AndroidR.styleable.LinearLayout_Layout);
+    		weight = androidA.getFloat(com.glview.AndroidR.styleable.LinearLayout_Layout_layout_weight, 0);
+    		gravity = androidA.getInt(com.glview.AndroidR.styleable.LinearLayout_Layout_layout_gravity, -1);
+        	androidA.recycle();
+        	
             TypedArray a =
                     c.obtainStyledAttributes(attrs, com.glview.R.styleable.LinearLayout_Layout);
 
-            weight = a.getFloat(com.glview.R.styleable.LinearLayout_Layout_layout_weight, 0);
-            gravity = a.getInt(com.glview.R.styleable.LinearLayout_Layout_layout_gravity, -1);
-
+            weight = a.getFloat(com.glview.R.styleable.LinearLayout_Layout_layout_weight, weight);
+            gravity = a.getInt(com.glview.R.styleable.LinearLayout_Layout_layout_gravity, gravity);
+            
             a.recycle();
         }
 
