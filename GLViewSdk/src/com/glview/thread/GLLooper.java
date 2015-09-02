@@ -6,7 +6,6 @@ import android.os.StrictMode;
 import android.os.StrictMode.ThreadPolicy;
 import android.util.Log;
 
-
 /**
  * GLView的MainLooper，使用该线程{@link GLHandlerThread}
  * 通过{@link #getGLLooper()} 取得GLThread主线程
@@ -32,6 +31,7 @@ class GLLooper {
 			sGLMainThread = new GLHandlerThread(true);
 			sGLMainThread.start();
 			sGLMainLooper = sGLMainThread.getLooper();
+			Watchdog.getInstance().addThread(sGLMainLooper, new Handler(sGLMainLooper), "GLMainThread");
 		}
 	}
 
