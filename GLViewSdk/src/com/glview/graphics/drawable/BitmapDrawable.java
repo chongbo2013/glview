@@ -38,6 +38,7 @@ import com.glview.graphics.shader.BitmapShader;
 import com.glview.graphics.shader.TileMode;
 import com.glview.hwui.GLCanvas;
 import com.glview.hwui.GLPaint;
+import com.glview.util.ArrayUtils;
 import com.glview.view.Gravity;
 
 /**
@@ -582,16 +583,18 @@ public class BitmapDrawable extends Drawable {
         final BitmapState s = mBitmapState;
         return super.isStateful() || (s.mTint != null && s.mTint.isStateful());
     }
-
+    
     @Override
     public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs)
             throws XmlPullParserException, IOException {
         super.inflate(r, parser, attrs);
 
-        final TypedArray a = obtainAttributes(r, attrs, R.styleable.BitmapDrawable);
-        updateStateFromTypedArray(a);
+        final TypedArray a = obtainAttributes(r, attrs, com.glview.R.styleable.BitmapDrawable);
+        final TypedArray androidA = obtainAttributes(r, attrs, com.glview.AndroidR.styleable.BitmapDrawable);
+        updateStateFromTypedArray(a, androidA);
         verifyState(a);
         a.recycle();
+        androidA.recycle();
     }
 
     /**
@@ -610,7 +613,7 @@ public class BitmapDrawable extends Drawable {
     /**
      * Updates the constant state from the values in the typed array.
      */
-    private void updateStateFromTypedArray(TypedArray a) throws XmlPullParserException {
+    private void updateStateFromTypedArray(TypedArray a, TypedArray androidA) throws XmlPullParserException {
         final Resources r = a.getResources();
         final BitmapState state = mBitmapState;
 
@@ -622,22 +625,23 @@ public class BitmapDrawable extends Drawable {
         // Extract the theme attributes, if any.
 //        state.mThemeAttrs = a.extractThemeAttrs();
 
-        final int srcResId = a.getResourceId(R.styleable.BitmapDrawable_src, 0);
+        int srcResId = a.getResourceId(R.styleable.BitmapDrawable_src, 0);
+        if (srcResId == 0) {
+        	androidA.getResourceId(com.glview.AndroidR.styleable.BitmapDrawable_src, 0);
+        }
         if (srcResId != 0) {
             final Bitmap bitmap = new ResourceBitmap(r, srcResId);
-            if (bitmap == null) {
-                throw new XmlPullParserException(a.getPositionDescription() +
-                        ": <bitmap> requires a valid src attribute");
-            }
-
             state.mBitmap = bitmap;
         }
 
         state.mTargetDensity = r.getDisplayMetrics().densityDpi;
 
-        final boolean defMipMap = state.mBitmap != null ? state.mBitmap.hasMipMap() : false;
+        boolean defMipMap = state.mBitmap != null ? state.mBitmap.hasMipMap() : false;
+        defMipMap = androidA.getBoolean(com.glview.AndroidR.styleable.BitmapDrawable_mipMap, defMipMap);
         setMipMap(a.getBoolean(R.styleable.BitmapDrawable_mipMap, defMipMap));
 
+        state.mAutoMirrored = androidA.getBoolean(
+        		com.glview.AndroidR.styleable.BitmapDrawable_autoMirrored, state.mAutoMirrored);
         state.mAutoMirrored = a.getBoolean(
                 R.styleable.BitmapDrawable_autoMirrored, state.mAutoMirrored);
 //        state.mBaseAlpha = a.getFloat(R.styleable.BitmapDrawable_alpha, state.mBaseAlpha);
@@ -659,9 +663,12 @@ public class BitmapDrawable extends Drawable {
 //        		R.styleable.BitmapDrawable_filter, paint.isFilterBitmap()));
 //        paint.setDither(a.getBoolean(R.styleable.BitmapDrawable_dither, paint.isDither()));
 //
-        setGravity(a.getInt(R.styleable.BitmapDrawable_gravity, state.mGravity));
+        int gravity = androidA.getInt(com.glview.AndroidR.styleable.BitmapDrawable_gravity, state.mGravity);
+        gravity = a.getInt(R.styleable.BitmapDrawable_gravity, gravity);
+        setGravity(gravity);
 
-        final int tileMode = a.getInt(R.styleable.BitmapDrawable_tileMode, TILE_MODE_UNDEFINED);
+        int tileMode = androidA.getInt(com.glview.AndroidR.styleable.BitmapDrawable_tileMode, TILE_MODE_UNDEFINED);
+        tileMode = a.getInt(R.styleable.BitmapDrawable_tileMode, tileMode);
         if (tileMode != TILE_MODE_UNDEFINED) {
             final TileMode mode = parseTileMode(tileMode);
             setTileModeXY(mode, mode);

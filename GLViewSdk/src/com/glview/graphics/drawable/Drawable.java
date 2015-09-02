@@ -24,7 +24,6 @@ import java.util.Arrays;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
@@ -38,8 +37,6 @@ import android.util.Xml;
 import com.glview.graphics.Bitmap;
 import com.glview.graphics.BitmapFactory;
 import com.glview.graphics.Rect;
-import com.glview.graphics.bitmap.AssetBitmap;
-import com.glview.graphics.bitmap.FileBitmap;
 import com.glview.hwui.GLCanvas;
 import com.glview.util.StateSet;
 
@@ -976,8 +973,11 @@ public abstract class Drawable {
      */
     public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs)
             throws XmlPullParserException, IOException {
-        final TypedArray a = r.obtainAttributes(attrs, com.glview.R.styleable.Drawable);
-
+    	final TypedArray androidA = r.obtainAttributes(attrs, com.glview.AndroidR.styleable.Drawable);
+        inflateWithAttributes(r, parser, androidA, com.glview.AndroidR.styleable.Drawable_visible);
+        androidA.recycle();
+    	
+    	final TypedArray a = r.obtainAttributes(attrs, com.glview.R.styleable.Drawable);
         inflateWithAttributes(r, parser, a, com.glview.R.styleable.Drawable_visible);
         a.recycle();
     }

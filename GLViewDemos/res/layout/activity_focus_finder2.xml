@@ -9,7 +9,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical" >
-        <Button 
+        <com.rendernode.test.android.view.MyButton 
 	        android:layout_width="wrap_content"
 	        android:layout_height="300dp"
 	        android:textSize="@dimen/text_size_1"
