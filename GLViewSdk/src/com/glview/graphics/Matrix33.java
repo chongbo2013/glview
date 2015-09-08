@@ -124,27 +124,27 @@ public class Matrix33 {
 	        return;
 	    }
 		
-		Matrix33 mat = sThreadLocal.get();
-		mat.setScale(sx, sy, px, py);
-		preConcat(mat);
+		Matrix33 m = sThreadLocal.get();
+		m.setScale(sx, sy, px, py);
+		preConcat(m);
 	}
 	
 	public void postScale(float sx, float sy, float px, float py) {
 		if (1 == sx && 1 == sy) {
 	        return;
 	    }
-		Matrix33 mat = sThreadLocal.get();
-		mat.setScale(sx, sy, px, py);
-		postConcat(mat);
+		Matrix33 m = sThreadLocal.get();
+		m.setScale(sx, sy, px, py);
+		postConcat(m);
 	}
 	
 	public void postScale(float sx, float sy) {
 		if (1 == sx && 1 == sy) {
 	        return;
 	    }
-		Matrix33 mat = sThreadLocal.get();
-		mat.setScale(sx, sy);
-		postConcat(mat);
+		Matrix33 m = sThreadLocal.get();
+		m.setScale(sx, sy);
+		postConcat(m);
 	}
 	
 	public void setTranslate(float dx, float dy) {
@@ -165,18 +165,18 @@ public class Matrix33 {
 		if (dx == 0 && dy == 0) {
 			return;
 		}
-		Matrix33 mat = sThreadLocal.get();
-        mat.setTranslate(dx, dy);
-        preConcat(mat);
+		Matrix33 m = sThreadLocal.get();
+        m.setTranslate(dx, dy);
+        preConcat(m);
 	}
 	
 	public void postTranslate(float dx, float dy) {
 		if (dx == 0 && dy == 0) {
 			return;
 		}
-		Matrix33 mat = sThreadLocal.get();
-        mat.setTranslate(dx, dy);
-        postConcat(mat);
+		Matrix33 m = sThreadLocal.get();
+        m.setTranslate(dx, dy);
+        postConcat(m);
 	}
 	
 	public void setSinCos(float sinV, float cosV) {
@@ -207,6 +207,13 @@ public class Matrix33 {
 	    fMat[kMPersp2] = 1;
 	}
 	
+	public void setRotate(float degrees, float px, float py) {
+		float a = degrees * (float) (Math.PI / 180.0f);
+		float sinV = (float) Math.sin(a);
+		float cosV = (float) Math.cos(a);
+		setSinCos(sinV, cosV, px, py);
+	}
+	
 	public void setRotate(float degrees) {
 		float a = degrees * (float) (Math.PI / 180.0f);
         float sinV = (float) Math.sin(a);
@@ -214,11 +221,28 @@ public class Matrix33 {
         setSinCos(sinV, cosV);
 	}
 	
-	public void setRotate(float degrees, float px, float py) {
-		float a = degrees * (float) (Math.PI / 180.0f);
-        float sinV = (float) Math.sin(a);
-        float cosV = (float) Math.cos(a);
-        setSinCos(sinV, cosV, px, py);
+	public void preRotate(float degrees, float px, float py) {
+		Matrix33 m = sThreadLocal.get();
+	    m.setRotate(degrees, px, py);
+	    preConcat(m);
+	}
+
+	public void preRotate(float degrees) {
+		Matrix33 m = sThreadLocal.get();
+	    m.setRotate(degrees);
+	    preConcat(m);
+	}
+
+	public void postRotate(float degrees, float px, float py) {
+		Matrix33 m = sThreadLocal.get();
+	    m.setRotate(degrees, px, py);
+	    postConcat(m);
+	}
+
+	public void postRotate(float degrees) {
+		Matrix33 m = sThreadLocal.get();
+	    m.setRotate(degrees);
+	    postConcat(m);
 	}
 	
 	public void setSkew(float sx, float sy) {

@@ -126,9 +126,9 @@ public class Matrix44 {
 		if (1 == sx && 1 == sy && 1 == sz) {
 	        return;
 	    }
-		Matrix44 mat = sThreadLocal.get();
-		mat.setScale(sx, sy, sz);
-		postConcat(mat);
+		Matrix44 m = sThreadLocal.get();
+		m.setScale(sx, sy, sz);
+		postConcat(m);
 	}
 	
 	public void setTranslate(float dx, float dy, float dz) {
@@ -143,18 +143,18 @@ public class Matrix44 {
 		if (dx == 0 && dy == 0 && dz == 0) {
 			return;
 		}
-		Matrix44 mat = sThreadLocal.get();
-        mat.setTranslate(dx, dy, dz);
-        preConcat(mat);
+		Matrix44 m = sThreadLocal.get();
+        m.setTranslate(dx, dy, dz);
+        preConcat(m);
 	}
 	
 	public void postTranslate(float dx, float dy, float dz) {
 		if (dx == 0 && dy == 0 && dz == 0) {
 			return;
 		}
-		Matrix44 mat = sThreadLocal.get();
-        mat.setTranslate(dx, dy, dz);
-        postConcat(mat);
+		Matrix44 m = sThreadLocal.get();
+        m.setTranslate(dx, dy, dz);
+        postConcat(m);
 	}
 	
 	public void setRotate(float degrees) {
@@ -218,27 +218,27 @@ public class Matrix44 {
 	}
 	
 	public void preRotate(float degrees) {
-		Matrix44 mat = sThreadLocal.get();
-		mat.setRotate(degrees);
-		preConcat(mat);
+		Matrix44 m = sThreadLocal.get();
+		m.setRotate(degrees);
+		preConcat(m);
 	}
 	
 	public void postRotate(float degrees) {
-		Matrix44 mat = sThreadLocal.get();
-		mat.setRotate(degrees);
-		postConcat(mat);
+		Matrix44 m = sThreadLocal.get();
+		m.setRotate(degrees);
+		postConcat(m);
 	}
 	
 	public void preRotate(float a, float x, float y, float z) {
-		Matrix44 mat = sThreadLocal.get();
-		mat.setRotate(a, x, y, z);
-		preConcat(mat);
+		Matrix44 m = sThreadLocal.get();
+		m.setRotate(a, x, y, z);
+		preConcat(m);
 	}
 	
 	public void postRotate(float a, float x, float y, float z) {
-		Matrix44 mat = sThreadLocal.get();
-		mat.setRotate(a, x, y, z);
-		postConcat(mat);
+		Matrix44 m = sThreadLocal.get();
+		m.setRotate(a, x, y, z);
+		postConcat(m);
 	}
 	
 	/**
