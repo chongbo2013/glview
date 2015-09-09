@@ -253,7 +253,15 @@ public final class Path {
         arcTo(oval.left, oval.top, oval.right, oval.bottom, startAngle, sweepAngle, false);
     }
     
-    private final static int kSkBuildQuadArcStorage = 17;
+    ThreadLocal<PointF[]> kBuildQuadArcThreadLocal = new ThreadLocal<PointF[]>() {
+    	protected PointF[] initialValue() {
+			return new PointF[] { new PointF(), new PointF(), new PointF(),
+					new PointF(), new PointF(), new PointF(), new PointF(),
+					new PointF(), new PointF(), new PointF(), new PointF(),
+					new PointF(), new PointF(), new PointF(), new PointF(),
+					new PointF(), new PointF() };
+    	};
+    };
     /**
      * Append the specified arc to the path as a new contour. If the start of
      * the path is different from the path's current last point, then an
@@ -269,8 +277,206 @@ public final class Path {
     public void arcTo(float left, float top, float right, float bottom, float startAngle,
             float sweepAngle, boolean forceMoveTo) {
     	if (right < left || bottom < top) return;
-    	PointF pts[] = new PointF[kSkBuildQuadArcStorage];
+    	PointF pts[] = kBuildQuadArcThreadLocal.get();
+    	RectF oval = new RectF(left, top, right, bottom);
+    	int count = build_arc_points(oval, startAngle, sweepAngle, pts);
+    	if ((count & 1) != 1) {
+    		return;
+    	}
+    	if (countVerbs() == 0) {
+            forceMoveTo = true;
+        }
+
+    	if (forceMoveTo) {
+        	this.moveTo(pts[0].x, pts[0].y);
+        } else {
+        	this.lineTo(pts[0].x, pts[0].y);
+        }
+        for (int i = 1; i < count; i += 2) {
+            this.quadTo(pts[i].x, pts[i].y, pts[i + 1].x, pts[i + 1].y);
+        }
     }
+    
+    private int build_arc_points(RectF oval, float startAngle,
+            float sweepAngle, PointF[] pts) {
+    	if (0 == sweepAngle &&
+	        (0 == startAngle || 360f == startAngle)) {
+	        // Chrome uses this path to move into and out of ovals. If not
+	        // treated as a special case the moves can distort the oval's
+	        // bounding box (and break the circle special case).
+	        pts[0].set(oval.right, oval.centerY());
+	        return 1;
+	    } else if (0 == oval.width() && 0 == oval.height()) {
+	        // Chrome will sometimes create 0 radius round rects. Having degenerate
+	        // quad segments in the path prevents the path from being recognized as
+	        // a rect.
+	        // TODO: optimizing the case where only one of width or height is zero
+	        // should also be considered. This case, however, doesn't seem to be
+	        // as common as the single point case.
+	        pts[0].set(oval.right, oval.top);
+	        return 1;
+	    }
+    	Vector start = new Vector(), stop = new Vector();
+    	float a = startAngle * (float) (Math.PI / 180.0f);
+		start.y = (float) Math.sin(a);
+		if (Math.abs(start.y) <= FloatNearlyZero) {
+			start.y = 0f;
+		}
+		start.x = (float) Math.cos(a);
+		if (Math.abs(start.x) <= FloatNearlyZero) {
+			start.x = 0f;
+		}
+		float stopDegrees = (startAngle + sweepAngle) * (float) (Math.PI / 180.0f);
+		stop.y = (float) Math.sin(stopDegrees);
+		if (Math.abs(stop.y) <= FloatNearlyZero) {
+			stop.y = 0f;
+		}
+		stop.x = (float) Math.cos(stopDegrees);
+		if (Math.abs(stop.x) <= FloatNearlyZero) {
+			stop.x = 0f;
+		}
+		
+		/*  If the sweep angle is nearly (but less than) 360, then due to precision
+        loss in radians-conversion and/or sin/cos, we may end up with coincident
+        vectors, which will fool SkBuildQuadArc into doing nothing (bad) instead
+        of drawing a nearly complete circle (good).
+             e.g. canvas.drawArc(0, 359.99, ...)
+             -vs- canvas.drawArc(0, 359.9, ...)
+        We try to detect this edge case, and tweak the stop vector
+     */
+		if (start.equals(stop)) {
+	        float sw = Math.abs(sweepAngle);
+	        if (sw < 360f && sw > 359f) {
+	            float stopRad = stopDegrees;
+	            // make a guess at a tiny angle (in radians) to tweak by
+	            float deltaRad = sweepAngle > 0 ? (1f/512) : (-1f/512);
+	            // not sure how much will be enough, so we use a loop
+	            do {
+	                stopRad -= deltaRad;
+	                stop.y = (float) Math.sin(stopRad);
+	        		if (Math.abs(stop.y) <= FloatNearlyZero) {
+	        			stop.y = 0f;
+	        		}
+	        		stop.x = (float) Math.cos(stopRad);
+	        		if (Math.abs(stop.x) <= FloatNearlyZero) {
+	        			stop.x = 0f;
+	        		}
+	            } while (start.equals(stop));
+	        }
+	    }
+		
+		Matrix matrix = new Matrix();
+		matrix.setScale(oval.width() / 2, oval.height() / 2);
+	    matrix.postTranslate(oval.centerX(), oval.centerY());
+	    
+    	return BuildQuadArc(start, stop, sweepAngle > 0 ? Direction.CW :
+    		Direction.CCW, matrix, pts);
+    }
+    
+    private final static float SK_ScalarTanPIOver8 = 0.414213562f;
+    private final static float SK_ScalarRoot2Over2 = 0.707106781f;
+    private final static float SK_ScalarSqrt2 = 1.41421356f;
+    private final static float SK_ScalarPI = 3.14159265f;
+    private final static float CUBIC_ARC_FACTOR = ((SK_ScalarSqrt2 - 1) * 4 / 3);
+    private final static float FloatNearlyZero = 1f / (1 << 12);
+    private final static float SK_MID_RRECT_OFFSET = (float) ((1f + SK_ScalarTanPIOver8 + (1f / (Math.pow(2, 23))) * 4) / 2);
+    
+    final static PointF gQuadCirclePts[] = new PointF[] {
+    	// The mid point of the quadratic arc approximation is half way between the two
+    	// control points. The float epsilon adjustment moves the on curve point out by
+    	// two bits, distributing the convex test error between the round rect
+    	// approximation and the convex cross product sign equality test.
+    	new PointF(1f, 0f),
+    	new PointF(1f, SK_ScalarTanPIOver8),
+    	new PointF(SK_MID_RRECT_OFFSET, SK_MID_RRECT_OFFSET),
+    	new PointF(SK_ScalarTanPIOver8, 1f),
+    	
+    	new PointF(0f, 1f),
+    	new PointF(-SK_ScalarTanPIOver8, 1f),
+    	new PointF(-SK_MID_RRECT_OFFSET,  SK_MID_RRECT_OFFSET),
+    	new PointF(-1f,  SK_ScalarTanPIOver8),
+    	
+    	new PointF(-1f, 0f),
+    	new PointF(-1f, -SK_ScalarTanPIOver8),
+    	new PointF(-SK_MID_RRECT_OFFSET,  -SK_MID_RRECT_OFFSET),
+    	new PointF(-SK_ScalarTanPIOver8,  - 1f),
+    	
+    	new PointF(0f, -1f),
+    	new PointF(SK_ScalarTanPIOver8, -1f),
+    	new PointF(SK_MID_RRECT_OFFSET,  -SK_MID_RRECT_OFFSET),
+    	new PointF(1f,  -SK_ScalarTanPIOver8),
+    	
+    	new PointF(1f,  0)};
+    
+    int BuildQuadArc(Vector uStart, Vector uStop,
+            Direction dir, Matrix userMatrix,
+            PointF quadPoints[]) {
+		// rotate by x,y so that uStart is (1.0)
+		float x = uStart.dot(uStop);
+		float y = uStart.crs(uStop);
+
+		float absX = Math.abs(x);
+		float absY = Math.abs(y);
+
+		int pointCount;
+
+		// check for (effectively) coincident vectors
+		// this can happen if our angle is nearly 0 or nearly 180 (y == 0)
+		// ... we use the dot-prod to distinguish between 0 and 180 (x > 0)
+		if (absY <= FloatNearlyZero
+				&& x > 0
+				&& ((y >= 0 && Direction.CW == dir) || (y <= 0 && Direction.CCW == dir))) {
+
+			// just return the start-point
+			quadPoints[0].set(1f, 0);
+			pointCount = 1;
+		} else {
+			if (dir == Direction.CCW) {
+				y = -y;
+			}
+			// what octant (quadratic curve) is [xy] in?
+			int oct = 0;
+			boolean sameSign = true;
+
+			if (0 == y) {
+				oct = 4; // 180
+			} else if (0 == x) {
+				oct = y > 0 ? 2 : 6; // 90 : 270
+			} else {
+				if (y < 0) {
+					oct += 4;
+				}
+				if ((x < 0) != (y < 0)) {
+					oct += 2;
+					sameSign = false;
+				}
+				if ((absX < absY) == sameSign) {
+					oct += 1;
+				}
+			}
+
+			int wholeCount = oct << 1;
+			System.arraycopy(gQuadCirclePts, 0, quadPoints, 0, wholeCount + 1);
+
+			// PointF arc = &gQuadCirclePts[wholeCount];
+			// if (truncate_last_curve(arc, x, y, quadPoints[wholeCount + 1])) {
+			// wholeCount += 2;
+			// }
+			pointCount = wholeCount + 1;
+		}
+
+		// now handle counter-clockwise and the initial unitStart rotation
+		Matrix matrix = new Matrix();
+		matrix.setSinCos(uStart.y, uStart.x);
+		if (dir == Direction.CCW) {
+			matrix.preScale(1f, -1f);
+		}
+		if (userMatrix != null) {
+			matrix.postConcat(userMatrix);
+		}
+		matrix.mapPoints(quadPoints, pointCount);
+		return pointCount;
+}
     
 	/**
      * Close the current contour. If the current point is not equal to the
@@ -355,11 +561,6 @@ public final class Path {
         addOval(oval.left, oval.top, oval.right, oval.bottom, dir);
     }
 
-    private final static float SK_ScalarTanPIOver8 = 0.414213562f;
-    private final static float SK_ScalarRoot2Over2 = 0.707106781f;
-    private final static float SK_ScalarSqrt2 = 1.41421356f;
-    private final static float SK_ScalarPI = 3.14159265f;
-    private final static float CUBIC_ARC_FACTOR = ((SK_ScalarSqrt2 - 1) * 4 / 3);
     /**
      * Add a closed oval contour to the path
      *
@@ -554,6 +755,7 @@ public final class Path {
      if (radii.length < 8) {
          throw new ArrayIndexOutOfBoundsException("radii[] needs 8 values");
      }
+     // TODO
  }
     
     void injectMoveToIfNeeded() {

@@ -10,16 +10,16 @@
         glview:layout_height="wrap_content" 
         glview:orientation="vertical">
 		<View
-		    glview:layout_width="wrap_content"
-		    glview:layout_height="wrap_content"
+		    glview:layout_width="100dp"
+		    glview:layout_height="100dp"
 		    glview:background="@drawable/button" />
 		<View
-		    glview:layout_width="wrap_content"
-		    glview:layout_height="wrap_content"
+		    glview:layout_width="100dp"
+		    glview:layout_height="100dp"
 		    glview:background="@drawable/button" />
 		<View
-		    glview:layout_width="wrap_content"
-		    glview:layout_height="wrap_content"
+		    glview:layout_width="100dp"
+		    glview:layout_height="100dp"
 			glview:background="@drawable/button" />
     </LinearLayout>
     

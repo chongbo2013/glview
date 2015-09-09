@@ -28,7 +28,6 @@ class GLLayoutInflater extends LayoutInflater {
     private static final String[] sClassPrefixList = {
 //        "android.widget.",
 //        "android.webkit."
-//    	"com.aliyun.image.widget."
     	"com.glview.widget."
     };
     

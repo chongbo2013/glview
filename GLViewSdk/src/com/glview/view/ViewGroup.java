@@ -13,8 +13,6 @@ import android.util.Log;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.view.SurfaceView;
-import android.view.TextureView;
 
 import com.glview.R;
 import com.glview.animation.LayoutTransition;
@@ -1328,12 +1326,45 @@ public abstract class ViewGroup extends View{
    
    public void removeViewAt(int index){
 	   if(index >= 0 && index < mChildrenCount){
-		   removeViewInternal(index, mChildren[index]);		   
+		   	removeViewInternal(index, getChildAt(index));
+	        requestLayout();
+	        invalidate(true);
 	   }
    }
    
    public void removeView(View view){
 	   removeViewInternal(view);
+	   requestLayout();
+       invalidate(true);
+   }
+   
+   /**
+    * Removes a view during layout. This is useful if in your onLayout() method,
+    * you need to remove more views.
+    *
+    * <p><strong>Note:</strong> do not invoke this method from
+    * {@link #draw(android.graphics.Canvas)}, {@link #onDraw(android.graphics.Canvas)},
+    * {@link #dispatchDraw(android.graphics.Canvas)} or any related method.</p>
+    * 
+    * @param view the view to remove from the group
+    */
+   public void removeViewInLayout(View view) {
+       removeViewInternal(view);
+   }
+
+   /**
+    * Removes a range of views during layout. This is useful if in your onLayout() method,
+    * you need to remove more views.
+    *
+    * <p><strong>Note:</strong> do not invoke this method from
+    * {@link #draw(android.graphics.Canvas)}, {@link #onDraw(android.graphics.Canvas)},
+    * {@link #dispatchDraw(android.graphics.Canvas)} or any related method.</p>
+    *
+    * @param start the index of the first view to remove from the group
+    * @param count the number of views to remove from the group
+    */
+   public void removeViewsInLayout(int start, int count) {
+       removeViewsInternal(start, count);
    }
    
    private void removeViewInternal(View view) {
@@ -1834,8 +1865,58 @@ public abstract class ViewGroup extends View{
 	   }
    }
    
+   private void removeViewsInternal(int start, int count) {
+       final View focused = mFocused;
+       final boolean detach = mAttachInfo != null;
+       boolean clearChildFocus = false;
+
+       final View[] children = mChildren;
+       final int end = start + count;
+
+       for (int i = start; i < end; i++) {
+           final View view = children[i];
+
+           if (mTransition != null) {
+               mTransition.removeChild(this, view);
+           }
+
+           if (view == focused) {
+               view.unFocus(null);
+               clearChildFocus = true;
+           }
+
+           cancelTouchTarget(view);
+
+           if (view.getAnimation() != null ||
+               (mTransitioningViews != null && mTransitioningViews.contains(view))) {
+               addDisappearingView(view);
+           } else if (detach) {
+              view.dispatchDetachedFromWindow();
+           }
+
+           if (view.hasTransientState()) {
+               childHasTransientStateChanged(view, false);
+           }
+
+           needGlobalAttributesUpdate(false);
+
+           onViewRemoved(view);
+       }
+
+       removeFromArray(start, count);
+
+       if (clearChildFocus) {
+           clearChildFocus(focused);
+           if (!rootViewRequestFocus()) {
+               notifyGlobalFocusCleared(focused);
+           }
+       }
+   }
+   
    public void removeAllViews(){
 	   removeAllViewsInLayout();
+	   requestLayout();
+       invalidate(true);
    }
     
     @Override

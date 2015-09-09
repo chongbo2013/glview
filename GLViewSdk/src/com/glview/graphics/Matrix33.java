@@ -323,6 +323,15 @@ public class Matrix33 {
 	    }
 	}
 	
+	public void mapPoints(PointF[] pts, int length) {
+		if (pts != null) {
+			for (int i = 0; i < pts.length && i < length; i ++) {
+				PointF pt = pts[i];
+				mapPoint(pt, pt.x, pt.y);
+			}
+		}
+	}
+	
 	public PointF mapPoint(PointF dst, float x, float y) {
 	    float dx = x * fMat[kMScaleX] + y * fMat[kMSkewX] + fMat[kMTransX];
 	    float dy = x * fMat[kMSkewY] + y * fMat[kMScaleY] + fMat[kMTransY];

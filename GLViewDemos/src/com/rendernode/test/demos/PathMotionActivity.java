@@ -42,8 +42,9 @@ public class PathMotionActivity extends BaseActivity {
 		Path path = new Path();
 //		path.addRect(0, 0, 500, 500, Direction.CCW);
 		path.moveTo(0, 0);
-		path.addOval(0, 0, 100, 500, Direction.CW);
-		path.addRoundRect(-300, -200, 300, 200, 100, 100, Direction.CCW);
+//		path.addOval(0, 0, 100, 500, Direction.CW);
+		path.arcTo(0, 0, 300, 300, 0, 90, false);
+//		path.addRoundRect(-300, -200, 300, 200, 100, 100, Direction.CCW);
 //		path.add
 //		path.quadTo(300, 300, 100, - 300);
 //		path.cubicTo(500, 500, -500, 20, -500, 300);
