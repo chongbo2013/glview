@@ -458,6 +458,7 @@ public final class Path {
 			int wholeCount = oct << 1;
 			System.arraycopy(gQuadCirclePts, 0, quadPoints, 0, wholeCount + 1);
 
+			// TODO
 			// PointF arc = &gQuadCirclePts[wholeCount];
 			// if (truncate_last_curve(arc, x, y, quadPoints[wholeCount + 1])) {
 			// wholeCount += 2;

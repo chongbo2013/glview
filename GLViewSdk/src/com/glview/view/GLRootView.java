@@ -75,6 +75,7 @@ final public class GLRootView extends SurfaceView
 	boolean mRenderPrepared = false;
 	
 	boolean mAttatched = false;
+	boolean mFirst;
 	
 	// This is the top-level view of the window, containing the window decor.
     private ViewGroup mDecor;
@@ -108,6 +109,7 @@ final public class GLRootView extends SurfaceView
 	}
 	
 	private void init() {
+		mFirst = true;
 		mAttachInfo = new AttachInfo(this, mWindowId, mHandler, mAndroidHandler, new RootCallbacks());
 		mThread = mHandler.getLooper().getThread();
 		
@@ -337,6 +339,7 @@ final public class GLRootView extends SurfaceView
 	
 	protected void onDrawFrame() {
 		checkThread();
+		
 		collectViewAttributes();
 		mAttachInfo.mDrawingTime = AnimationUtils.currentAnimationTimeMillis();
 		// if need layout
@@ -344,6 +347,12 @@ final public class GLRootView extends SurfaceView
             layoutContentPane();
             mAttachInfo.mTreeObserver.dispatchOnGlobalLayout();
         }
+		
+		if (mFirst) {
+			boolean isInTouchMode = isInTouchMode();
+			mAttachInfo.mInTouchMode = !isInTouchMode;
+			ensureTouchMode(isInTouchMode);
+		}
 		
 		boolean cancelDraw = mAttachInfo.mTreeObserver.dispatchOnPreDraw();
 		if (!cancelDraw) {
@@ -363,6 +372,8 @@ final public class GLRootView extends SurfaceView
 		if (mRenderMode == RENDERMODE_CONTINUOUSLY) {
 			requestRender();
 		}
+		
+		mFirst = false;
 	}
 	
 	private boolean collectViewAttributes() {
@@ -702,9 +713,26 @@ final public class GLRootView extends SurfaceView
 
 	@Override
 	public void onTouchModeChanged(boolean isInTouchMode) {
-		mTouchModeChangedTask.mIsInTouchMode = isInTouchMode;
-		mGLHandler.postAndWait(mTouchModeChangedTask);
+		ensureTouchMode(isInTouchMode);
 	}
+	
+	/**
+     * Something in the current window tells us we need to change the touch mode.  For
+     * example, we are not in touch mode, and the user touches the screen.
+     *
+     * If the touch mode has changed, tell the window manager, and handle it locally.
+     *
+     * @param inTouchMode Whether we want to be in touch mode.
+     * @return True if the touch mode changed and focus changed was changed as a result
+     */
+    boolean ensureTouchMode(boolean inTouchMode) {
+    	if (mAttachInfo.mInTouchMode == inTouchMode) {
+    		return false;
+    	}
+    	mTouchModeChangedTask.mIsInTouchMode = inTouchMode;
+		mGLHandler.postAndWait(mTouchModeChangedTask);
+		return true;
+    }
 	
 	TouchModeChangedTask mTouchModeChangedTask = new TouchModeChangedTask();
 	
