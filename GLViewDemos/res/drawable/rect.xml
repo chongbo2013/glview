@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:dither="true"
-    android:shape="rectangle" >
+    xmlns:glview="http://schemas.android.com/apk/res-auto" 
+    glview:dither="true"
+    glview:shape="rectangle" >
 
     <gradient
-        android:endColor="#660000ff"
-        android:gradientRadius="75%"
-        android:startColor="#ffff0000"
-        android:type="radial"
-        android:useLevel="false" />
+        glview:endColor="#660000ff"
+        glview:gradientRadius="75%"
+        glview:startColor="#ffff0000"
+        glview:type="linear"
+        glview:useLevel="false" />
 
     <size
-        android:height="100dp"
-        android:width="100dp" />
+        glview:height="100dp"
+        glview:width="100dp" />
 
 </shape>

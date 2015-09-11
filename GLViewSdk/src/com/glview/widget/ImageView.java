@@ -88,28 +88,40 @@ public class ImageView extends View {
         
         TypedArray a = context.obtainStyledAttributes(attrs,
                 R.styleable.ImageView, defStyleAttr, defStyleRes);
+        TypedArray androidA = context.obtainStyledAttributes(attrs,
+                com.glview.AndroidR.styleable.ImageView, defStyleAttr, defStyleRes);
 
-        Drawable d = GLContext.get().getResources().getDrawable(a.getResourceId(R.styleable.ImageView_src, 0));;//a.getDrawable(R.styleable.ImageView_src);
-        
-        if (d != null && d instanceof BitmapDrawable) {
-            setImageBitmap(((BitmapDrawable)d).getBitmap());
+        Drawable d = GLContext.get().getResources().getDrawable(a.getResourceId(R.styleable.ImageView_src, 0));//a.getDrawable(R.styleable.ImageView_src);
+        if (d == null) {
+        	d = GLContext.get().getResources().getDrawable(androidA.getResourceId(com.glview.AndroidR.styleable.ImageView_src, 0));
         }
-
-        setAdjustViewBounds(
-                a.getBoolean(R.styleable.ImageView_adjustViewBounds,
-                false));
+        
+        if (d != null) {
+            setImageDrawable(d);
+        }
+        
+        boolean adjustViewBounds = androidA.getBoolean(com.glview.AndroidR.styleable.ImageView_adjustViewBounds, false);
+        adjustViewBounds = a.getBoolean(R.styleable.ImageView_adjustViewBounds, adjustViewBounds);
+        setAdjustViewBounds(adjustViewBounds);
+        
+        setMaxWidth(androidA.getDimensionPixelSize(
+        		com.glview.AndroidR.styleable.ImageView_maxWidth, Integer.MAX_VALUE));
         setMaxWidth(a.getDimensionPixelSize(
-        		R.styleable.ImageView_maxWidth, Integer.MAX_VALUE));
+        		R.styleable.ImageView_maxWidth, mMaxWidth));
         
+        setMaxHeight(androidA.getDimensionPixelSize(
+        		com.glview.AndroidR.styleable.ImageView_maxHeight, Integer.MAX_VALUE));
         setMaxHeight(a.getDimensionPixelSize(
-        		R.styleable.ImageView_maxHeight, Integer.MAX_VALUE));
+        		R.styleable.ImageView_maxHeight, mMaxHeight));
         
-        int index = a.getInt(R.styleable.ImageView_scaleType, -1);
+        int index = androidA.getInt(com.glview.AndroidR.styleable.ImageView_scaleType, -1);
+        index = a.getInt(R.styleable.ImageView_scaleType, index);
         if (index >= 0) {
             setScaleType(sScaleTypeArray[index]);
         }
         
         a.recycle();
+        androidA.recycle();
         
         //need inflate syntax/reader for matrix
     }
