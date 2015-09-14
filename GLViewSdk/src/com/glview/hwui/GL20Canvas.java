@@ -261,6 +261,11 @@ class GL20Canvas extends StatefullBaseCanvas {
 		
 		setupDraw();
 		
+		// If a shader is set, preserve only the alpha
+		if (paint.getShader() != null) {
+	        color |= 0x00ffffff;
+	    }
+		
 		float alpha = currentSnapshot().alpha * paint.getAlpha() / 255;
 		float prealpha = ((color >>> 24) & 0xFF) * alpha / 255;
 		float colorR = Math.round(((color >> 16) & 0xFF) * prealpha) * 1.0f / 255;

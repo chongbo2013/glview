@@ -16,7 +16,6 @@
 
 package com.glview.view;
 
-import static android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH;
 import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
 import static java.lang.Math.max;
 
@@ -46,7 +45,6 @@ import android.view.SoundEffectConstants;
 import android.view.SurfaceView;
 import android.view.TextureView;
 import android.view.VelocityTracker;
-import android.view.View.OnClickListener;
 import android.view.View.OnCreateContextMenuListener;
 import android.view.View.OnDragListener;
 import android.view.View.OnGenericMotionListener;
@@ -2247,6 +2245,8 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
      */
     void dispatchAttachedToWindow(AttachInfo info, int visibility) {
     	mAttachInfo = info;
+    	// FIXME for getDrawingCache
+    	mViewRootImpl = mAttachInfo.mViewRootImpl;
     	if (mOverlay != null) {
             mOverlay.getOverlayView().dispatchAttachedToWindow(info, visibility);
         }
@@ -2576,10 +2576,10 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
         
         onDrawScrollBars(canvas);
         
+        canvas.restore();
         if (mOverlay != null && !mOverlay.isEmpty()) {
             mOverlay.getOverlayView().dispatchDraw(canvas);
         }
-        canvas.restore();
     }
     
     /**
@@ -10076,6 +10076,8 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
         }
     }
     
+    // FIXME
+    private GLRootView mViewRootImpl;
     /**
      * <p>Calling this method is equivalent to calling <code>getDrawingCache(false)</code>.</p>
      *
@@ -10084,8 +10086,8 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
      * @see #getDrawingCache(boolean)
      */
     public Bitmap getDrawingCache() {
-    	if (isAttachedToWindow() && getWidth() > 0 && getHeight() > 0) {
-    		return mAttachInfo.mViewRootImpl.buildDrawingCache(this);
+    	if (mViewRootImpl != null && getWidth() > 0 && getHeight() > 0) {
+    		return mViewRootImpl.buildDrawingCache(this);
     	}
         return null;
     }

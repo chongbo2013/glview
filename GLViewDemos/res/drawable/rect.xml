@@ -5,9 +5,10 @@
     glview:shape="rectangle" >
 
     <gradient
-        glview:endColor="#660000ff"
-        glview:gradientRadius="75%"
+        glview:endColor="#ffff0000"
         glview:startColor="#ffff0000"
+        glview:centerColor="#ff00ff00"
+        glview:centerX="0.3"
         glview:type="linear"
         glview:useLevel="false" />
 

@@ -41,7 +41,6 @@
 		    glview:layout_width="wrap_content"
 		    glview:layout_height="wrap_content"
 		    glview:layout_gravity="center"
-		    glview:src="@drawable/rect"
-		    android:background="@color/red" />
+		    glview:src="@drawable/rect"/>
 	
 </FrameLayout>
