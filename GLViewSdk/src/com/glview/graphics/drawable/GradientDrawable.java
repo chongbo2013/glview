@@ -25,14 +25,13 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
 
+import com.glview.graphics.Path;
 import com.glview.graphics.Rect;
 import com.glview.graphics.RectF;
 import com.glview.graphics.shader.LinearGradient;
@@ -133,7 +132,6 @@ public class GradientDrawable extends Drawable {
     private final Path mPath = new Path();
     private final RectF mRect = new RectF();
 
-    private Paint mLayerPaint;    // internal, used if we use saveLayer()
     private boolean mGradientIsDirty;   // internal state
     private boolean mMutated;
     private Path mRingPath;
@@ -590,7 +588,7 @@ public class GradientDrawable extends Drawable {
         if (mPathIsDirty) {
             ensureValidRect();
             mPath.reset();
-//            mPath.addRoundRect(mRect, st.mRadiusArray, Path.Direction.CW);
+            mPath.addRoundRect(mRect, st.mRadiusArray, Path.Direction.CW);
             mPathIsDirty = false;
         }
     }
@@ -628,7 +626,7 @@ public class GradientDrawable extends Drawable {
         // arcTo treats the sweep angle mod 360, so check for that, since we
         // think 360 means draw the entire oval
         if (sweep < 360 && sweep > -360) {
-            ringPath.setFillType(Path.FillType.EVEN_ODD);
+//            ringPath.setFillType(Path.FillType.EVEN_ODD);
             // inner top
             ringPath.moveTo(x + radius, y);
             // outer top
