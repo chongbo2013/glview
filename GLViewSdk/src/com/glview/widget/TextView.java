@@ -536,13 +536,13 @@ public class TextView extends View {
         
 		if (mTextBitmap == null) {
 			mTextBitmap = Bitmap.createBitmap(width, height, mConfig);
-		} else if ((width != mTextBitmap.getWidth() || height != mTextBitmap.getHeight()) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+		} /*else if ((width != mTextBitmap.getWidth() || height != mTextBitmap.getHeight()) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
 			try {
 				mTextBitmap.reconfigure(width, height, mConfig);
 			} catch (IllegalArgumentException e) {
 				mTextBitmap = Bitmap.createBitmap(width, height, mConfig);
 			}
-		} else {
+		} */else if (width > mTextBitmap.getWidth() || height > mTextBitmap.getHeight()) {
 			mTextBitmap = Bitmap.createBitmap(width, height, mConfig);
 		}
 		mTextCanvas = new Canvas(mTextBitmap.getBitmap());
