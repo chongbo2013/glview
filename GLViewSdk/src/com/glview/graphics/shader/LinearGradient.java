@@ -71,6 +71,10 @@ public class LinearGradient extends DefaultTextureShader {
 		mEndPointHandle = new HandleInfo("u_endPoint");
 	}
 	
+	boolean isSimplemGradient() {
+		return mType == TYPE_COLOR_START_AND_COLOR_END;
+	}
+	
 	public void setPosition(float x0, float y0, float x1, float y1) {
 		this.mX0 = x0;
 		this.mY0 = y0;
