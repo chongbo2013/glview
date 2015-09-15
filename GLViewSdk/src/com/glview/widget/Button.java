@@ -98,7 +98,7 @@ public class Button extends TextView {
     }
 
     public Button(Context context, AttributeSet attrs) {
-        this(context, attrs, com.glview.AndroidR.attr.buttonStyle);
+        this(context, attrs, android.R.attr.buttonStyle);
     }
 
     public Button(Context context, AttributeSet attrs, int defStyleAttr) {

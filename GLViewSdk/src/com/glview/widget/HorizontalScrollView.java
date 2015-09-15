@@ -20,6 +20,7 @@ import java.util.List;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.InputDevice;
@@ -133,7 +134,7 @@ public class HorizontalScrollView extends FrameLayout {
     }
 
     public HorizontalScrollView(Context context, AttributeSet attrs) {
-        this(context, attrs, com.glview.R.attr.horizontalScrollViewStyle);
+        this(context, attrs, Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB ? android.R.attr.horizontalScrollViewStyle : com.glview.R.attr.horizontalScrollViewStyle);
     }
 
     public HorizontalScrollView(Context context, AttributeSet attrs, int defStyleAttr) {

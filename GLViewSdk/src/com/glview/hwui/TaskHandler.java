@@ -81,10 +81,10 @@ public class TaskHandler extends Handler {
 			task.setSync(true);
 			boolean r = post(task);
 			synchronized (task) {
-				// Blocking here, until the task is done.
+				// Blocking here, until the task is done. 10000ms
 				while (task.isRunning()) {
 					try {
-						task.wait();
+						task.wait(10000);
 					} catch (InterruptedException e) {
 						Thread.currentThread().interrupt();
 					}
@@ -104,10 +104,10 @@ public class TaskHandler extends Handler {
 			task.setSync(true);
 			boolean r = postAtFrontOfQueue(task);
 			synchronized (task) {
-				// Blocking here, until the task is done.
+				// Blocking here, until the task is done. 10000ms
 				while (task.isRunning()) {
 					try {
-						task.wait();
+						task.wait(10000);
 					} catch (InterruptedException e) {
 						Thread.currentThread().interrupt();
 					}

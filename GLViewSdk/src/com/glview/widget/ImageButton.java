@@ -71,7 +71,7 @@ public class ImageButton extends ImageView {
     }
 
     public ImageButton(Context context, AttributeSet attrs) {
-        this(context, attrs, com.glview.R.attr.imageButtonStyle);
+        this(context, attrs, android.R.attr.imageButtonStyle);
     }
 
     public ImageButton(Context context, AttributeSet attrs, int defStyleAttr) {

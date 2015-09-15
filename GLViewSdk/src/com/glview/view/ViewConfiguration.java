@@ -22,6 +22,7 @@ import android.content.res.Resources;
 import android.graphics.Point;
 import android.os.Build;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.WindowManager;
@@ -309,12 +310,12 @@ public class ViewConfiguration {
 
         try {
         	mFadingMarqueeEnabled = res.getBoolean(
-                    com.glview.AndroidR.bool.config_ui_enableFadingMarquee);
+        			res.getIdentifier("config_ui_enableFadingMarquee", "bool", "android"));
         } catch (Exception e) {}
         
         try {
         	mTouchSlop = res.getDimensionPixelSize(
-            		com.glview.AndroidR.dimen.config_viewConfigurationTouchSlop);
+        			res.getIdentifier("config_viewConfigurationTouchSlop", "dimen", "android"));
         } catch (Exception e) {
         	mTouchSlop = 8;
         }

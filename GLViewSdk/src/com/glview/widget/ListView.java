@@ -126,7 +126,7 @@ public class ListView extends AbsListView {
     }
 
     public ListView(Context context, AttributeSet attrs) {
-        this(context, attrs, com.glview.AndroidR.attr.listViewStyle);
+        this(context, attrs, android.R.attr.listViewStyle);
     }
 
     public ListView(Context context, AttributeSet attrs, int defStyleAttr) {

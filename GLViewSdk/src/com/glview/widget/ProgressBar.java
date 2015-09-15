@@ -230,7 +230,7 @@ public class ProgressBar extends View {
     }
 
     public ProgressBar(Context context, AttributeSet attrs) {
-        this(context, attrs, com.glview.R.attr.progressBarStyle);
+        this(context, attrs, android.R.attr.progressBarStyle);
     }
 
     public ProgressBar(Context context, AttributeSet attrs, int defStyleAttr) {

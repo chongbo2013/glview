@@ -76,7 +76,7 @@ public class SeekBar extends AbsSeekBar {
     }
     
     public SeekBar(Context context, AttributeSet attrs) {
-        this(context, attrs, com.glview.R.attr.seekBarStyle);
+        this(context, attrs, android.R.attr.seekBarStyle);
     }
 
     public SeekBar(Context context, AttributeSet attrs, int defStyleAttr) {

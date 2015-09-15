@@ -97,7 +97,7 @@ public abstract class LayoutInflater {
     private static final String TAG_TAG = "tag";
 
     private static final int[] ATTRS_THEME = new int[] {
-            com.glview.AndroidR.attr.theme };
+            android.R.attr.theme };
 
     /**
      * Hook to allow clients of the LayoutInflater to restrict the set of Views that are allowed
