@@ -34,7 +34,8 @@ public class Extensions {
 	
 	public Extensions() {
 		mGL = App.getGL20();
-		String extensions = mGL.glGetString(GL20.GL_EXTENSIONS);
+		Log.d(TAG, "mGL=" + mGL);
+		String extensions = mGL != null ? mGL.glGetString(GL20.GL_EXTENSIONS) : null;
 		Log.i(TAG, "GL_EXTENSIONS=" + extensions);
 		findExtensions(extensions, mGlExtensionList);
 		mHasNPot = hasGlExtension("GL_OES_texture_npot");
@@ -46,7 +47,7 @@ public class Extensions {
 	    mHas1BitStencil = hasGlExtension("GL_OES_stencil1");
 	    mHas4BitStencil = hasGlExtension("GL_OES_stencil4");
 	    
-	    String version = mGL.glGetString(GL20.GL_VERSION);
+	    String version = mGL != null ? mGL.glGetString(GL20.GL_VERSION) : null;
 	    Log.i(TAG, "GL_VERSION=" + version);
 	    //"OpenGL ES %d.%d"
 	    try {

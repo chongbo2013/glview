@@ -1,12 +1,17 @@
 package com.glview;
 
+import com.glview.libgdx.graphics.opengl.AndroidGL20;
 import com.glview.libgdx.graphics.opengl.GL;
 import com.glview.libgdx.graphics.opengl.GL11;
 import com.glview.libgdx.graphics.opengl.GL20;
 
 public class App {
 	
-	static ThreadLocal<GL20> sGL20ThreadInstance = new ThreadLocal<GL20>();
+	static ThreadLocal<GL20> sGL20ThreadInstance = new ThreadLocal<GL20>() {
+		protected GL20 initialValue() {
+			return new AndroidGL20();
+		};
+	};
 	
 	public static GL20 getGL20() {
 		return sGL20ThreadInstance.get();

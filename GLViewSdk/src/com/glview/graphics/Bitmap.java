@@ -86,8 +86,8 @@ public class Bitmap {
 			} else {
 				mGenerationId = 0;
 			}
-			mAllocationByteCount = mBitmap.getAllocationByteCount();
 			mByteCount = mBitmap.getByteCount();
+			mAllocationByteCount = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT ? mBitmap.getAllocationByteCount() : mByteCount;
 			mRowBytes = mBitmap.getRowBytes();
 			mDensity = mBitmap.getDensity();
 			mNinePatchChunk = mBitmap.getNinePatchChunk();
