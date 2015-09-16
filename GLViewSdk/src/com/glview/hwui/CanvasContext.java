@@ -237,9 +237,11 @@ class CanvasContext {
     }
     
     void destroySurface() {
-    	if (DEBUG) Log.d(TAG, "destroy EGLSurface called in CanvasContext.");
-    	sEglManager.destroySurface(mEglSurface);
-        mEglSurface = null;
+    	if (mEglSurface != null) {
+    		if (DEBUG) Log.d(TAG, "destroy EGLSurface called in CanvasContext.");
+    		sEglManager.destroySurface(mEglSurface);
+    		mEglSurface = null;
+    	}
     }
     
     void destroyContext() {
@@ -400,6 +402,7 @@ class CanvasContext {
 					Caches.getInstance().clear();
 					if (sEglManager != null) {
 						sEglManager.destroy();
+						sEglManager.initializeEgl();
 					}
 				} else if (level >= TRIM_MEMORY_UI_HIDDEN) {
 					Caches.getInstance().textureCache.flush();
