@@ -70,6 +70,14 @@ public final class Looper {
     public static void prepare() {
         prepare(true);
     }
+    
+    /**
+     * Only for RenderThread
+     * @hide
+     */
+    public static void prepare1() {
+    	prepare(false);
+    }
 
     private static void prepare(boolean quitAllowed) {
         if (sThreadLocal.get() != null) {

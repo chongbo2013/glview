@@ -1,7 +1,5 @@
 package com.glview.hwui;
 
-import java.lang.reflect.Method;
-
 import android.os.Build;
 import android.os.Process;
 import android.os.StrictMode;
@@ -52,18 +50,19 @@ class RenderThread extends Thread {
 		Log.i(TAG, "starting tid=" + getId());
 		init();
 		// 主线程，调用prepare(false)，线程不允许被quit
-		try {
-			Log.i(TAG, "Try to prepare the looper with declaredMethod 'private static void android.os.Looper.prepare(boolean)' to set quitAllowed=false");
-			Method m = Looper.class.getDeclaredMethod("prepare", boolean.class);
-			m.setAccessible(true);
-			m.invoke(null, false);
-			m.setAccessible(false);
-		} catch(Exception e) {
-			Log.w(TAG, "Reflection failed, use public prepare", e);
-		}
-		if (Looper.myLooper() == null) {
-			Looper.prepare();
-		}
+//		try {
+//			Log.i(TAG, "Try to prepare the looper with declaredMethod 'private static void android.os.Looper.prepare(boolean)' to set quitAllowed=false");
+//			Method m = Looper.class.getDeclaredMethod("prepare", boolean.class);
+//			m.setAccessible(true);
+//			m.invoke(null, false);
+//			m.setAccessible(false);
+//		} catch(Exception e) {
+//			Log.w(TAG, "Reflection failed, use public prepare", e);
+//		}
+//		if (Looper.myLooper() == null) {
+//			Looper.prepare();
+//		}
+		Looper.prepare1();
 		synchronized (this) {
             mLooper = Looper.myLooper();
             notifyAll();
