@@ -1,6 +1,5 @@
 package com.glview.hwui.task;
 
-import android.os.SystemClock;
 import android.util.Log;
 
 import com.glview.thread.Handler;
@@ -27,19 +26,16 @@ public class TaskHandler extends Handler {
 	
 	public boolean post(Task task) {
 		if (DEBUG) Log.d(TAG, "Post a task. task=" + task);
-		task.startTask();
 		return super.post(task);
 	}
 	
 	public boolean postAtFrontOfQueue(Task task) {
 		if (DEBUG) Log.d(TAG, "Post a task at front of queue. task=" + task);
-		task.startTask();
 		return super.postAtFrontOfQueue(task);
 	}
 	
 	public void remove(Task task) {
 		super.removeCallbacks(task);
-		task.cancelTask();
 	}
 	
 	/**
@@ -77,66 +73,22 @@ public class TaskHandler extends Handler {
 	public boolean postAndWait(Task task) {
 		if (DEBUG) Log.d(TAG, "Post a sync task. task=" + task);
 		if (isCurrentThread()) {
-			task.setSync(false);
 			task.run();
 			return true;
 		} else {
-			task.setSync(true);
-			boolean r = post(task);
-			if (r) {
-				synchronized (task) {
-					// Blocking here, until the task is done. 10000ms
-					final long expirationTime = SystemClock.uptimeMillis() + WAIT_TIMEOUT;
-					while (task.isRunning()) {
-						long delay = expirationTime - SystemClock.uptimeMillis();
-                        if (delay <= 0) {
-                        	task.cancelTask();
-                            return false; // timeout
-                        }
-						try {
-							task.wait(delay);
-						} catch (InterruptedException e) {
-							Thread.currentThread().interrupt();
-						}
-					}
-				}
-			} else {
-				task.cancelTask();
-			}
-			return r;
+			BlockingRunable blockingRunable = BlockingRunable.obtain(task);
+			return blockingRunable.postAndWait(this, WAIT_TIMEOUT);
 		}
 	}
 	
 	public boolean postAtFrontOfQueueAndWait (Task task) {
 		if (DEBUG) Log.d(TAG, "Post a sync task at front of queue. task=" + task);
 		if (isCurrentThread()) {
-			task.setSync(false);
 			task.run();
 			return true;
 		} else {
-			task.setSync(true);
-			boolean r = postAtFrontOfQueue(task);
-			if (r) {
-				synchronized (task) {
-					// Blocking here, until the task is done. 10000ms
-					final long expirationTime = SystemClock.uptimeMillis() + WAIT_TIMEOUT;
-					while (task.isRunning()) {
-						long delay = expirationTime - SystemClock.uptimeMillis();
-                        if (delay <= 0) {
-                        	task.cancelTask();
-                            return false; // timeout
-                        }
-						try {
-							task.wait(delay);
-						} catch (InterruptedException e) {
-							Thread.currentThread().interrupt();
-						}
-					}
-				}
-			} else {
-				task.cancelTask();
-			}
-			return r;
+			BlockingRunable blockingRunable = BlockingRunable.obtain(task);
+			return blockingRunable.postAtFrontOfQueueAndWait(this, WAIT_TIMEOUT);
 		}
 	}
 

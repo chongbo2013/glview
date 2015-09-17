@@ -121,7 +121,7 @@ public final class RenderPolicy {
 				scheduleAnimatingDrawTask();
 			}
 		}*/
-		if (mCanvasContext.draw() && fromGLThread && mDrawTask.isRunning()) {
+		if (mCanvasContext.draw() && fromGLThread) {
 //			mHandler.remove(mDrawTask);
 		}
 	}
