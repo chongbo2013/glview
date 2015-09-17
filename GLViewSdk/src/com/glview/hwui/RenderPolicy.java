@@ -9,6 +9,8 @@ import android.view.Surface;
 
 import com.glview.animation.Animator;
 import com.glview.graphics.Bitmap;
+import com.glview.hwui.task.Task;
+import com.glview.hwui.task.TaskHandler;
 import com.glview.view.GLRootView;
 
 public final class RenderPolicy {

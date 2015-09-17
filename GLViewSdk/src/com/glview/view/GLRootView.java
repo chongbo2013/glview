@@ -20,8 +20,8 @@ import android.view.SurfaceView;
 
 import com.glview.animation.Animator;
 import com.glview.graphics.Bitmap;
-import com.glview.hwui.Task;
-import com.glview.hwui.TaskHandler;
+import com.glview.hwui.task.Task;
+import com.glview.hwui.task.TaskHandler;
 import com.glview.thread.Handler;
 import com.glview.thread.Looper;
 import com.glview.thread.Message;

@@ -16,6 +16,8 @@ import com.glview.animation.AnimatorListenerAdapter;
 import com.glview.animation.ValueAnimator;
 import com.glview.animation.ValueAnimator.AnimatorUpdateListener;
 import com.glview.graphics.Bitmap;
+import com.glview.hwui.task.Task;
+import com.glview.hwui.task.TaskHandler;
 import com.glview.libgdx.graphics.opengl.AndroidGL20;
 import com.glview.thread.Looper;
 import com.glview.util.FPSUtils;
