@@ -14,8 +14,6 @@ public class TaskHandler extends Handler {
 	final static String TAG = "TaskHandler";
 	final static boolean DEBUG = false;
 	
-	final static long WAIT_TIMEOUT = 10000;
-	
 	public TaskHandler(Looper looper) {
 		super(looper);
 	}
@@ -77,7 +75,9 @@ public class TaskHandler extends Handler {
 			return true;
 		} else {
 			BlockingRunable blockingRunable = BlockingRunable.obtain(task);
-			return blockingRunable.postAndWait(this, WAIT_TIMEOUT);
+			boolean r =  blockingRunable.postAndWait(this, -1);
+			blockingRunable.recycle();
+			return r;
 		}
 	}
 	
@@ -88,7 +88,9 @@ public class TaskHandler extends Handler {
 			return true;
 		} else {
 			BlockingRunable blockingRunable = BlockingRunable.obtain(task);
-			return blockingRunable.postAtFrontOfQueueAndWait(this, WAIT_TIMEOUT);
+			boolean r =  blockingRunable.postAtFrontOfQueueAndWait(this, -1);
+			blockingRunable.recycle();
+			return r;
 		}
 	}
 
