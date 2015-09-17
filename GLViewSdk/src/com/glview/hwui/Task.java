@@ -4,26 +4,26 @@ package com.glview.hwui;
 public abstract class Task implements Runnable {
 	
 	private boolean mTaskDone = true;
-	private boolean mCanceled = true;
+	private boolean mCanceled = false;
 	
 	/**
 	 * A sync task, main thread may be blocked by the handler thread.
 	 */
 	private boolean mSyncTask = false;
 	
-	public boolean isTaskDone() {
+	public synchronized boolean isTaskDone() {
 		return mTaskDone;
 	}
 	
-	public boolean isRunning() {
-		return !mTaskDone || mCanceled;
+	public synchronized boolean isRunning() {
+		return !mTaskDone && !mCanceled;
 	}
 	
-	void setSync(boolean sync) {
+	synchronized void setSync(boolean sync) {
 		mSyncTask = sync;
 	}
 	
-	void startTask() {
+	synchronized void startTask() {
 		mTaskDone = false;
 		mCanceled = false;
 	}
@@ -37,7 +37,7 @@ public abstract class Task implements Runnable {
 		}
 	}
 	
-	final void finishTask() {
+	final synchronized void finishTask() {
 		if (!mTaskDone) {
 			mTaskDone = true;
 			// If this is a sync task, notify the main thread which is blocked by me.
@@ -49,7 +49,7 @@ public abstract class Task implements Runnable {
 		}
 	}
 	
-	final void cancelTask() {
+	final synchronized void cancelTask() {
 		if (!mCanceled) {
 			mCanceled = true;
 			// If this is a sync task, notify the main thread which is blocked by me.

@@ -1,5 +1,6 @@
 package com.glview.hwui;
 
+import android.os.SystemClock;
 import android.util.Log;
 
 import com.glview.thread.Handler;
@@ -13,6 +14,8 @@ public class TaskHandler extends Handler {
 
 	final static String TAG = "TaskHandler";
 	final static boolean DEBUG = false;
+	
+	final static long WAIT_TIMEOUT = 10000;
 	
 	public TaskHandler(Looper looper) {
 		super(looper);
@@ -36,7 +39,7 @@ public class TaskHandler extends Handler {
 	
 	public void remove(Task task) {
 		super.removeCallbacks(task);
-		task.finishTask();
+		task.cancelTask();
 	}
 	
 	/**
@@ -80,15 +83,25 @@ public class TaskHandler extends Handler {
 		} else {
 			task.setSync(true);
 			boolean r = post(task);
-			synchronized (task) {
-				// Blocking here, until the task is done. 10000ms
-				while (task.isRunning()) {
-					try {
-						task.wait(10000);
-					} catch (InterruptedException e) {
-						Thread.currentThread().interrupt();
+			if (r) {
+				synchronized (task) {
+					// Blocking here, until the task is done. 10000ms
+					final long expirationTime = SystemClock.uptimeMillis() + WAIT_TIMEOUT;
+					while (task.isRunning()) {
+						long delay = expirationTime - SystemClock.uptimeMillis();
+                        if (delay <= 0) {
+                        	task.cancelTask();
+                            return false; // timeout
+                        }
+						try {
+							task.wait(delay);
+						} catch (InterruptedException e) {
+							Thread.currentThread().interrupt();
+						}
 					}
 				}
+			} else {
+				task.cancelTask();
 			}
 			return r;
 		}
@@ -103,15 +116,25 @@ public class TaskHandler extends Handler {
 		} else {
 			task.setSync(true);
 			boolean r = postAtFrontOfQueue(task);
-			synchronized (task) {
-				// Blocking here, until the task is done. 10000ms
-				while (task.isRunning()) {
-					try {
-						task.wait(10000);
-					} catch (InterruptedException e) {
-						Thread.currentThread().interrupt();
+			if (r) {
+				synchronized (task) {
+					// Blocking here, until the task is done. 10000ms
+					final long expirationTime = SystemClock.uptimeMillis() + WAIT_TIMEOUT;
+					while (task.isRunning()) {
+						long delay = expirationTime - SystemClock.uptimeMillis();
+                        if (delay <= 0) {
+                        	task.cancelTask();
+                            return false; // timeout
+                        }
+						try {
+							task.wait(delay);
+						} catch (InterruptedException e) {
+							Thread.currentThread().interrupt();
+						}
 					}
 				}
+			} else {
+				task.cancelTask();
 			}
 			return r;
 		}
