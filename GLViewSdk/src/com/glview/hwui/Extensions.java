@@ -32,7 +32,7 @@ public class Extensions {
     int mVersionMajor;
     int mVersionMinor;
 	
-	public Extensions() {
+	Extensions() {
 		mGL = App.getGL20();
 		Log.d(TAG, "mGL=" + mGL);
 		String extensions = mGL != null ? mGL.glGetString(GL20.GL_EXTENSIONS) : null;

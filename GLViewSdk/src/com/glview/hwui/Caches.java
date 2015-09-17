@@ -12,7 +12,12 @@ import com.glview.hwui.cache.TextureCache;
 import com.glview.libgdx.graphics.glutils.ShaderProgram;
 import com.glview.libgdx.graphics.opengl.GL20;
 import com.glview.libgdx.graphics.utils.BufferUtils;
+import com.glview.thread.Looper;
 
+/**
+ * @hide
+ * @author lijing.lj
+ */
 public final class Caches {
 	
 	static ThreadLocal<Caches> sThreadLocal = new ThreadLocal<Caches>() {
@@ -42,7 +47,12 @@ public final class Caches {
 	IntBuffer mBuffer = BufferUtils.newIntBuffer(1);
 	
 	public static Caches getInstance() {
-		return sThreadLocal.get();
+		if (Looper.myLooper() == RenderThread.getRenderThreadLooper()) {
+			CanvasContext.ensureEglManager();
+			return sThreadLocal.get();
+		} else {
+			throw new IllegalStateException("Only call from RenderThread.");
+		}
 	}
 	
 	Texture mBindedTexture = null;

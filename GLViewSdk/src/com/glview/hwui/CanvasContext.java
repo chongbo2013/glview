@@ -121,14 +121,17 @@ class CanvasContext {
 	
     public CanvasContext(RenderNode rootRenderNode) {
     	mHandler = new TaskHandler(Looper.myLooper());
-    	// now we only support OpenGL 2.0.
-    	if (sEglManager == null) {
-    		sEglManager = new EglManager(EGL_CONTEXT_CLIENT_VERSION);
-    	}
+    	ensureEglManager();
     	mRootNode = rootRenderNode;
     	if (DEBUG_FPS) mFpsUtils = new FPSUtils(this);
     	
     	App.setGL20(new AndroidGL20());
+    }
+    
+    public static void ensureEglManager() {
+    	// now we only support OpenGL 2.0.
+    	if (sEglManager == null) sEglManager = new EglManager(EGL_CONTEXT_CLIENT_VERSION);
+    	sEglManager.initializeEgl();
     }
     
     public boolean isOpenGL20() {
@@ -226,6 +229,7 @@ class CanvasContext {
     void destroyHardwareResources() {
     	Caches.getInstance().clear();
     	destroyContext();
+    	ensureEglManager();
     }
     
     void swapBuffers() {
@@ -398,12 +402,13 @@ class CanvasContext {
     	sTaskHandler.postAndWait(new Task() {
 			@Override
 			public void doTask() {
+				ensureEglManager();
+				Log.v(TAG, "trimMemory level=" + level);
+				sEglManager.initializeEgl();
 				if (level >= TRIM_MEMORY_COMPLETE) {
 					Caches.getInstance().clear();
-					if (sEglManager != null) {
-						sEglManager.destroy();
-						sEglManager.initializeEgl();
-					}
+					sEglManager.destroy();
+					sEglManager.initializeEgl();
 				} else if (level >= TRIM_MEMORY_UI_HIDDEN) {
 					Caches.getInstance().textureCache.flush();
 				} else {
