@@ -29,6 +29,7 @@ class EglManager {
 	
 	final static String TAG = "EglManager";
 	final static boolean DEBUG = true;
+	final static boolean EGL_SAMPLES = false;
 	
 	int mEGLContextClientVersion = 1;
 
@@ -66,7 +67,7 @@ class EglManager {
 
             checkEglErrorsForced();
 
-            sEglConfig = loadEglConfig(true);
+            sEglConfig = loadEglConfig(EGL_SAMPLES);
         }
 
         if (mEglContext == null) {
