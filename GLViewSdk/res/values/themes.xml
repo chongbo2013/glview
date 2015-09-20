@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:glview="http://schemas.android.com/apk/res-auto">
+    
+    <style name="Theme" parent="@android:style/Theme">
+        <item name="fastScrollStyle">@style/Widget.FastScroll</item>
+    </style>
+    
+    <style name="Theme.NoTitleBar">
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <style name="Theme.NoTitleBar.Fullscreen">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+</resources>

@@ -513,6 +513,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Vi
      * The last scroll state reported to clients through {@link OnScrollListener}.
      */
     private int mLastScrollState = OnScrollListener.SCROLL_STATE_IDLE;
+    
+    /**
+     * Helper object that renders and controls the fast scroll thumb.
+     */
+    private FastScroller mFastScroll;
 
     /**
      * Temporary holder for fast scroller style until a FastScroller object
@@ -692,9 +697,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Vi
         mOwnerThread = Thread.currentThread();
 
         setVerticalScrollBarEnabled(true);
-        TypedArray a = context.obtainStyledAttributes(com.glview.R.styleable.View);
-        initializeScrollbarsInternal(a);
-        a.recycle();
+        initializeScrollbarsInternal(null, 0, 0);
     }
 
     public AbsListView(Context context, AttributeSet attrs) {
@@ -713,6 +716,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Vi
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, com.glview.R.styleable.AbsListView, defStyleAttr, defStyleRes);
+        final TypedArray androidA = context.obtainStyledAttributes(
+                attrs, com.glview.AndroidR.styleable.AbsListView, defStyleAttr, defStyleRes);
 
         Drawable d = GLContext.get().getResources().getDrawable(a.getResourceId(com.glview.R.styleable.AbsListView_listSelector, 0));
         if (d != null) {
@@ -741,8 +746,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Vi
         boolean enableFastScroll = a.getBoolean(com.glview.R.styleable.AbsListView_fastScrollEnabled, false);
         setFastScrollEnabled(enableFastScroll);
 
-//        int fastScrollStyle = a.getResourceId(com.glview.R.styleable.AbsListView_fastScrollStyle, 0);
-//        setFastScrollStyle(fastScrollStyle);
+        int fastScrollStyle = androidA.getResourceId(com.glview.AndroidR.styleable.AbsListView_fastScrollStyle, 0);
+        fastScrollStyle = a.getResourceId(com.glview.R.styleable.AbsListView_fastScrollStyle, fastScrollStyle);
+        setFastScrollStyle(fastScrollStyle);
 
         boolean smoothScrollbar = a.getBoolean(com.glview.R.styleable.AbsListView_smoothScrollbar, true);
         setSmoothScrollbarEnabled(smoothScrollbar);
@@ -752,6 +758,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Vi
                 a.getBoolean(com.glview.R.styleable.AbsListView_fastScrollAlwaysVisible, false));
 
         a.recycle();
+        androidA.recycle();
     }
 
     private void initAbsListView() {
@@ -1129,7 +1136,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Vi
     }
 
     private void setFastScrollerEnabledUiThread(boolean enabled) {
-        /*if (mFastScroll != null) {
+        if (mFastScroll != null) {
             mFastScroll.setEnabled(enabled);
         } else if (enabled) {
             mFastScroll = new FastScroller(this, mFastScrollStyle);
@@ -1140,7 +1147,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Vi
 
         if (mFastScroll != null) {
             mFastScroll.updateLayout();
-        }*/
+        }
     }
 
     /**
@@ -1150,11 +1157,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Vi
      * @see android.R.styleable#FastScroll
      */
     public void setFastScrollStyle(int styleResId) {
-        /*if (mFastScroll == null) {
+        if (mFastScroll == null) {
             mFastScrollStyle = styleResId;
         } else {
             mFastScroll.setStyle(styleResId);
-        }*/
+        }
     }
 
     /**
@@ -1193,9 +1200,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Vi
     }
 
     private void setFastScrollerAlwaysVisibleUiThread(boolean alwaysShow) {
-        /*if (mFastScroll != null) {
+        if (mFastScroll != null) {
             mFastScroll.setAlwaysShow(alwaysShow);
-        }*/
+        }
     }
 
     /**
@@ -1212,19 +1219,18 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Vi
      * @see #setFastScrollAlwaysVisible(boolean)
      */
     public boolean isFastScrollAlwaysVisible() {
-        /*if (mFastScroll == null) {
+        if (mFastScroll == null) {
             return mFastScrollEnabled && mFastScrollAlwaysVisible;
         } else {
             return mFastScroll.isEnabled() && mFastScroll.isAlwaysShowEnabled();
-        }*/
-    	return false;
+        }
     }
 
     @Override
     public int getVerticalScrollbarWidth() {
-        /*if (mFastScroll != null && mFastScroll.isEnabled()) {
+        if (mFastScroll != null && mFastScroll.isEnabled()) {
             return Math.max(super.getVerticalScrollbarWidth(), mFastScroll.getWidth());
-        }*/
+        }
         return super.getVerticalScrollbarWidth();
     }
 
@@ -1235,28 +1241,27 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Vi
      * @return true if fast scroll is enabled, false otherwise
      */
     public boolean isFastScrollEnabled() {
-        /*if (mFastScroll == null) {
+        if (mFastScroll == null) {
             return mFastScrollEnabled;
         } else {
             return mFastScroll.isEnabled();
-        }*/
-    	return false;
+        }
     }
 
     @Override
     public void setVerticalScrollbarPosition(int position) {
         super.setVerticalScrollbarPosition(position);
-        /*if (mFastScroll != null) {
+        if (mFastScroll != null) {
             mFastScroll.setScrollbarPosition(position);
-        }*/
+        }
     }
 
     @Override
     public void setScrollBarStyle(int style) {
         super.setScrollBarStyle(style);
-        /*if (mFastScroll != null) {
+        if (mFastScroll != null) {
             mFastScroll.setScrollBarStyle(style);
-        }*/
+        }
     }
 
     /**
@@ -1315,9 +1320,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Vi
      * Notify our scroll listener (if there is one) of a change in scroll state
      */
     void invokeOnItemScrollListener() {
-        /*if (mFastScroll != null) {
+        if (mFastScroll != null) {
             mFastScroll.onScroll(mFirstPosition, getChildCount(), mItemCount);
-        }*/
+        }
         if (mOnScrollListener != null) {
             mOnScrollListener.onScroll(this, mFirstPosition, getChildCount(), mItemCount);
         }
@@ -1635,9 +1640,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Vi
         mOverscrollMax = (b - t) / OVERSCROLL_LIMIT_DIVISOR;
 
         // TODO: Move somewhere sane. This doesn't belong in onLayout().
-        /*if (mFastScroll != null) {
+        if (mFastScroll != null) {
             mFastScroll.onItemCountChanged(getChildCount(), mItemCount);
-        }*/
+        }
     }
 
     /**
@@ -1948,9 +1953,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Vi
             rememberSyncState();
         }
 
-        /*if (mFastScroll != null) {
+        if (mFastScroll != null) {
             mFastScroll.onSizeChanged(w, h, oldw, oldh);
-        }*/
+        }
     }
 
     /**
@@ -2214,9 +2219,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Vi
     @Override
     public void onRtlPropertiesChanged(int layoutDirection) {
         super.onRtlPropertiesChanged(layoutDirection);
-        /*if (mFastScroll != null) {
+        if (mFastScroll != null) {
            mFastScroll.setScrollbarPosition(getVerticalScrollbarPosition());
-        }*/
+        }
     }
 
     /**
@@ -2760,12 +2765,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Vi
 
         startNestedScroll(SCROLL_AXIS_VERTICAL);
 
-        /*if (mFastScroll != null) {
+        if (mFastScroll != null) {
             boolean intercepted = mFastScroll.onTouchEvent(ev);
             if (intercepted) {
                 return true;
             }
-        }*/
+        }
 
         initVelocityTrackerIfNotExists();
         final MotionEvent vtev = MotionEvent.obtain(ev);
@@ -3340,9 +3345,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Vi
             return false;
         }
 
-        /*if (mFastScroll != null && mFastScroll.onInterceptTouchEvent(ev)) {
+        if (mFastScroll != null && mFastScroll.onInterceptTouchEvent(ev)) {
             return true;
-        }*/
+        }
 
         switch (actionMasked) {
         case MotionEvent.ACTION_DOWN: {
@@ -4758,17 +4763,17 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Vi
         @Override
         public void onChanged() {
             super.onChanged();
-            /*if (mFastScroll != null) {
+            if (mFastScroll != null) {
                 mFastScroll.onSectionsChanged();
-            }*/
+            }
         }
 
         @Override
         public void onInvalidated() {
             super.onInvalidated();
-            /*if (mFastScroll != null) {
+            if (mFastScroll != null) {
                 mFastScroll.onSectionsChanged();
-            }*/
+            }
         }
     }
 

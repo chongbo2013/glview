@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:glview="http://schemas.android.com/apk/res-auto">
+    
+    <style name="Theme.Holo" parent="@android:style/Theme.Holo">
+        <item name="fastScrollStyle">@style/Widget.FastScroll</item>
+    </style>
+    
+    <style name="Theme.Holo.NoActionBar">
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <style name="Theme.Holo.NoActionBar.Fullscreen">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+    
+    
+    <style name="Theme.Holo.Light" parent="@android:style/Theme.Holo.Light">
+        <item name="fastScrollStyle">@style/Widget.FastScroll</item>
+    </style>
+    
+    <style name="Theme.Holo.Light.NoActionBar">
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <style name="Theme.Holo.Light.NoActionBar.Fullscreen">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+</resources>

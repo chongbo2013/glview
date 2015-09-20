@@ -244,7 +244,7 @@ public abstract class ViewGroup extends View{
 			if (attr == R.styleable.ViewGroup_clipChildren) {
 				setClipChildren(a.getBoolean(attr, true));
 			} else if (attr == R.styleable.ViewGroup_clipToPadding) {
-				// setClipToPadding(a.getBoolean(attr, true));
+				 setClipToPadding(a.getBoolean(attr, true));
 			} else if (attr == R.styleable.ViewGroup_animationCache) {
 				// setAnimationCacheEnabled(a.getBoolean(attr, true));
 			} else if (attr == R.styleable.ViewGroup_persistentDrawingCache) {
@@ -266,10 +266,10 @@ public abstract class ViewGroup extends View{
 			} else if (attr == R.styleable.ViewGroup_splitMotionEvents) {
 				// setMotionEventSplittingEnabled(a.getBoolean(attr, false));
 			} else if (attr == R.styleable.ViewGroup_animateLayoutChanges) {
-				// boolean animateLayoutChanges = a.getBoolean(attr, false);
-				// if (animateLayoutChanges) {
-				// setLayoutTransition(new LayoutTransition());
-				// }
+				 boolean animateLayoutChanges = a.getBoolean(attr, false);
+				 if (animateLayoutChanges) {
+					 setLayoutTransition(new LayoutTransition());
+				 }
 				break;
 			}
 		}

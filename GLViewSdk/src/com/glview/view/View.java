@@ -1510,7 +1510,7 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
     public View(Context context){
     	mContext = context;
 //        mResources = context != null ? context.getResources() : null;
-//    	mPrivateFlags |= PFLAG_HAS_BOUNDS; 
+    	mPrivateFlags |= PFLAG_HAS_BOUNDS; 
     	mViewFlags = SOUND_EFFECTS_ENABLED | HAPTIC_FEEDBACK_ENABLED;
     }
 
@@ -2194,7 +2194,7 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
         }
         
         if (initializeScrollbars) {
-            initializeScrollbarsInternal(a);
+            initializeScrollbarsInternal(attrs, defStyleAttr, defStyleRes);
         }
         
 		a.recycle();
@@ -2896,16 +2896,7 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
      * @removed
      */
     protected void initializeScrollbars(TypedArray a) {
-        // It's not safe to use this method from apps. The parameter 'a' must have been obtained
-        // using the View filter array which is not available to the SDK. As such, internal
-        // framework usage now uses initializeScrollbarsInternal and we grab a default
-        // TypedArray with the right filter instead here.
-        TypedArray arr = mContext.obtainStyledAttributes(com.glview.R.styleable.View);
-
-        initializeScrollbarsInternal(arr);
-
-        // We ignored the method parameter. Recycle the one we actually did use.
-        arr.recycle();
+        initializeScrollbarsInternal(null, 0, 0);
     }
 
     /**
@@ -2920,8 +2911,13 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
      * @param a the styled attributes set to initialize the scrollbars from
      * @hide
      */
-    protected void initializeScrollbarsInternal(TypedArray a) {
+    protected void initializeScrollbarsInternal(AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         initScrollCache();
+        
+        TypedArray a = mContext.obtainStyledAttributes(attrs,
+				com.glview.AndroidR.styleable.View, defStyleAttr, defStyleRes);
+        TypedArray androidA = mContext.obtainStyledAttributes(attrs,
+				com.glview.AndroidR.styleable.View, defStyleAttr, defStyleRes);
 
         final ScrollabilityCache scrollabilityCache = mScrollCache;
 
@@ -2929,7 +2925,8 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
             scrollabilityCache.scrollBar = new ScrollBarDrawable();
         }
 
-        final boolean fadeScrollbars = a.getBoolean(com.glview.R.styleable.View_fadeScrollbars, true);
+        boolean fadeScrollbars = androidA.getBoolean(com.glview.AndroidR.styleable.View_fadeScrollbars, true);
+        fadeScrollbars = a.getBoolean(com.glview.R.styleable.View_fadeScrollbars, fadeScrollbars);
 
         if (!fadeScrollbars) {
             scrollabilityCache.state = ScrollabilityCache.ON;
@@ -2937,42 +2934,67 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
         scrollabilityCache.fadeScrollBars = fadeScrollbars;
 
 
-        scrollabilityCache.scrollBarFadeDuration = a.getInt(
-        		com.glview.R.styleable.View_scrollbarFadeDuration, ViewConfiguration
+        scrollabilityCache.scrollBarFadeDuration = androidA.getInt(
+        		com.glview.AndroidR.styleable.View_scrollbarFadeDuration, ViewConfiguration
                         .getScrollBarFadeDuration());
+        scrollabilityCache.scrollBarFadeDuration = a.getInt(
+        		com.glview.R.styleable.View_scrollbarFadeDuration, 
+        		scrollabilityCache.scrollBarFadeDuration);
+        scrollabilityCache.scrollBarDefaultDelayBeforeFade = androidA.getInt(
+        		com.glview.AndroidR.styleable.View_scrollbarDefaultDelayBeforeFade,
+                ViewConfiguration.getScrollDefaultDelay());
         scrollabilityCache.scrollBarDefaultDelayBeforeFade = a.getInt(
         		com.glview.R.styleable.View_scrollbarDefaultDelayBeforeFade,
-                ViewConfiguration.getScrollDefaultDelay());
+        		scrollabilityCache.scrollBarDefaultDelayBeforeFade);
 
 
+        scrollabilityCache.scrollBarSize = androidA.getDimensionPixelSize(
+        		com.glview.AndroidR.styleable.View_scrollbarSize,
+                ViewConfiguration.get(mContext).getScaledScrollBarSize());
         scrollabilityCache.scrollBarSize = a.getDimensionPixelSize(
         		com.glview.R.styleable.View_scrollbarSize,
-                ViewConfiguration.get(mContext).getScaledScrollBarSize());
+        		scrollabilityCache.scrollBarSize);
 
         Drawable track = GLContext.get().getResources().getDrawable(a.getResourceId(com.glview.R.styleable.View_scrollbarTrackHorizontal, 0));
+        if (track == null) {
+        	track = GLContext.get().getResources().getDrawable(androidA.getResourceId(com.glview.AndroidR.styleable.View_scrollbarTrackHorizontal, 0));
+        }
         scrollabilityCache.scrollBar.setHorizontalTrackDrawable(track);
 
         Drawable thumb = GLContext.get().getResources().getDrawable(a.getResourceId(com.glview.R.styleable.View_scrollbarThumbHorizontal, 0));
+        if (thumb == null) {
+        	thumb = GLContext.get().getResources().getDrawable(androidA.getResourceId(com.glview.AndroidR.styleable.View_scrollbarThumbHorizontal, 0));
+        }
         if (thumb != null) {
             scrollabilityCache.scrollBar.setHorizontalThumbDrawable(thumb);
         }
 
-        boolean alwaysDraw = a.getBoolean(com.glview.R.styleable.View_scrollbarAlwaysDrawHorizontalTrack,
+        boolean alwaysDraw = androidA.getBoolean(com.glview.AndroidR.styleable.View_scrollbarAlwaysDrawHorizontalTrack,
                 false);
+        alwaysDraw = a.getBoolean(com.glview.R.styleable.View_scrollbarAlwaysDrawHorizontalTrack,
+                alwaysDraw);
         if (alwaysDraw) {
             scrollabilityCache.scrollBar.setAlwaysDrawHorizontalTrack(true);
         }
 
         track = GLContext.get().getResources().getDrawable(a.getResourceId(com.glview.R.styleable.View_scrollbarTrackVertical, 0));
+        if (track == null) {
+        	track = GLContext.get().getResources().getDrawable(androidA.getResourceId(com.glview.AndroidR.styleable.View_scrollbarTrackVertical, 0));
+        }
         scrollabilityCache.scrollBar.setVerticalTrackDrawable(track);
 
         thumb = GLContext.get().getResources().getDrawable(a.getResourceId(com.glview.R.styleable.View_scrollbarThumbVertical, 0));
+        if (thumb == null) {
+        	thumb = GLContext.get().getResources().getDrawable(androidA.getResourceId(com.glview.AndroidR.styleable.View_scrollbarThumbVertical, 0));
+        }
         if (thumb != null) {
             scrollabilityCache.scrollBar.setVerticalThumbDrawable(thumb);
         }
 
-        alwaysDraw = a.getBoolean(com.glview.R.styleable.View_scrollbarAlwaysDrawVerticalTrack,
+        alwaysDraw = androidA.getBoolean(com.glview.AndroidR.styleable.View_scrollbarAlwaysDrawVerticalTrack,
                 false);
+        alwaysDraw = a.getBoolean(com.glview.R.styleable.View_scrollbarAlwaysDrawVerticalTrack,
+                alwaysDraw);
         if (alwaysDraw) {
             scrollabilityCache.scrollBar.setAlwaysDrawVerticalTrack(true);
         }
@@ -2988,6 +3010,8 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
 
         // Re-apply user/background padding so that scrollbar(s) get added
         resolvePadding();
+        a.recycle();
+        androidA.recycle();
     }
 
     /**
@@ -4107,15 +4131,36 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
         return false;
     }
     
-    public void setPaddings(int paddingLeft, int paddingTop, int paddingRight, int paddingBottom){
-    	mPaddingLeft = paddingLeft;
-    	mPaddingTop = paddingTop;
-    	mPaddingRight = paddingRight;
-    	mPaddingBottom = paddingBottom;
-    }
-    
-    public void setPaddings(Rect rect){
-    	setPaddings(rect.left, rect.top, rect.right, rect.bottom);
+    /**
+     * Sets the padding. The view may add on the space required to display
+     * the scrollbars, depending on the style and visibility of the scrollbars.
+     * So the values returned from {@link #getPaddingLeft}, {@link #getPaddingTop},
+     * {@link #getPaddingRight} and {@link #getPaddingBottom} may be different
+     * from the values set in this call.
+     *
+     * @attr ref android.R.styleable#View_padding
+     * @attr ref android.R.styleable#View_paddingBottom
+     * @attr ref android.R.styleable#View_paddingLeft
+     * @attr ref android.R.styleable#View_paddingRight
+     * @attr ref android.R.styleable#View_paddingTop
+     * @param left the left padding in pixels
+     * @param top the top padding in pixels
+     * @param right the right padding in pixels
+     * @param bottom the bottom padding in pixels
+     */
+    public void setPadding(int left, int top, int right, int bottom) {
+        resetResolvedPadding();
+
+        mUserPaddingStart = UNDEFINED_PADDING;
+        mUserPaddingEnd = UNDEFINED_PADDING;
+
+        mUserPaddingLeftInitial = left;
+        mUserPaddingRightInitial = right;
+
+        mLeftPaddingDefined = true;
+        mRightPaddingDefined = true;
+
+        internalSetPadding(left, top, right, bottom);
     }
     
     /**
@@ -10589,4 +10634,5 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
             return (view.mID == mId);
         }
     }
+    
 }

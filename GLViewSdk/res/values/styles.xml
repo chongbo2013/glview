@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:glview="http://schemas.android.com/apk/res-auto">
+    
+    <style name="Widget">
+    </style>
+    
+    <style name="Widget.FastScroll">
+        <item name="thumbDrawable">@drawable/scrollbar_handle_accelerated_anim2</item>
+        <item name="trackDrawable">@null</item>
+        <item name="backgroundLeft">@null</item>
+        <item name="backgroundRight">@null</item>
+        <item name="thumbMinWidth">64dp</item>
+        <item name="thumbMinHeight">52dp</item>
+        <item name="textSize">52sp</item>
+        <item name="minWidth">72dp</item>
+        <item name="minHeight">72dp</item>
+        <item name="padding">16dp</item>
+    </style>
+    
+</resources>
