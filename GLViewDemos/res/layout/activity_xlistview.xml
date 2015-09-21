@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:glview="http://schemas.android.com/apk/res-auto"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    glview:orientation="vertical" android:background="#f0f0f0">
+
+    <com.glview.widget.xlistview.XListView
+        android:id="@+id/xListView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" android:cacheColorHint="#00000000"
+        glview:listSelector="@drawable/list_selector">
+    </com.glview.widget.xlistview.XListView>
+
+</LinearLayout>

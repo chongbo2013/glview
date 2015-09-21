@@ -107,6 +107,11 @@
             android:label="@string/title_activity_focus_finder2"
             android:theme="@android:style/Theme.Black.NoTitleBar" >
         </activity>
+        <activity
+            android:name=".demos.XListViewActivity"
+            android:label="@string/title_activity_x_list_view"
+            android:theme="@android:style/Theme.Black.NoTitleBar" >
+        </activity>
     </application>
 
 </manifest>

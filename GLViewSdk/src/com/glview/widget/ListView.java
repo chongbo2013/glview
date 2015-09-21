@@ -32,6 +32,7 @@ import com.glview.graphics.drawable.Drawable;
 import com.glview.hwui.GLCanvas;
 import com.glview.hwui.GLPaint;
 import com.glview.libgdx.graphics.math.MathUtils;
+import com.glview.util.Predicate;
 import com.glview.view.FocusFinder;
 import com.glview.view.View;
 import com.glview.view.ViewGroup;
@@ -3499,7 +3500,7 @@ public class ListView extends AbsListView {
     protected View findViewTraversal(int id) {
     	View v;
         v = super.findViewTraversal(id);
-        /*if (v == null) {
+        if (v == null) {
             v = findViewInHeadersOrFooters(mHeaderViewInfos, id);
             if (v != null) {
                 return v;
@@ -3508,7 +3509,7 @@ public class ListView extends AbsListView {
             if (v != null) {
                 return v;
             }
-        }*/
+        }
         return v;
     }
 
@@ -3516,7 +3517,7 @@ public class ListView extends AbsListView {
      *
      * Look in the passed in list of headers or footers for the view.
      */
-    /*View findViewInHeadersOrFooters(ArrayList<FixedViewInfo> where, int id) {
+    View findViewInHeadersOrFooters(ArrayList<FixedViewInfo> where, int id) {
         if (where != null) {
             int len = where.size();
             View v;
@@ -3534,13 +3535,13 @@ public class ListView extends AbsListView {
             }
         }
         return null;
-    }*/
+    }
 
     /* (non-Javadoc)
      * @see android.view.View#findViewWithTag(Object)
      * First look in our children, then in any header and footer views that may be scrolled off.
      */
-    /*@Override
+    @Override
     protected View findViewWithTagTraversal(Object tag) {
         View v;
         v = super.findViewWithTagTraversal(tag);
@@ -3556,13 +3557,13 @@ public class ListView extends AbsListView {
             }
         }
         return v;
-    }*/
+    }
 
     /* (non-Javadoc)
      *
      * Look in the passed in list of headers or footers for the view with the tag.
      */
-    /*View findViewWithTagInHeadersOrFooters(ArrayList<FixedViewInfo> where, Object tag) {
+    View findViewWithTagInHeadersOrFooters(ArrayList<FixedViewInfo> where, Object tag) {
         if (where != null) {
             int len = where.size();
             View v;
@@ -3580,14 +3581,14 @@ public class ListView extends AbsListView {
             }
         }
         return null;
-    }*/
+    }
 
     /**
      * @hide
      * @see android.view.View#findViewByPredicate(Predicate)
      * First look in our children, then in any header and footer views that may be scrolled off.
      */
-    /*@Override
+    @Override
     protected View findViewByPredicateTraversal(Predicate<View> predicate, View childToSkip) {
         View v;
         v = super.findViewByPredicateTraversal(predicate, childToSkip);
@@ -3603,14 +3604,14 @@ public class ListView extends AbsListView {
             }
         }
         return v;
-    }*/
+    }
 
     /* (non-Javadoc)
      *
      * Look in the passed in list of headers or footers for the first view that matches
      * the predicate.
      */
-    /*View findViewByPredicateInHeadersOrFooters(ArrayList<FixedViewInfo> where,
+    View findViewByPredicateInHeadersOrFooters(ArrayList<FixedViewInfo> where,
             Predicate<View> predicate, View childToSkip) {
         if (where != null) {
             int len = where.size();
@@ -3629,7 +3630,7 @@ public class ListView extends AbsListView {
             }
         }
         return null;
-    }*/
+    }
 
     /**
      * Returns the set of checked items ids. The result is only valid if the
@@ -3674,6 +3675,74 @@ public class ListView extends AbsListView {
             }
         }
         return new long[0];
+    }
+    
+    @Override
+    int getHeightForPosition(int position) {
+        final int height = super.getHeightForPosition(position);
+        if (shouldAdjustHeightForDivider(position)) {
+            return height + mDividerHeight;
+        }
+        return height;
+    }
+
+    private boolean shouldAdjustHeightForDivider(int itemIndex) {
+        final int dividerHeight = mDividerHeight;
+        final Drawable overscrollHeader = mOverScrollHeader;
+        final Drawable overscrollFooter = mOverScrollFooter;
+        final boolean drawOverscrollHeader = overscrollHeader != null;
+        final boolean drawOverscrollFooter = overscrollFooter != null;
+        final boolean drawDividers = dividerHeight > 0 && mDivider != null;
+
+        if (drawDividers) {
+            final boolean fillForMissingDividers = false;//isOpaque() && !super.isOpaque();
+            final int itemCount = mItemCount;
+            final int headerCount = mHeaderViewInfos.size();
+            final int footerLimit = (itemCount - mFooterViewInfos.size());
+            final boolean isHeader = (itemIndex < headerCount);
+            final boolean isFooter = (itemIndex >= footerLimit);
+            final boolean headerDividers = mHeaderDividersEnabled;
+            final boolean footerDividers = mFooterDividersEnabled;
+            if ((headerDividers || !isHeader) && (footerDividers || !isFooter)) {
+                final ListAdapter adapter = mAdapter;
+                if (!mStackFromBottom) {
+                    final boolean isLastItem = (itemIndex == (itemCount - 1));
+                    if (!drawOverscrollFooter || !isLastItem) {
+                        final int nextIndex = itemIndex + 1;
+                        // Draw dividers between enabled items, headers
+                        // and/or footers when enabled and requested, and
+                        // after the last enabled item.
+                        if (adapter.isEnabled(itemIndex) && (headerDividers || !isHeader
+                                && (nextIndex >= headerCount)) && (isLastItem
+                                || adapter.isEnabled(nextIndex) && (footerDividers || !isFooter
+                                                && (nextIndex < footerLimit)))) {
+                            return true;
+                        } else if (fillForMissingDividers) {
+                            return true;
+                        }
+                    }
+                } else {
+                    final int start = drawOverscrollHeader ? 1 : 0;
+                    final boolean isFirstItem = (itemIndex == start);
+                    if (!isFirstItem) {
+                        final int previousIndex = (itemIndex - 1);
+                        // Draw dividers between enabled items, headers
+                        // and/or footers when enabled and requested, and
+                        // before the first enabled item.
+                        if (adapter.isEnabled(itemIndex) && (headerDividers || !isHeader
+                                && (previousIndex >= headerCount)) && (isFirstItem ||
+                                adapter.isEnabled(previousIndex) && (footerDividers || !isFooter
+                                        && (previousIndex < footerLimit)))) {
+                            return true;
+                        } else if (fillForMissingDividers) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
 }
