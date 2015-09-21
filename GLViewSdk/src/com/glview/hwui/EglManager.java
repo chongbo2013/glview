@@ -17,7 +17,6 @@ import javax.microedition.khronos.egl.EGLSurface;
 import javax.microedition.khronos.opengles.GL;
 
 import android.opengl.EGL14;
-import android.opengl.EGLExt;
 import android.opengl.GLUtils;
 import android.util.Log;
 
@@ -29,13 +28,13 @@ class EglManager {
 	
 	final static String TAG = "EglManager";
 	final static boolean DEBUG = true;
-	final static boolean EGL_SAMPLES = false;
 	
 	int mEGLContextClientVersion = 1;
 
 	static EGL10 sEgl;
     static EGLDisplay sEglDisplay;
     static EGLConfig sEglConfig;
+    static EGLConfigChooser sEglConfigChooser;
     
     EGLContext mEglContext;
     
@@ -67,7 +66,8 @@ class EglManager {
 
             checkEglErrorsForced();
 
-            sEglConfig = loadEglConfig(EGL_SAMPLES);
+            sEglConfigChooser = new GLViewEGLConfigChooser(8, 8, 8, 8, 0, 0, 0);
+            sEglConfig = loadEglConfig();
         }
 
         if (mEglContext == null) {
@@ -92,80 +92,53 @@ class EglManager {
         return true;
     }
 	
-	private EGLConfig loadEglConfig(boolean sample) {
-		int[] attribs;
-		if (sample) {
-			attribs = new int[] {
-					EGL10.EGL_RED_SIZE, 8,
-					EGL10.EGL_GREEN_SIZE, 8,
-					EGL10.EGL_BLUE_SIZE, 8,
-					EGL10.EGL_ALPHA_SIZE, 8,
-					EGL10.EGL_DEPTH_SIZE, 0,
-					EGL10.EGL_CONFIG_CAVEAT, EGL_NONE,
-					EGL10.EGL_STENCIL_SIZE, 0,
-					EGL10.EGL_SURFACE_TYPE, EGL10.EGL_WINDOW_BIT,
-					EGL10.EGL_SAMPLE_BUFFERS, 1,//抗拒齿
-		            EGL10.EGL_SAMPLES, 2,//抗拒齿
-					EGL10.EGL_NONE
-		    };
-		} else {
-			attribs = new int[] {
-					EGL10.EGL_RED_SIZE, 8,
-					EGL10.EGL_GREEN_SIZE, 8,
-					EGL10.EGL_BLUE_SIZE, 8,
-					EGL10.EGL_ALPHA_SIZE, 8,
-					EGL10.EGL_DEPTH_SIZE, 0,
-					EGL10.EGL_CONFIG_CAVEAT, EGL_NONE,
-					EGL10.EGL_STENCIL_SIZE, 0,
-					EGL10.EGL_SURFACE_TYPE, EGL10.EGL_WINDOW_BIT,
-					EGL10.EGL_NONE
-					/*EGL10.EGL_RED_SIZE, 8,
-					EGL10.EGL_GREEN_SIZE, 8,
-					EGL10.EGL_BLUE_SIZE, 8,
-					EGL10.EGL_ALPHA_SIZE, 0,
-					EGL10.EGL_DEPTH_SIZE, 16,
-					EGL10.EGL_STENCIL_SIZE, 0,
-					EGL10.EGL_NONE*/
-		    };
-		}
-		attribs = filterConfigSpec(attribs);
-		int num_configs[] = new int[]{1};
-		EGLConfig[] configs = new EGLConfig[num_configs.length];
-		if (!sEgl.eglChooseConfig(sEglDisplay, attribs, configs, num_configs.length, num_configs) || num_configs[0] != 1) {
-			if (sample) {
-				return loadEglConfig(false);
-			}
-			throw new RuntimeException("eglConfig choose failed");
-		}
-        EGLConfig eglConfig = configs[0];
-        if (eglConfig == null) {
-        	if (sample) {
-				return loadEglConfig(false);
-			}
-            throw new RuntimeException("eglConfig not initialized");
-        }
-        return eglConfig;
+	private EGLConfig loadEglConfig() {
+		return sEglConfigChooser.chooseConfig(sEgl, sEglDisplay);
+//		int[] attribs;
+//		attribs = new int[] {
+//				EGL10.EGL_RED_SIZE, 8,
+//				EGL10.EGL_GREEN_SIZE, 8,
+//				EGL10.EGL_BLUE_SIZE, 8,
+//				EGL10.EGL_ALPHA_SIZE, 8,
+//				EGL10.EGL_DEPTH_SIZE, 0,
+//				EGL10.EGL_CONFIG_CAVEAT, EGL_NONE,
+//				EGL10.EGL_STENCIL_SIZE, 0,
+//				EGL10.EGL_SURFACE_TYPE, EGL10.EGL_WINDOW_BIT,
+//				EGL10.EGL_NONE
+//	    };
+//			
+//		attribs = filterConfigSpec(attribs);
+//		int num_configs[] = new int[]{1};
+//		EGLConfig[] configs = new EGLConfig[num_configs.length];
+//		if (!sEgl.eglChooseConfig(sEglDisplay, attribs, configs, num_configs.length, num_configs) || num_configs[0] != 1) {
+//			throw new RuntimeException("eglConfig choose failed");
+//		}
+//        EGLConfig eglConfig = configs[0];
+//        if (eglConfig == null) {
+//            throw new RuntimeException("eglConfig not initialized");
+//        }
+//        return eglConfig;
     }
 	
-	private int[] filterConfigSpec(int[] configSpec) {
-        if (mEGLContextClientVersion != 2 && mEGLContextClientVersion != 3) {
-            return configSpec;
-        }
-        /* We know none of the subclasses define EGL_RENDERABLE_TYPE.
-         * And we know the configSpec is well formed.
-         */
-        int len = configSpec.length;
-        int[] newConfigSpec = new int[len + 2];
-        System.arraycopy(configSpec, 0, newConfigSpec, 0, len-1);
-        newConfigSpec[len-1] = EGL10.EGL_RENDERABLE_TYPE;
-        if (mEGLContextClientVersion == 2) {
-            newConfigSpec[len] = EGL14.EGL_OPENGL_ES2_BIT;  /* EGL_OPENGL_ES2_BIT */
-        } else {
-            newConfigSpec[len] = EGLExt.EGL_OPENGL_ES3_BIT_KHR; /* EGL_OPENGL_ES3_BIT_KHR */
-        }
-        newConfigSpec[len+1] = EGL10.EGL_NONE;
-        return newConfigSpec;
-    }
+//	private int[] filterConfigSpec(int[] configSpec) {
+//        if (mEGLContextClientVersion != 2 && mEGLContextClientVersion != 3) {
+//            return configSpec;
+//        }
+//        /* We know none of the subclasses define EGL_RENDERABLE_TYPE.
+//         * And we know the configSpec is well formed.
+//         */
+//        int len = configSpec.length;
+//        int[] newConfigSpec = new int[len + 2];
+//        System.arraycopy(configSpec, 0, newConfigSpec, 0, len-1);
+//        newConfigSpec[len-1] = EGL10.EGL_RENDERABLE_TYPE;
+//        if (mEGLContextClientVersion == 2) {
+//            newConfigSpec[len] = EGL14.EGL_OPENGL_ES2_BIT;  /* EGL_OPENGL_ES2_BIT */
+//        } else {
+//            newConfigSpec[len] = EGLExt.EGL_OPENGL_ES3_BIT_KHR; /* EGL_OPENGL_ES3_BIT_KHR */
+//        }
+//        newConfigSpec[len+1] = EGL10.EGL_NONE;
+//        return newConfigSpec;
+//    }
 	
 	EGLContext createContext(EGL10 egl, EGLDisplay eglDisplay, EGLConfig eglConfig) {
         int[] attribs = { EGL14.EGL_CONTEXT_CLIENT_VERSION, mEGLContextClientVersion, EGL_NONE };

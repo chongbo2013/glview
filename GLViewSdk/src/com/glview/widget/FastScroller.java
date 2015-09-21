@@ -328,46 +328,32 @@ class FastScroller {
         final int N = ta.getIndexCount();
         for (int i = 0; i < N; i++) {
             final int index = ta.getIndex(i);
-            switch (index) {
-                case com.glview.R.styleable.FastScroll_position:
-                    mOverlayPosition = ta.getInt(index, OVERLAY_FLOATING);
-                    break;
-                case com.glview.R.styleable.FastScroll_backgroundLeft:
-                    mPreviewResId[PREVIEW_LEFT] = ta.getResourceId(index, 0);
-                    break;
-                case com.glview.R.styleable.FastScroll_backgroundRight:
-                    mPreviewResId[PREVIEW_RIGHT] = ta.getResourceId(index, 0);
-                    break;
-                case com.glview.R.styleable.FastScroll_thumbDrawable:
-                    mThumbDrawable = GLContext.get().getResources().getDrawable(ta.getResourceId(index, 0));
-                    break;
-                case com.glview.R.styleable.FastScroll_trackDrawable:
-                    mTrackDrawable = GLContext.get().getResources().getDrawable(ta.getResourceId(index, 0));
-                    break;
-                case com.glview.R.styleable.FastScroll_textAppearance:
-                    mTextAppearance = ta.getResourceId(index, 0);
-                    break;
-                case com.glview.R.styleable.FastScroll_textColor:
-                    mTextColor = ta.getColorStateList(index);
-                    break;
-                case com.glview.R.styleable.FastScroll_textSize:
-                    mTextSize = ta.getDimensionPixelSize(index, 0);
-                    break;
-                case com.glview.R.styleable.FastScroll_minWidth:
-                    mPreviewMinWidth = ta.getDimensionPixelSize(index, 0);
-                    break;
-                case com.glview.R.styleable.FastScroll_minHeight:
-                    mPreviewMinHeight = ta.getDimensionPixelSize(index, 0);
-                    break;
-                case com.glview.R.styleable.FastScroll_thumbMinWidth:
-                    mThumbMinWidth = ta.getDimensionPixelSize(index, 0);
-                    break;
-                case com.glview.R.styleable.FastScroll_thumbMinHeight:
-                    mThumbMinHeight = ta.getDimensionPixelSize(index, 0);
-                    break;
-                case com.glview.R.styleable.FastScroll_padding:
-                    mPreviewPadding = ta.getDimensionPixelSize(index, 0);
-                    break;
+            if (index == com.glview.R.styleable.FastScroll_position) {
+              	mOverlayPosition = ta.getInt(index, OVERLAY_FLOATING);
+            } else if (index == com.glview.R.styleable.FastScroll_backgroundLeft) {
+              	mPreviewResId[PREVIEW_LEFT] = ta.getResourceId(index, 0);
+            } else if (index == com.glview.R.styleable.FastScroll_backgroundRight) {
+             	mPreviewResId[PREVIEW_RIGHT] = ta.getResourceId(index, 0);
+            } else if (index == com.glview.R.styleable.FastScroll_thumbDrawable) {
+             	mThumbDrawable = GLContext.get().getResources().getDrawable(ta.getResourceId(index, 0));
+            } else if (index == com.glview.R.styleable.FastScroll_trackDrawable) {
+               	mTrackDrawable = GLContext.get().getResources().getDrawable(ta.getResourceId(index, 0));
+            } else if (index == com.glview.R.styleable.FastScroll_textAppearance) {
+               	mTextAppearance = ta.getResourceId(index, 0);
+            } else if (index == com.glview.R.styleable.FastScroll_textColor) {
+              	mTextColor = ta.getColorStateList(index);
+            } else if (index == com.glview.R.styleable.FastScroll_textSize) {
+              	mTextSize = ta.getDimensionPixelSize(index, 0);
+            } else if (index == com.glview.R.styleable.FastScroll_minWidth) {
+              	mPreviewMinWidth = ta.getDimensionPixelSize(index, 0);
+            } else if (index == com.glview.R.styleable.FastScroll_minHeight) {
+              	mPreviewMinHeight = ta.getDimensionPixelSize(index, 0);
+            } else if (index == com.glview.R.styleable.FastScroll_thumbMinWidth) {
+            	mThumbMinWidth = ta.getDimensionPixelSize(index, 0);
+            } else if (index == com.glview.R.styleable.FastScroll_thumbMinHeight) {
+            	mThumbMinHeight = ta.getDimensionPixelSize(index, 0);
+            } else if (index == com.glview.R.styleable.FastScroll_padding) {
+            	mPreviewPadding = ta.getDimensionPixelSize(index, 0);
             }
         }
 

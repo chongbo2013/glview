@@ -38,8 +38,6 @@ class CanvasContext {
 	private final static boolean DEBUG_FPS = true;
 	private final static boolean DEBUG_ANIMATING = false;
 	
-	private static int EGL_CONTEXT_CLIENT_VERSION = 2;
-	
 	/**
 	 * EGL Management.
 	 * Manage the EGL Context.
@@ -132,12 +130,12 @@ class CanvasContext {
     
     public static void ensureEglManager() {
     	// now we only support OpenGL 2.0.
-    	if (sEglManager == null) sEglManager = new EglManager(EGL_CONTEXT_CLIENT_VERSION);
+    	if (sEglManager == null) sEglManager = new EglManager(Constant.EGL_CONTEXT_CLIENT_VERSION);
     	sEglManager.initializeEgl();
     }
     
     public boolean isOpenGL20() {
-    	return EGL_CONTEXT_CLIENT_VERSION == 2 || EGL_CONTEXT_CLIENT_VERSION == 3;
+    	return Constant.EGL_CONTEXT_CLIENT_VERSION == 2 || Constant.EGL_CONTEXT_CLIENT_VERSION == 3;
     }
     
     /**
