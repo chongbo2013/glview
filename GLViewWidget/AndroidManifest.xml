@@ -1,10 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.glview.widget"
-    android:versionCode="1"
-    android:versionName="1.0" >
+    android:versionCode="010005"
+    android:versionName="1.0.5_D" >
 
     <uses-sdk
-        android:minSdkVersion="8"
+        android:minSdkVersion="10"
         android:targetSdkVersion="21" />
 
     <application>
