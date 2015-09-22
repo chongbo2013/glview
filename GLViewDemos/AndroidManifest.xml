@@ -28,13 +28,11 @@
         </activity>
         <activity
             android:name=".demos.SlideShowActivity"
-            android:label="@string/title_activity_slide_show"
-            android:theme="@android:style/Theme.Black.NoTitleBar" >
+            android:label="@string/title_activity_slide_show" >
         </activity>
         <activity
             android:name=".demos.RippleShaderActivity"
-            android:label="@string/title_activity_ripple_shader"
-            android:theme="@android:style/Theme.Black.NoTitleBar" >
+            android:label="@string/title_activity_ripple_shader" >
         </activity>
         <activity
             android:name=".demos.TextViewActivity"
@@ -54,28 +52,23 @@
         </activity>
         <activity
             android:name=".demos.RotateViewActivity"
-            android:label="@string/title_activity_rotate_view"
-            android:theme="@android:style/Theme.Black.NoTitleBar" >
+            android:label="@string/title_activity_rotate_view" >
         </activity>
         <activity
             android:name=".demos.RotateView1Activity"
-            android:label="@string/title_activity_rotate_view1"
-            android:theme="@android:style/Theme.Black.NoTitleBar" >
+            android:label="@string/title_activity_rotate_view1" >
         </activity>
         <activity
             android:name=".demos.RecyclerViewActivity"
-            android:label="@string/title_activity_recycler_view"
-            android:theme="@android:style/Theme.Black.NoTitleBar" >
+            android:label="@string/title_activity_recycler_view" >
         </activity>
         <activity
             android:name=".demos.RecyclerViewGridActivity"
-            android:label="@string/title_activity_recycler_view_grid"
-            android:theme="@android:style/Theme.Black.NoTitleBar" >
+            android:label="@string/title_activity_recycler_view_grid" >
         </activity>
         <activity
             android:name=".demos.HardwareLayerActivity"
-            android:label="@string/title_activity_hardware_layer"
-            android:theme="@android:style/Theme.Black.NoTitleBar" >
+            android:label="@string/title_activity_hardware_layer" >
         </activity>
         <activity
             android:name=".demos.transition.TransitionActivity"
@@ -84,33 +77,31 @@
         </activity>
         <activity
             android:name=".demos.transition.SceneTransitionActivity"
-            android:label="@string/title_activity_transition_scene"
-            android:theme="@android:style/Theme.Black.NoTitleBar" >
+            android:label="@string/title_activity_transition_scene" >
         </activity>
         <activity
             android:name=".demos.PathMotionActivity"
-            android:label="@string/title_activity_path_motion"
-            android:theme="@android:style/Theme.Black.NoTitleBar" >
+            android:label="@string/title_activity_path_motion" >
         </activity>
         <activity
             android:name=".demos.StateListActivity"
-            android:label="@string/title_activity_state_list"
-            android:theme="@android:style/Theme.Black.NoTitleBar" >
+            android:label="@string/title_activity_state_list" >
         </activity>
         <activity
             android:name=".demos.FocusFinderActivity"
-            android:label="@string/title_activity_focus_finder"
-            android:theme="@android:style/Theme.Black.NoTitleBar" >
+            android:label="@string/title_activity_focus_finder" >
         </activity>
         <activity
             android:name=".demos.FocusFinder2Activity"
-            android:label="@string/title_activity_focus_finder2"
-            android:theme="@android:style/Theme.Black.NoTitleBar" >
+            android:label="@string/title_activity_focus_finder2" >
         </activity>
         <activity
             android:name=".demos.XListViewActivity"
-            android:label="@string/title_activity_x_list_view"
-            android:theme="@android:style/Theme.Black.NoTitleBar" >
+            android:label="@string/title_activity_x_list_view" >
+        </activity>
+        <activity
+            android:name=".demos.ProgressBarActivity"
+            android:label="@string/title_activity_progress_bar" >
         </activity>
     </application>
 

@@ -21,5 +21,6 @@
     <string name="title_activity_focus_finder">FocusFinderActivity</string>
     <string name="title_activity_focus_finder2">FocusFinder2Activity</string>
     <string name="title_activity_x_list_view">XListViewActivity</string>
+    <string name="title_activity_progress_bar">ProgressBarActivity</string>
 
 </resources>
