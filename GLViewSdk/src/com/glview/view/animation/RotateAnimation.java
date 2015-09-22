@@ -174,15 +174,11 @@ public class RotateAnimation extends Animation {
         	canvas.rotate(degrees, 0, 0, 1);
         } else {
 //            t.getMatrix().setRotate(degrees, mPivotX * scale, mPivotY * scale);
-        	canvas.rotate(degrees, mPivotX * scale, mPivotY * scale, 1);
+        	canvas.translate(mPivotX * scale, mPivotY * scale);
+        	canvas.rotate(degrees, 0, 0, 1);
+        	canvas.translate(- mPivotX * scale, - mPivotY * scale);
         }
     }
-    
-//    @Override
-//    public void initialize() {
-//    	super.initialize();
-//    	initialize(0, 0, 0, 0);
-//    }
 
     @Override
     public void initialize(int width, int height, int parentWidth, int parentHeight) {

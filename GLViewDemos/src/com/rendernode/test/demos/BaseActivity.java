@@ -21,7 +21,6 @@ public class BaseActivity extends GLActivity {
 
 	@Override
 	public void onAttached(View content) {
-		
 	}
 
 }

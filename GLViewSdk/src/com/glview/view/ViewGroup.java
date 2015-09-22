@@ -4,8 +4,6 @@ import java.util.ArrayList;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Canvas;
-import android.graphics.PointF;
 import android.os.Build;
 import android.os.SystemClock;
 import android.util.AttributeSet;
@@ -16,9 +14,11 @@ import android.view.MotionEvent;
 
 import com.glview.R;
 import com.glview.animation.LayoutTransition;
+import com.glview.graphics.PointF;
 import com.glview.graphics.Rect;
 import com.glview.hwui.GLCanvas;
 import com.glview.view.animation.Animation;
+import com.glview.view.animation.AnimationUtils;
 import com.glview.view.animation.LayoutAnimationController;
 
 public abstract class ViewGroup extends View{
@@ -165,6 +165,28 @@ public abstract class ViewGroup extends View{
     // to clip it, even if FLAG_CLIP_TO_PADDING is set
     private static final int FLAG_PADDING_NOT_NULL = 0x20;
     
+    // Layout Modes
+
+    private static final int LAYOUT_MODE_UNDEFINED = -1;
+
+    /**
+     * This constant is a {@link #setLayoutMode(int) layoutMode}.
+     * Clip bounds are the raw values of {@link #getLeft() left}, {@link #getTop() top},
+     * {@link #getRight() right} and {@link #getBottom() bottom}.
+     */
+    public static final int LAYOUT_MODE_CLIP_BOUNDS = 0;
+
+    /**
+     * This constant is a {@link #setLayoutMode(int) layoutMode}.
+     * Optical bounds describe where a widget appears to be. They sit inside the clip
+     * bounds which need to cover a larger area to allow other effects,
+     * such as shadows and glows, to be drawn.
+     */
+    public static final int LAYOUT_MODE_OPTICAL_BOUNDS = 1;
+
+    /** @hide */
+    public static int LAYOUT_MODE_DEFAULT = LAYOUT_MODE_CLIP_BOUNDS;
+    
     /**
      * We clip to padding when FLAG_CLIP_TO_PADDING and FLAG_PADDING_NOT_NULL
      * are set at the same time.
@@ -235,10 +257,68 @@ public abstract class ViewGroup extends View{
     
     private void initFromAttributes(
             Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        final TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ViewGroup, defStyleAttr,
+    	
+    	TypedArray a = context.obtainStyledAttributes(attrs, com.glview.AndroidR.styleable.ViewGroup, defStyleAttr,
                 defStyleRes);
 
-        final int N = a.getIndexCount();
+        int N = a.getIndexCount();
+        for (int i = 0; i < N; i++) {
+            int attr = a.getIndex(i);
+            switch (attr) {
+                case com.glview.AndroidR.styleable.ViewGroup_clipChildren:
+                    setClipChildren(a.getBoolean(attr, true));
+                    break;
+                case com.glview.AndroidR.styleable.ViewGroup_clipToPadding:
+                    setClipToPadding(a.getBoolean(attr, true));
+                    break;
+                case com.glview.AndroidR.styleable.ViewGroup_animationCache:
+//                    setAnimationCacheEnabled(a.getBoolean(attr, true));
+                    break;
+                case com.glview.AndroidR.styleable.ViewGroup_persistentDrawingCache:
+//                    setPersistentDrawingCache(a.getInt(attr, PERSISTENT_SCROLLING_CACHE));
+                    break;
+                case com.glview.AndroidR.styleable.ViewGroup_addStatesFromChildren:
+//                    setAddStatesFromChildren(a.getBoolean(attr, false));
+                    break;
+                case com.glview.AndroidR.styleable.ViewGroup_alwaysDrawnWithCache:
+//                    setAlwaysDrawnWithCacheEnabled(a.getBoolean(attr, true));
+                    break;
+                case com.glview.AndroidR.styleable.ViewGroup_layoutAnimation:
+                    int id = a.getResourceId(attr, -1);
+                    if (id > 0) {
+                        setLayoutAnimation(AnimationUtils.loadLayoutAnimation(mContext, id));
+                    }
+                    break;
+                case com.glview.AndroidR.styleable.ViewGroup_descendantFocusability:
+                    setDescendantFocusability(DESCENDANT_FOCUSABILITY_FLAGS[a.getInt(attr, 0)]);
+                    break;
+                case com.glview.AndroidR.styleable.ViewGroup_splitMotionEvents:
+                    setMotionEventSplittingEnabled(a.getBoolean(attr, false));
+                    break;
+                case com.glview.AndroidR.styleable.ViewGroup_animateLayoutChanges:
+                    boolean animateLayoutChanges = a.getBoolean(attr, false);
+                    if (animateLayoutChanges) {
+                        setLayoutTransition(new LayoutTransition());
+                    }
+                    break;
+                case com.glview.AndroidR.styleable.ViewGroup_layoutMode:
+                    setLayoutMode(a.getInt(attr, LAYOUT_MODE_UNDEFINED));
+                    break;
+                case com.glview.AndroidR.styleable.ViewGroup_transitionGroup:
+//                    setTransitionGroup(a.getBoolean(attr, false));
+                    break;
+                case com.glview.AndroidR.styleable.ViewGroup_touchscreenBlocksFocus:
+//                    setTouchscreenBlocksFocus(a.getBoolean(attr, false));
+                    break;
+            }
+        }
+
+        a.recycle();
+        
+        a = context.obtainStyledAttributes(attrs, R.styleable.ViewGroup, defStyleAttr,
+                defStyleRes);
+
+        N = a.getIndexCount();
 		for (int i = 0; i < N; i++) {
 			int attr = a.getIndex(i);
 			if (attr == R.styleable.ViewGroup_clipChildren) {
@@ -255,11 +335,10 @@ public abstract class ViewGroup extends View{
 			} else if (attr == R.styleable.ViewGroup_alwaysDrawnWithCache) {
 				// setAlwaysDrawnWithCacheEnabled(a.getBoolean(attr, true));
 			} else if (attr == R.styleable.ViewGroup_layoutAnimation) {
-				// int id = a.getResourceId(attr, -1);
-				// if (id > 0) {
-				// setLayoutAnimation(AnimationUtils.loadLayoutAnimation(mContext,
-				// id));
-				// }
+				 int id = a.getResourceId(attr, -1);
+				 if (id > 0) {
+					 setLayoutAnimation(AnimationUtils.loadLayoutAnimation(mContext, id));
+				 }
 			} else if (attr == R.styleable.ViewGroup_descendantFocusability) {
 				// setDescendantFocusability(DESCENDANT_FOCUSABILITY_FLAGS[a.getInt(attr,
 				// 0)]);

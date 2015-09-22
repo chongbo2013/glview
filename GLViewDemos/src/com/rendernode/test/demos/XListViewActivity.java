@@ -2,6 +2,7 @@ package com.rendernode.test.demos;
 
 import java.util.ArrayList;
 
+import android.graphics.Color;
 import android.os.Bundle;
 
 import com.glview.thread.Handler;
@@ -29,6 +30,7 @@ public class XListViewActivity extends BaseActivity implements IXListViewListene
 	@Override
 	public void onAttached(View content) {
 		super.onAttached(content);
+		content.setBackgroundColor(Color.BLUE);
 		mListView = (XListView) content.findViewById(R.id.xListView);
 		mListView.setPullLoadEnable(true);
 		mAdapter = new ArrayAdapter<String>(this, R.layout.list_item, items);
@@ -40,7 +42,7 @@ public class XListViewActivity extends BaseActivity implements IXListViewListene
 	}
 	
 	private void geneItems() {
-		for (int i = 0; i != 20; ++i) {
+		for (int i = 0; i != 40; ++i) {
 			items.add("refresh cnt " + (++start));
 		}
 	}

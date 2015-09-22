@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:glview="http://schemas.android.com/apk/res-auto">
+<resources>
     
     <style name="Widget">
     </style>
@@ -16,5 +16,4 @@
         <item name="minHeight">72dp</item>
         <item name="padding">16dp</item>
     </style>
-    
 </resources>

@@ -59,21 +59,27 @@ public class LinearLayout extends ViewGroup{
     public LinearLayout(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
+        final TypedArray androidA = context.obtainStyledAttributes(
+                attrs, com.glview.AndroidR.styleable.LinearLayout, defStyleAttr, defStyleRes);
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, com.glview.R.styleable.LinearLayout, defStyleAttr, defStyleRes);
 
-        int index = a.getInt(com.glview.R.styleable.LinearLayout_orientation, -1);
+        int index = androidA.getInt(com.glview.AndroidR.styleable.LinearLayout_orientation, -1);
+        index = a.getInt(com.glview.R.styleable.LinearLayout_orientation, index);
         if (index >= 0) {
             setOrientation(index);
         }
 
-        index = a.getInt(com.glview.R.styleable.LinearLayout_gravity, -1);
+        index = androidA.getInt(com.glview.AndroidR.styleable.LinearLayout_gravity, -1);
+        index = a.getInt(com.glview.R.styleable.LinearLayout_gravity, index);
         if (index >= 0) {
             setGravity(index);
         }
 
-        mWeightSum = a.getFloat(com.glview.R.styleable.LinearLayout_weightSum, -1.0f);
+        mWeightSum = androidA.getFloat(com.glview.AndroidR.styleable.LinearLayout_weightSum, -1.0f);
+        mWeightSum = a.getFloat(com.glview.R.styleable.LinearLayout_weightSum, mWeightSum);
 
+        androidA.recycle();
         a.recycle();
     }
 	

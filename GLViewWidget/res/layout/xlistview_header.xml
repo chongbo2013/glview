@@ -57,6 +57,8 @@
             android:layout_alignLeft="@id/xlistview_header_text"
             android:layout_centerVertical="true"
             android:layout_marginLeft="-40dp"
+            android:indeterminate="true"
+            android:indeterminateDrawable="@drawable/progress_medium_white"
             android:visibility="invisible" />
     </RelativeLayout>
 

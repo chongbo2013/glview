@@ -449,7 +449,6 @@ public class ListView extends AbsListView {
         } else {
             mAdapter = adapter;
         }
-        mAdapter = adapter;
 
         mOldSelectedPosition = INVALID_POSITION;
         mOldSelectedRowId = INVALID_ROW_ID;
@@ -1682,6 +1681,30 @@ public class ListView extends AbsListView {
     }
 
     /**
+     * @param child a direct child of this list.
+     * @return Whether child is a header or footer view.
+     */
+    private boolean isDirectChildHeaderOrFooter(View child) {
+        final ArrayList<FixedViewInfo> headers = mHeaderViewInfos;
+        final int numHeaders = headers.size();
+        for (int i = 0; i < numHeaders; i++) {
+            if (child == headers.get(i).view) {
+                return true;
+            }
+        }
+
+        final ArrayList<FixedViewInfo> footers = mFooterViewInfos;
+        final int numFooters = footers.size();
+        for (int i = 0; i < numFooters; i++) {
+            if (child == footers.get(i).view) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Obtain the view and add it to our list of children. The view can be made
      * fresh, converted from an unused view, or used as is if it was in the
      * recycle bin.
@@ -1773,9 +1796,9 @@ public class ListView extends AbsListView {
         }
 
         if (mChoiceMode != CHOICE_MODE_NONE && mCheckStates != null) {
-            /*if (child instanceof Checkable) {
+            if (child instanceof Checkable) {
                 ((Checkable) child).setChecked(mCheckStates.get(position));
-            } else */if (getContext().getApplicationInfo().targetSdkVersion
+            } else if (getContext().getApplicationInfo().targetSdkVersion
                     >= android.os.Build.VERSION_CODES.HONEYCOMB) {
                 child.setActivated(mCheckStates.get(position));
             }
@@ -3163,7 +3186,7 @@ public class ListView extends AbsListView {
                     if (drawOverscrollHeader) {
                         bounds.bottom = 0;
                         bounds.top = scrollY;
-//                        drawOverscrollHeader(canvas, overscrollHeader, bounds);
+                        drawOverscrollHeader(canvas, overscrollHeader, bounds);
                     } else if (drawDividers) {
                         bounds.bottom = 0;
                         bounds.top = -dividerHeight;
@@ -3197,7 +3220,7 @@ public class ListView extends AbsListView {
                             } else if (fillForMissingDividers) {
                                 bounds.top = bottom;
                                 bounds.bottom = bottom + dividerHeight;
-//                                canvas.drawRect(bounds, paint);
+                                canvas.drawRect(bounds, paint);
                             }
                         }
                     }
@@ -3208,7 +3231,7 @@ public class ListView extends AbsListView {
                         overFooterBottom > bottom) {
                     bounds.top = bottom;
                     bounds.bottom = overFooterBottom;
-//                    drawOverscrollFooter(canvas, overscrollFooter, bounds);
+                    drawOverscrollFooter(canvas, overscrollFooter, bounds);
                 }
             } else {
                 int top;
@@ -3218,7 +3241,7 @@ public class ListView extends AbsListView {
                 if (count > 0 && drawOverscrollHeader) {
                     bounds.top = scrollY;
                     bounds.bottom = getChildAt(0).getTop();
-//                    drawOverscrollHeader(canvas, overscrollHeader, bounds);
+                    drawOverscrollHeader(canvas, overscrollHeader, bounds);
                 }
 
                 final int start = drawOverscrollHeader ? 1 : 0;
@@ -3250,7 +3273,7 @@ public class ListView extends AbsListView {
                             } else if (fillForMissingDividers) {
                                 bounds.top = top - dividerHeight;
                                 bounds.bottom = top;
-//                                canvas.drawRect(bounds, paint);
+                                canvas.drawRect(bounds, paint);
                             }
                         }
                     }
@@ -3261,7 +3284,7 @@ public class ListView extends AbsListView {
                         final int absListBottom = mBottom;
                         bounds.top = absListBottom;
                         bounds.bottom = absListBottom + scrollY;
-//                        drawOverscrollFooter(canvas, overscrollFooter, bounds);
+                        drawOverscrollFooter(canvas, overscrollFooter, bounds);
                     } else if (drawDividers) {
                         bounds.top = listBottom;
                         bounds.bottom = listBottom + dividerHeight;

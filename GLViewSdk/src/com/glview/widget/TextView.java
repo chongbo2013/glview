@@ -74,8 +74,91 @@ public class TextView extends View {
         int shadowcolor = 0;
 		
         final Resources.Theme theme = context.getTheme();
-		TypedArray a = theme.obtainStyledAttributes(attrs, com.glview.R.styleable.TextView, defStyleAttr, defStyleRes);
+        
+        TypedArray a = theme.obtainStyledAttributes(attrs, com.glview.AndroidR.styleable.TextView, defStyleAttr, defStyleRes);
         int n = a.getIndexCount();
+		for (int i = 0; i < n; i++) {
+			int attr = a.getIndex(i);
+			if (attr == com.glview.AndroidR.styleable.TextView_autoLink) {
+				// mAutoLinkMask = a.getInt(attr, 0);
+			} else if (attr == com.glview.AndroidR.styleable.TextView_linksClickable) {
+				// mLinksClickable = a.getBoolean(attr, true);
+			} else if (attr == com.glview.AndroidR.styleable.TextView_maxLines) {
+				// setMaxLines(a.getInt(attr, -1));
+			} else if (attr == com.glview.AndroidR.styleable.TextView_maxHeight) {
+				// setMaxHeight(a.getDimensionPixelSize(attr, -1));
+			} else if (attr == com.glview.AndroidR.styleable.TextView_lines) {
+				// setLines(a.getInt(attr, -1));
+			} else if (attr == com.glview.AndroidR.styleable.TextView_height) {
+				// setHeight(a.getDimensionPixelSize(attr, -1));
+			} else if (attr == com.glview.AndroidR.styleable.TextView_minLines) {
+				// setMinLines(a.getInt(attr, -1));
+			} else if (attr == com.glview.AndroidR.styleable.TextView_minHeight) {
+				// setMinHeight(a.getDimensionPixelSize(attr, -1));
+			} else if (attr == com.glview.AndroidR.styleable.TextView_maxWidth) {
+				setMaxWidth(a.getDimensionPixelSize(attr, -1));
+			} else if (attr == com.glview.AndroidR.styleable.TextView_width) {
+				// setWidth(a.getDimensionPixelSize(attr, -1));
+			} else if (attr == com.glview.AndroidR.styleable.TextView_minWidth) {
+				setMinWidth(a.getDimensionPixelSize(attr, -1));
+			} else if (attr == com.glview.AndroidR.styleable.TextView_gravity) {
+				setGravity(a.getInt(attr, -1));
+			} else if (attr == com.glview.AndroidR.styleable.TextView_hint) {
+				// hint = a.getText(attr);
+			} else if (attr == com.glview.AndroidR.styleable.TextView_text) {
+				mText = (String) a.getText(attr);
+			} else if (attr == com.glview.AndroidR.styleable.TextView_scrollHorizontally) {
+				// if (a.getBoolean(attr, false)) {
+				// setHorizontallyScrolling(true);
+				// }
+			} else if (attr == com.glview.AndroidR.styleable.TextView_singleLine) {
+				// singleLine = a.getBoolean(attr, singleLine);
+			} else if (attr == com.glview.AndroidR.styleable.TextView_ellipsize) {
+				// ellipsize = a.getInt(attr, ellipsize);
+				ellipsize = a.getInt(attr, ellipsize);
+			} else if (attr == com.glview.AndroidR.styleable.TextView_marqueeRepeatLimit) {
+				// setMarqueeRepeatLimit(a.getInt(attr, mMarqueeRepeatLimit));
+			} else if (attr == com.glview.AndroidR.styleable.TextView_includeFontPadding) {
+				// if (!a.getBoolean(attr, true)) {
+				// setIncludeFontPadding(false);
+				// }
+			} else if (attr == com.glview.AndroidR.styleable.TextView_maxLength) {
+				// maxlength = a.getInt(attr, -1);
+			} else if (attr == com.glview.AndroidR.styleable.TextView_textScaleX) {
+				// setTextScaleX(a.getFloat(attr, 1.0f));
+			} else if (attr == com.glview.AndroidR.styleable.TextView_shadowColor) {
+				shadowcolor = a.getInt(attr, 0);
+			} else if (attr == com.glview.AndroidR.styleable.TextView_shadowDx) {
+				dx = a.getFloat(attr, 0);
+			} else if (attr == com.glview.AndroidR.styleable.TextView_shadowDy) {
+				dy = a.getFloat(attr, 0);
+			} else if (attr == com.glview.AndroidR.styleable.TextView_shadowRadius) {
+				r = a.getFloat(attr, 0);
+			} else if (attr == com.glview.AndroidR.styleable.TextView_enabled) {
+				setEnabled(a.getBoolean(attr, isEnabled()));
+			} else if (attr == com.glview.AndroidR.styleable.TextView_textColorHighlight) {
+				// textColorHighlight = a.getColor(attr, textColorHighlight);
+			} else if (attr == com.glview.AndroidR.styleable.TextView_textColor) {
+				// textColor = a.getColorStateList(attr);
+				mTextColor = a.getColor(attr, DEFAULT_TEXT_COLOR);
+			} else if (attr == com.glview.AndroidR.styleable.TextView_textColorHint) {
+				// textColorHint = a.getColorStateList(attr);
+			} else if (attr == com.glview.AndroidR.styleable.TextView_textColorLink) {
+				// textColorLink = a.getColorStateList(attr);
+			} else if (attr == com.glview.AndroidR.styleable.TextView_textSize) {
+				mTextSize = a.getDimensionPixelSize(attr, DEFAULT_TEXT_SIZE);
+			} else if (attr == com.glview.AndroidR.styleable.TextView_typeface) {
+				// typefaceIndex = a.getInt(attr, typefaceIndex);
+			} else if (attr == com.glview.AndroidR.styleable.TextView_textStyle) {
+				// styleIndex = a.getInt(attr, styleIndex);
+			} else if (attr == com.glview.AndroidR.styleable.TextView_fontFamily) {
+				// fontFamily = a.getString(attr);
+			}
+		}
+        a.recycle();
+        
+		a = theme.obtainStyledAttributes(attrs, com.glview.R.styleable.TextView, defStyleAttr, defStyleRes);
+        n = a.getIndexCount();
 		for (int i = 0; i < n; i++) {
 			int attr = a.getIndex(i);
 			if (attr == com.glview.R.styleable.TextView_autoLink) {
