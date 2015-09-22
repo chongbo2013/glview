@@ -16,4 +16,33 @@
         <item name="minHeight">72dp</item>
         <item name="padding">16dp</item>
     </style>
+    
+    <style name="Widget.ProgressBar">
+        <item name="indeterminateOnly">true</item>
+        <item name="indeterminateDrawable">@drawable/progress_medium_white</item>
+        <item name="indeterminateBehavior">repeat</item>
+        <item name="indeterminateDuration">3500</item>
+        <item name="minWidth">48dip</item>
+        <item name="maxWidth">48dip</item>
+        <item name="minHeight">48dip</item>
+        <item name="maxHeight">48dip</item>
+        <item name="mirrorForRtl">false</item>
+    </style>
+
+    <style name="Widget.ProgressBar.Large">
+        <item name="indeterminateDrawable">@drawable/progress_large_white</item>
+        <item name="minWidth">76dip</item>
+        <item name="maxWidth">76dip</item>
+        <item name="minHeight">76dip</item>
+        <item name="maxHeight">76dip</item>
+    </style>
+
+    <style name="Widget.ProgressBar.Small">
+        <item name="indeterminateDrawable">@drawable/progress_small_white</item>
+        <item name="minWidth">16dip</item>
+        <item name="maxWidth">16dip</item>
+        <item name="minHeight">16dip</item>
+        <item name="maxHeight">16dip</item>
+    </style>
+
 </resources>

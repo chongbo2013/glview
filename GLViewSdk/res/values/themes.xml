@@ -3,6 +3,9 @@
     
     <style name="Theme" parent="@android:style/Theme">
         <item name="fastScrollStyle">@style/Widget.FastScroll</item>
+        <item name="progressBarStyle">@style/Widget.ProgressBar</item>
+        <item name="progressBarStyleSmall">@style/Widget.ProgressBar.Small</item>
+        <item name="progressBarStyleLarge">@style/Widget.ProgressBar.Large</item>
     </style>
     
     <style name="Theme.NoTitleBar">
