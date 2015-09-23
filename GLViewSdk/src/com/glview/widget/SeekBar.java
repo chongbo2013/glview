@@ -18,8 +18,6 @@ package com.glview.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityNodeInfo;
 
 
 
@@ -76,7 +74,7 @@ public class SeekBar extends AbsSeekBar {
     }
     
     public SeekBar(Context context, AttributeSet attrs) {
-        this(context, attrs, android.R.attr.seekBarStyle);
+        this(context, attrs, com.glview.R.attr.seekBarStyle);
     }
 
     public SeekBar(Context context, AttributeSet attrs, int defStyleAttr) {

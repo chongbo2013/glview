@@ -24,9 +24,6 @@
         <item name="progressBarStyle">@style/Widget.ProgressBar</item>
         <item name="progressBarStyleSmall">@style/Widget.ProgressBar.Small</item>
         <item name="progressBarStyleLarge">@style/Widget.ProgressBar.Large</item>
-        <item name="android:progressBarStyle">@style/Widget.ProgressBar</item>
-        <item name="android:progressBarStyleSmall">@style/Widget.ProgressBar.Small</item>
-        <item name="android:progressBarStyleLarge">@style/Widget.ProgressBar.Large</item>
     </style>
     
     <style name="Theme.Holo.Light.NoActionBar">
