@@ -263,54 +263,56 @@ public abstract class ViewGroup extends View{
 
         int N = a.getIndexCount();
         for (int i = 0; i < N; i++) {
-            int attr = a.getIndex(i);
-            switch (attr) {
-                case com.glview.AndroidR.styleable.ViewGroup_clipChildren:
-                    setClipChildren(a.getBoolean(attr, true));
-                    break;
-                case com.glview.AndroidR.styleable.ViewGroup_clipToPadding:
-                    setClipToPadding(a.getBoolean(attr, true));
-                    break;
-                case com.glview.AndroidR.styleable.ViewGroup_animationCache:
-//                    setAnimationCacheEnabled(a.getBoolean(attr, true));
-                    break;
-                case com.glview.AndroidR.styleable.ViewGroup_persistentDrawingCache:
-//                    setPersistentDrawingCache(a.getInt(attr, PERSISTENT_SCROLLING_CACHE));
-                    break;
-                case com.glview.AndroidR.styleable.ViewGroup_addStatesFromChildren:
-//                    setAddStatesFromChildren(a.getBoolean(attr, false));
-                    break;
-                case com.glview.AndroidR.styleable.ViewGroup_alwaysDrawnWithCache:
-//                    setAlwaysDrawnWithCacheEnabled(a.getBoolean(attr, true));
-                    break;
-                case com.glview.AndroidR.styleable.ViewGroup_layoutAnimation:
-                    int id = a.getResourceId(attr, -1);
-                    if (id > 0) {
-                        setLayoutAnimation(AnimationUtils.loadLayoutAnimation(mContext, id));
-                    }
-                    break;
-                case com.glview.AndroidR.styleable.ViewGroup_descendantFocusability:
-                    setDescendantFocusability(DESCENDANT_FOCUSABILITY_FLAGS[a.getInt(attr, 0)]);
-                    break;
-                case com.glview.AndroidR.styleable.ViewGroup_splitMotionEvents:
-                    setMotionEventSplittingEnabled(a.getBoolean(attr, false));
-                    break;
-                case com.glview.AndroidR.styleable.ViewGroup_animateLayoutChanges:
-                    boolean animateLayoutChanges = a.getBoolean(attr, false);
-                    if (animateLayoutChanges) {
-                        setLayoutTransition(new LayoutTransition());
-                    }
-                    break;
-                case com.glview.AndroidR.styleable.ViewGroup_layoutMode:
-                    setLayoutMode(a.getInt(attr, LAYOUT_MODE_UNDEFINED));
-                    break;
-                case com.glview.AndroidR.styleable.ViewGroup_transitionGroup:
-//                    setTransitionGroup(a.getBoolean(attr, false));
-                    break;
-                case com.glview.AndroidR.styleable.ViewGroup_touchscreenBlocksFocus:
-//                    setTouchscreenBlocksFocus(a.getBoolean(attr, false));
-                    break;
-            }
+        	try {
+	            int attr = a.getIndex(i);
+	            switch (attr) {
+	                case com.glview.AndroidR.styleable.ViewGroup_clipChildren:
+	                    setClipChildren(a.getBoolean(attr, true));
+	                    break;
+	                case com.glview.AndroidR.styleable.ViewGroup_clipToPadding:
+	                    setClipToPadding(a.getBoolean(attr, true));
+	                    break;
+	                case com.glview.AndroidR.styleable.ViewGroup_animationCache:
+//	                    setAnimationCacheEnabled(a.getBoolean(attr, true));
+	                    break;
+	                case com.glview.AndroidR.styleable.ViewGroup_persistentDrawingCache:
+//	                    setPersistentDrawingCache(a.getInt(attr, PERSISTENT_SCROLLING_CACHE));
+	                    break;
+	                case com.glview.AndroidR.styleable.ViewGroup_addStatesFromChildren:
+//	                    setAddStatesFromChildren(a.getBoolean(attr, false));
+	                    break;
+	                case com.glview.AndroidR.styleable.ViewGroup_alwaysDrawnWithCache:
+//	                    setAlwaysDrawnWithCacheEnabled(a.getBoolean(attr, true));
+	                    break;
+	                case com.glview.AndroidR.styleable.ViewGroup_layoutAnimation:
+	                    int id = a.getResourceId(attr, -1);
+	                    if (id > 0) {
+	                        setLayoutAnimation(AnimationUtils.loadLayoutAnimation(mContext, id));
+	                    }
+	                    break;
+	                case com.glview.AndroidR.styleable.ViewGroup_descendantFocusability:
+//	                    setDescendantFocusability(DESCENDANT_FOCUSABILITY_FLAGS[a.getInt(attr, 0)]);
+	                    break;
+	                case com.glview.AndroidR.styleable.ViewGroup_splitMotionEvents:
+//	                    setMotionEventSplittingEnabled(a.getBoolean(attr, false));
+	                    break;
+	                case com.glview.AndroidR.styleable.ViewGroup_animateLayoutChanges:
+	                    boolean animateLayoutChanges = a.getBoolean(attr, false);
+	                    if (animateLayoutChanges) {
+	                        setLayoutTransition(new LayoutTransition());
+	                    }
+	                    break;
+	                case com.glview.AndroidR.styleable.ViewGroup_layoutMode:
+//	                    setLayoutMode(a.getInt(attr, LAYOUT_MODE_UNDEFINED));
+	                    break;
+	                case com.glview.AndroidR.styleable.ViewGroup_transitionGroup:
+//	                    setTransitionGroup(a.getBoolean(attr, false));
+	                    break;
+	                case com.glview.AndroidR.styleable.ViewGroup_touchscreenBlocksFocus:
+//	                    setTouchscreenBlocksFocus(a.getBoolean(attr, false));
+	                    break;
+	            }
+        	} catch (Throwable tr) {}
         }
 
         a.recycle();
