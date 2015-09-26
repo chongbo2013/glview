@@ -243,47 +243,30 @@ public class ProgressBar extends View {
         mUiThreadId = Thread.currentThread().getId();
         initProgressBar();
 
-        final TypedArray androidA = context.obtainStyledAttributes(
-                attrs, com.glview.AndroidR.styleable.ProgressBar, defStyleAttr, defStyleRes);
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, com.glview.R.styleable.ProgressBar, defStyleAttr, defStyleRes);
 
         mNoInvalidate = true;
 
         Drawable progressDrawable = GLContext.get().getResources().getDrawable(a.getResourceId(com.glview.R.styleable.ProgressBar_progressDrawable, 0));
-        if (progressDrawable == null) {
-        	progressDrawable = GLContext.get().getResources().getDrawable(androidA.getResourceId(com.glview.AndroidR.styleable.ProgressBar_progressDrawable, 0));
-        }
         if (progressDrawable != null) {
             // Calling this method can set mMaxHeight, make sure the corresponding
             // XML attribute for mMaxHeight is read after calling this method
             setProgressDrawableTiled(progressDrawable);
         }
 
-        mDuration = androidA.getInt(com.glview.AndroidR.styleable.ProgressBar_indeterminateDuration, mDuration);
         mDuration = a.getInt(com.glview.R.styleable.ProgressBar_indeterminateDuration, mDuration);
 
-        mMinWidth = androidA.getDimensionPixelSize(com.glview.AndroidR.styleable.ProgressBar_minWidth, mMinWidth);
         mMinWidth = a.getDimensionPixelSize(com.glview.R.styleable.ProgressBar_minWidth, mMinWidth);
-        
-        mMaxWidth = androidA.getDimensionPixelSize(com.glview.AndroidR.styleable.ProgressBar_maxWidth, mMaxWidth);
         mMaxWidth = a.getDimensionPixelSize(com.glview.R.styleable.ProgressBar_maxWidth, mMaxWidth);
-        
-        mMinHeight = androidA.getDimensionPixelSize(com.glview.AndroidR.styleable.ProgressBar_minHeight, mMinHeight);
         mMinHeight = a.getDimensionPixelSize(com.glview.R.styleable.ProgressBar_minHeight, mMinHeight);
-        
-        mMaxHeight = androidA.getDimensionPixelSize(com.glview.AndroidR.styleable.ProgressBar_maxHeight, mMaxHeight);
         mMaxHeight = a.getDimensionPixelSize(com.glview.R.styleable.ProgressBar_maxHeight, mMaxHeight);
 
-        mBehavior = androidA.getInt(com.glview.AndroidR.styleable.ProgressBar_indeterminateBehavior, mBehavior);
         mBehavior = a.getInt(com.glview.R.styleable.ProgressBar_indeterminateBehavior, mBehavior);
 
-        int resID = androidA.getResourceId(
-        		com.glview.AndroidR.styleable.ProgressBar_interpolator,
-                android.R.anim.linear_interpolator); // default to linear interpolator
-        resID = a.getResourceId(
-        		com.glview.R.styleable.ProgressBar_interpolator,
-        		resID);
+        int resID = a.getResourceId(
+        		com.glview.R.styleable.ProgressBar_interpolator, // default to linear interpolator
+        		com.glview.R.anim.linear_interpolator);
         if (resID > 0) {
             setInterpolator(context, resID);
         }
@@ -296,9 +279,6 @@ public class ProgressBar extends View {
                 a.getInt(com.glview.R.styleable.ProgressBar_secondaryProgress, mSecondaryProgress));
 
         Drawable indeterminateDrawable = GLContext.get().getResources().getDrawable(a.getResourceId(com.glview.R.styleable.ProgressBar_indeterminateDrawable, 0));
-        if (indeterminateDrawable == null) {
-        	indeterminateDrawable = GLContext.get().getResources().getDrawable(androidA.getResourceId(com.glview.AndroidR.styleable.ProgressBar_indeterminateDrawable, 0));
-        }
         if (indeterminateDrawable != null) {
             setIndeterminateDrawableTiled(indeterminateDrawable);
         }
@@ -308,10 +288,8 @@ public class ProgressBar extends View {
 
         mNoInvalidate = false;
 
-        boolean indeterminate = androidA.getBoolean(com.glview.AndroidR.styleable.ProgressBar_indeterminate, mIndeterminate);
-        indeterminate = a.getBoolean(com.glview.R.styleable.ProgressBar_indeterminate, indeterminate);
-        
-        setIndeterminate(mOnlyIndeterminate || indeterminate);
+        setIndeterminate(mOnlyIndeterminate || a.getBoolean(
+                com.glview.R.styleable.ProgressBar_indeterminate, mIndeterminate));
 
         mMirrorForRtl = a.getBoolean(com.glview.R.styleable.ProgressBar_mirrorForRtl, mMirrorForRtl);
 
@@ -387,7 +365,6 @@ public class ProgressBar extends View {
             mProgressTintInfo.mHasIndeterminateTint = true;
         }*/
 
-        androidA.recycle();
         a.recycle();
 
         applyProgressTints();

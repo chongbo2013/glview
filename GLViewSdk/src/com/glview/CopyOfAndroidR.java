@@ -8,7 +8,7 @@
 package com.glview;
 
 //目前R使用的是android5.0编译出来的R，后面需要更新
-public final class AndroidR {
+public final class CopyOfAndroidR {
     public static final class anim {
         public static final int accelerate_decelerate_interpolator=0x010a0004;
         /**  Acceleration curve matching Flash's quadratic ease out function. 

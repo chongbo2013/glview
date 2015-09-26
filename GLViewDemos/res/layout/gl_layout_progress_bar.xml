@@ -6,16 +6,16 @@
     glview:orientation="vertical" >
     
     <ProgressBar
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        glview:layout_width="wrap_content"
+        glview:layout_height="wrap_content" />
     
     <ProgressBar 
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="?android:attr/progressBarStyleLarge" />
+        glview:layout_width="wrap_content"
+        glview:layout_height="wrap_content"
+        style="?attr/progressBarStyleLarge" />
     
     <ProgressBar 
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="?android:attr/progressBarStyleSmall" />
+        glview:layout_width="wrap_content"
+        glview:layout_height="wrap_content"
+        style="?attr/progressBarStyleSmall" />
 </LinearLayout>

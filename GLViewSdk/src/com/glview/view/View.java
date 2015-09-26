@@ -1591,9 +1591,6 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
     public View(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         this(context);
 
-		TypedArray a = context.obtainStyledAttributes(attrs,
-				com.glview.AndroidR.styleable.View, defStyleAttr, defStyleRes);
-
 		Drawable background = null;
 
         int leftPadding = -1;
@@ -1636,336 +1633,9 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
 		// final int targetSdkVersion =
 		// context.getApplicationInfo().targetSdkVersion;
 
-        int N = a.getIndexCount();
-        for (int i = 0; i < N; i++) {
-        	try {
-        		int attr = a.getIndex(i);
-        		switch (attr) {
-        		case com.glview.AndroidR.styleable.View_background:
-        			background = GLContext.get().getResources().getDrawable(a.getResourceId(attr, 0));
-        			break;
-        		case com.glview.AndroidR.styleable.View_padding:
-        			padding = a.getDimensionPixelSize(attr, -1);
-        			mUserPaddingLeftInitial = padding;
-        			mUserPaddingRightInitial = padding;
-        			leftPaddingDefined = true;
-        			rightPaddingDefined = true;
-        			break;
-        		case com.glview.AndroidR.styleable.View_paddingLeft:
-        			leftPadding = a.getDimensionPixelSize(attr, -1);
-        			mUserPaddingLeftInitial = leftPadding;
-        			leftPaddingDefined = true;
-        			break;
-        		case com.glview.AndroidR.styleable.View_paddingTop:
-        			topPadding = a.getDimensionPixelSize(attr, -1);
-        			break;
-        		case com.glview.AndroidR.styleable.View_paddingRight:
-        			rightPadding = a.getDimensionPixelSize(attr, -1);
-        			mUserPaddingRightInitial = rightPadding;
-        			rightPaddingDefined = true;
-        			break;
-        		case com.glview.AndroidR.styleable.View_paddingBottom:
-        			bottomPadding = a.getDimensionPixelSize(attr, -1);
-        			break;
-        		case com.glview.AndroidR.styleable.View_paddingStart:
-        			startPadding = a.getDimensionPixelSize(attr, UNDEFINED_PADDING);
-        			startPaddingDefined = (startPadding != UNDEFINED_PADDING);
-        			break;
-        		case com.glview.AndroidR.styleable.View_paddingEnd:
-        			endPadding = a.getDimensionPixelSize(attr, UNDEFINED_PADDING);
-        			endPaddingDefined = (endPadding != UNDEFINED_PADDING);
-        			break;
-        		case com.glview.AndroidR.styleable.View_scrollX:
-        			x = a.getDimensionPixelOffset(attr, 0);
-        			break;
-        		case com.glview.AndroidR.styleable.View_scrollY:
-        			y = a.getDimensionPixelOffset(attr, 0);
-        			break;
-        		case com.glview.AndroidR.styleable.View_alpha:
-        			setAlpha(a.getFloat(attr, 1f));
-        			break;
-        		case com.glview.AndroidR.styleable.View_transformPivotX:
-//        			setPivotX(a.getDimensionPixelOffset(attr, 0));
-        			break;
-        		case com.glview.AndroidR.styleable.View_transformPivotY:
-//        			setPivotY(a.getDimensionPixelOffset(attr, 0));
-        			break;
-        		case com.glview.AndroidR.styleable.View_translationX:
-        			tx = a.getDimensionPixelOffset(attr, 0);
-        			transformSet = true;
-        			break;
-        		case com.glview.AndroidR.styleable.View_translationY:
-        			ty = a.getDimensionPixelOffset(attr, 0);
-        			transformSet = true;
-        			break;
-        		case com.glview.AndroidR.styleable.View_translationZ:
-        			tz = a.getDimensionPixelOffset(attr, 0);
-        			transformSet = true;
-        			break;
-        		case com.glview.AndroidR.styleable.View_elevation:
-        			elevation = a.getDimensionPixelOffset(attr, 0);
-        			transformSet = true;
-        			break;
-        		case com.glview.AndroidR.styleable.View_rotation:
-        			rotation = a.getFloat(attr, 0);
-        			transformSet = true;
-        			break;
-        		case com.glview.AndroidR.styleable.View_rotationX:
-        			rotationX = a.getFloat(attr, 0);
-        			transformSet = true;
-        			break;
-        		case com.glview.AndroidR.styleable.View_rotationY:
-        			rotationY = a.getFloat(attr, 0);
-        			transformSet = true;
-        			break;
-        		case com.glview.AndroidR.styleable.View_scaleX:
-        			sx = a.getFloat(attr, 1f);
-        			transformSet = true;
-        			break;
-        		case com.glview.AndroidR.styleable.View_scaleY:
-        			sy = a.getFloat(attr, 1f);
-        			transformSet = true;
-        			break;
-        		case com.glview.AndroidR.styleable.View_id:
-        			mID = a.getResourceId(attr, NO_ID);
-        			break;
-        		case com.glview.AndroidR.styleable.View_tag:
-        			mTag = a.getText(attr);
-        			break;
-        		case com.glview.AndroidR.styleable.View_fitsSystemWindows:
-        			if (a.getBoolean(attr, false)) {
-        				viewFlagValues |= FITS_SYSTEM_WINDOWS;
-        				viewFlagMasks |= FITS_SYSTEM_WINDOWS;
-        			}
-        			break;
-        		case com.glview.AndroidR.styleable.View_focusable:
-        			if (a.getBoolean(attr, false)) {
-        				viewFlagValues |= FOCUSABLE;
-        				viewFlagMasks |= FOCUSABLE_MASK;
-        			}
-        			break;
-        		case com.glview.AndroidR.styleable.View_focusableInTouchMode:
-        			if (a.getBoolean(attr, false)) {
-        				viewFlagValues |= FOCUSABLE_IN_TOUCH_MODE | FOCUSABLE;
-        				viewFlagMasks |= FOCUSABLE_IN_TOUCH_MODE | FOCUSABLE_MASK;
-        			}
-        			break;
-        		case com.glview.AndroidR.styleable.View_clickable:
-        			if (a.getBoolean(attr, false)) {
-        				viewFlagValues |= CLICKABLE;
-        				viewFlagMasks |= CLICKABLE;
-        			}
-        			break;
-        		case com.glview.AndroidR.styleable.View_longClickable:
-        			if (a.getBoolean(attr, false)) {
-        				viewFlagValues |= LONG_CLICKABLE;
-        				viewFlagMasks |= LONG_CLICKABLE;
-        			}
-        			break;
-        		case com.glview.AndroidR.styleable.View_saveEnabled:
-        			if (!a.getBoolean(attr, true)) {
-        				viewFlagValues |= SAVE_DISABLED;
-        				viewFlagMasks |= SAVE_DISABLED_MASK;
-        			}
-        			break;
-        		case com.glview.AndroidR.styleable.View_duplicateParentState:
-        			if (a.getBoolean(attr, false)) {
-        				viewFlagValues |= DUPLICATE_PARENT_STATE;
-        				viewFlagMasks |= DUPLICATE_PARENT_STATE;
-        			}
-        			break;
-        		case com.glview.AndroidR.styleable.View_visibility:
-        			final int visibility = a.getInt(attr, 0);
-        			if (visibility != 0) {
-        				viewFlagValues |= VISIBILITY_FLAGS[visibility];
-        				viewFlagMasks |= VISIBILITY_MASK;
-        			}
-        			break;
-        		case com.glview.AndroidR.styleable.View_layoutDirection:
-        			// Clear any layout direction flags (included resolved bits) already set
-        			mPrivateFlags2 &=
-        			~(PFLAG2_LAYOUT_DIRECTION_MASK | PFLAG2_LAYOUT_DIRECTION_RESOLVED_MASK);
-        			// Set the layout direction flags depending on the value of the attribute
-        			final int layoutDirection = a.getInt(attr, -1);
-        			final int value = (layoutDirection != -1) ?
-        					LAYOUT_DIRECTION_FLAGS[layoutDirection] : LAYOUT_DIRECTION_DEFAULT;
-        					mPrivateFlags2 |= (value << PFLAG2_LAYOUT_DIRECTION_MASK_SHIFT);
-        					break;
-        		case com.glview.AndroidR.styleable.View_drawingCacheQuality:
-//        			final int cacheQuality = a.getInt(attr, 0);
-//        			if (cacheQuality != 0) {
-//        				viewFlagValues |= DRAWING_CACHE_QUALITY_FLAGS[cacheQuality];
-//        				viewFlagMasks |= DRAWING_CACHE_QUALITY_MASK;
-//        			}
-        			break;
-        		case com.glview.AndroidR.styleable.View_contentDescription:
-        			setContentDescription(a.getString(attr));
-        			break;
-        		case com.glview.AndroidR.styleable.View_labelFor:
-//        			setLabelFor(a.getResourceId(attr, NO_ID));
-        			break;
-        		case com.glview.AndroidR.styleable.View_soundEffectsEnabled:
-        			if (!a.getBoolean(attr, true)) {
-        				viewFlagValues &= ~SOUND_EFFECTS_ENABLED;
-        				viewFlagMasks |= SOUND_EFFECTS_ENABLED;
-        			}
-        			break;
-        		case com.glview.AndroidR.styleable.View_hapticFeedbackEnabled:
-        			if (!a.getBoolean(attr, true)) {
-        				viewFlagValues &= ~HAPTIC_FEEDBACK_ENABLED;
-        				viewFlagMasks |= HAPTIC_FEEDBACK_ENABLED;
-        			}
-        			break;
-        		case com.glview.AndroidR.styleable.View_scrollbars:
-        			final int scrollbars = a.getInt(attr, SCROLLBARS_NONE);
-        			if (scrollbars != SCROLLBARS_NONE) {
-        				viewFlagValues |= scrollbars;
-        				viewFlagMasks |= SCROLLBARS_MASK;
-        				initializeScrollbars = true;
-        			}
-        			break;
-        			//noinspection deprecation
-        		case com.glview.AndroidR.styleable.View_fadingEdge:
-    				// Ignore the attribute starting with ICS
-    				break;
-        			// With builds < ICS, fall through and apply fading edges
-        		case com.glview.AndroidR.styleable.View_requiresFadingEdge:
-//        			final int fadingEdge = a.getInt(attr, FADING_EDGE_NONE);
-//        			if (fadingEdge != FADING_EDGE_NONE) {
-//        				viewFlagValues |= fadingEdge;
-//        				viewFlagMasks |= FADING_EDGE_MASK;
-//        				initializeFadingEdgeInternal(a);
-//        			}
-        			break;
-        		case com.glview.AndroidR.styleable.View_scrollbarStyle:
-        			scrollbarStyle = a.getInt(attr, SCROLLBARS_INSIDE_OVERLAY);
-        			if (scrollbarStyle != SCROLLBARS_INSIDE_OVERLAY) {
-        				viewFlagValues |= scrollbarStyle & SCROLLBARS_STYLE_MASK;
-        				viewFlagMasks |= SCROLLBARS_STYLE_MASK;
-        			}
-        			break;
-        		case com.glview.AndroidR.styleable.View_isScrollContainer:
-        			setScrollContainer = true;
-        			if (a.getBoolean(attr, false)) {
-//        				setScrollContainer(true);
-        			}
-        			break;
-        		case com.glview.AndroidR.styleable.View_keepScreenOn:
-        			if (a.getBoolean(attr, false)) {
-        				viewFlagValues |= KEEP_SCREEN_ON;
-        				viewFlagMasks |= KEEP_SCREEN_ON;
-        			}
-        			break;
-        		case com.glview.AndroidR.styleable.View_filterTouchesWhenObscured:
-//        			if (a.getBoolean(attr, false)) {
-//        				viewFlagValues |= FILTER_TOUCHES_WHEN_OBSCURED;
-//        				viewFlagMasks |= FILTER_TOUCHES_WHEN_OBSCURED;
-//        			}
-        			break;
-        		case com.glview.AndroidR.styleable.View_nextFocusLeft:
-        			mNextFocusLeftId = a.getResourceId(attr, View.NO_ID);
-        			break;
-        		case com.glview.AndroidR.styleable.View_nextFocusRight:
-        			mNextFocusRightId = a.getResourceId(attr, View.NO_ID);
-        			break;
-        		case com.glview.AndroidR.styleable.View_nextFocusUp:
-        			mNextFocusUpId = a.getResourceId(attr, View.NO_ID);
-        			break;
-        		case com.glview.AndroidR.styleable.View_nextFocusDown:
-        			mNextFocusDownId = a.getResourceId(attr, View.NO_ID);
-        			break;
-        		case com.glview.AndroidR.styleable.View_nextFocusForward:
-        			mNextFocusForwardId = a.getResourceId(attr, View.NO_ID);
-        			break;
-        		case com.glview.AndroidR.styleable.View_minWidth:
-        			mMinWidth = a.getDimensionPixelSize(attr, 0);
-        			break;
-        		case com.glview.AndroidR.styleable.View_minHeight:
-        			mMinHeight = a.getDimensionPixelSize(attr, 0);
-        			break;
-        		case com.glview.AndroidR.styleable.View_onClick:
-        			if (context.isRestricted()) {
-        				throw new IllegalStateException("The android:onClick attribute cannot "
-        						+ "be used within a restricted context");
-        			}
-        			
-        			final String handlerName = a.getString(attr);
-        			if (handlerName != null) {
-        				setOnClickListener(new OnClickListener() {
-        					private Method mHandler;
-        					
-        					public void onClick(View v) {
-        						if (mHandler == null) {
-        							try {
-        								mHandler = getContext().getClass().getMethod(handlerName,
-        										View.class);
-        							} catch (NoSuchMethodException e) {
-        								int id = getId();
-        								String idText = id == NO_ID ? "" : " with id '"
-        										+ getContext().getResources().getResourceEntryName(
-        												id) + "'";
-        								throw new IllegalStateException("Could not find a method " +
-        										handlerName + "(View) in the activity "
-        										+ getContext().getClass() + " for onClick handler"
-        										+ " on view " + View.this.getClass() + idText, e);
-        							}
-        						}
-        						
-        						try {
-        							mHandler.invoke(getContext(), View.this);
-        						} catch (IllegalAccessException e) {
-        							throw new IllegalStateException("Could not execute non "
-        									+ "public method of the activity", e);
-        						} catch (InvocationTargetException e) {
-        							throw new IllegalStateException("Could not execute "
-        									+ "method of the activity", e);
-        						}
-        					}
-        				});
-        			}
-        			break;
-        		case com.glview.AndroidR.styleable.View_overScrollMode:
-        			overScrollMode = a.getInt(attr, OVER_SCROLL_IF_CONTENT_SCROLLS);
-        			break;
-        		case com.glview.AndroidR.styleable.View_verticalScrollbarPosition:
-        			mVerticalScrollbarPosition = a.getInt(attr, SCROLLBAR_POSITION_DEFAULT);
-        			break;
-        		case com.glview.AndroidR.styleable.View_layerType:
-        			setLayerType(a.getInt(attr, LAYER_TYPE_NONE));
-        			break;
-        		case com.glview.AndroidR.styleable.View_textDirection:
-        			break;
-        		case com.glview.AndroidR.styleable.View_textAlignment:
-        			break;
-        		case com.glview.AndroidR.styleable.View_importantForAccessibility:
-        			break;
-        		case com.glview.AndroidR.styleable.View_accessibilityLiveRegion:
-        			break;
-        		case com.glview.AndroidR.styleable.View_transitionName:
-        			setTransitionName(a.getString(attr));
-        			break;
-        		case com.glview.AndroidR.styleable.View_nestedScrollingEnabled:
-        			setNestedScrollingEnabled(a.getBoolean(attr, false));
-        			break;
-        		case com.glview.AndroidR.styleable.View_stateListAnimator:
-        			setStateListAnimator(AnimatorInflater.loadStateListAnimator(context,
-        					a.getResourceId(attr, 0)));
-        			break;
-        		case com.glview.AndroidR.styleable.View_backgroundTint:
-        			// This will get applied later during setBackground().
-        			break;
-        		case com.glview.AndroidR.styleable.View_backgroundTintMode:
-        			break;
-        		case com.glview.AndroidR.styleable.View_outlineProvider:
-        			break;
-        		}
-        	} catch (Throwable tr) {}
-        }
-        a.recycle();
-        
-        a = context.obtainStyledAttributes(attrs,
+        final TypedArray a = context.obtainStyledAttributes(attrs,
 				com.glview.R.styleable.View, defStyleAttr, defStyleRes);
-		N = a.getIndexCount();
+		final int N = a.getIndexCount();
 		for (int i = 0; i < N; i++) {
 			int attr = a.getIndex(i);
 			if (attr == com.glview.R.styleable.View_background) {
@@ -2194,7 +1864,7 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
         }
         
         if (initializeScrollbars) {
-            initializeScrollbarsInternal(attrs, defStyleAttr, defStyleRes);
+            initializeScrollbarsInternal(a);
         }
         
 		a.recycle();
@@ -2896,7 +2566,16 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
      * @removed
      */
     protected void initializeScrollbars(TypedArray a) {
-        initializeScrollbarsInternal(null, 0, 0);
+    	// It's not safe to use this method from apps. The parameter 'a' must have been obtained
+        // using the View filter array which is not available to the SDK. As such, internal
+        // framework usage now uses initializeScrollbarsInternal and we grab a default
+        // TypedArray with the right filter instead here.
+        TypedArray arr = mContext.obtainStyledAttributes(com.glview.R.styleable.View);
+
+        initializeScrollbarsInternal(arr);
+
+        // We ignored the method parameter. Recycle the one we actually did use.
+        arr.recycle();
     }
 
     /**
@@ -2911,13 +2590,9 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
      * @param a the styled attributes set to initialize the scrollbars from
      * @hide
      */
-    protected void initializeScrollbarsInternal(AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    protected void initializeScrollbarsInternal(TypedArray a) {
         initScrollCache();
         
-        TypedArray a = mContext.obtainStyledAttributes(attrs,
-				com.glview.AndroidR.styleable.View, defStyleAttr, defStyleRes);
-        TypedArray androidA = mContext.obtainStyledAttributes(attrs,
-				com.glview.AndroidR.styleable.View, defStyleAttr, defStyleRes);
 
         final ScrollabilityCache scrollabilityCache = mScrollCache;
 
@@ -2925,8 +2600,7 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
             scrollabilityCache.scrollBar = new ScrollBarDrawable();
         }
 
-        boolean fadeScrollbars = androidA.getBoolean(com.glview.AndroidR.styleable.View_fadeScrollbars, true);
-        fadeScrollbars = a.getBoolean(com.glview.R.styleable.View_fadeScrollbars, fadeScrollbars);
+       final boolean  fadeScrollbars = a.getBoolean(com.glview.R.styleable.View_fadeScrollbars, true);
 
         if (!fadeScrollbars) {
             scrollabilityCache.state = ScrollabilityCache.ON;
@@ -2934,65 +2608,40 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
         scrollabilityCache.fadeScrollBars = fadeScrollbars;
 
 
-        scrollabilityCache.scrollBarFadeDuration = androidA.getInt(
-        		com.glview.AndroidR.styleable.View_scrollbarFadeDuration, ViewConfiguration
-                        .getScrollBarFadeDuration());
         scrollabilityCache.scrollBarFadeDuration = a.getInt(
-        		com.glview.R.styleable.View_scrollbarFadeDuration, 
-        		scrollabilityCache.scrollBarFadeDuration);
-        scrollabilityCache.scrollBarDefaultDelayBeforeFade = androidA.getInt(
-        		com.glview.AndroidR.styleable.View_scrollbarDefaultDelayBeforeFade,
-                ViewConfiguration.getScrollDefaultDelay());
+        		com.glview.R.styleable.View_scrollbarFadeDuration, ViewConfiguration
+                .getScrollBarFadeDuration());
         scrollabilityCache.scrollBarDefaultDelayBeforeFade = a.getInt(
         		com.glview.R.styleable.View_scrollbarDefaultDelayBeforeFade,
-        		scrollabilityCache.scrollBarDefaultDelayBeforeFade);
+        		ViewConfiguration.getScrollDefaultDelay());
 
 
-        scrollabilityCache.scrollBarSize = androidA.getDimensionPixelSize(
-        		com.glview.AndroidR.styleable.View_scrollbarSize,
-                ViewConfiguration.get(mContext).getScaledScrollBarSize());
         scrollabilityCache.scrollBarSize = a.getDimensionPixelSize(
         		com.glview.R.styleable.View_scrollbarSize,
-        		scrollabilityCache.scrollBarSize);
+        		ViewConfiguration.get(mContext).getScaledScrollBarSize());
 
         Drawable track = GLContext.get().getResources().getDrawable(a.getResourceId(com.glview.R.styleable.View_scrollbarTrackHorizontal, 0));
-        if (track == null) {
-        	track = GLContext.get().getResources().getDrawable(androidA.getResourceId(com.glview.AndroidR.styleable.View_scrollbarTrackHorizontal, 0));
-        }
         scrollabilityCache.scrollBar.setHorizontalTrackDrawable(track);
 
         Drawable thumb = GLContext.get().getResources().getDrawable(a.getResourceId(com.glview.R.styleable.View_scrollbarThumbHorizontal, 0));
-        if (thumb == null) {
-        	thumb = GLContext.get().getResources().getDrawable(androidA.getResourceId(com.glview.AndroidR.styleable.View_scrollbarThumbHorizontal, 0));
-        }
         if (thumb != null) {
             scrollabilityCache.scrollBar.setHorizontalThumbDrawable(thumb);
         }
 
-        boolean alwaysDraw = androidA.getBoolean(com.glview.AndroidR.styleable.View_scrollbarAlwaysDrawHorizontalTrack,
+        boolean alwaysDraw = a.getBoolean(com.glview.R.styleable.View_scrollbarAlwaysDrawHorizontalTrack,
                 false);
-        alwaysDraw = a.getBoolean(com.glview.R.styleable.View_scrollbarAlwaysDrawHorizontalTrack,
-                alwaysDraw);
         if (alwaysDraw) {
             scrollabilityCache.scrollBar.setAlwaysDrawHorizontalTrack(true);
         }
 
         track = GLContext.get().getResources().getDrawable(a.getResourceId(com.glview.R.styleable.View_scrollbarTrackVertical, 0));
-        if (track == null) {
-        	track = GLContext.get().getResources().getDrawable(androidA.getResourceId(com.glview.AndroidR.styleable.View_scrollbarTrackVertical, 0));
-        }
         scrollabilityCache.scrollBar.setVerticalTrackDrawable(track);
 
         thumb = GLContext.get().getResources().getDrawable(a.getResourceId(com.glview.R.styleable.View_scrollbarThumbVertical, 0));
-        if (thumb == null) {
-        	thumb = GLContext.get().getResources().getDrawable(androidA.getResourceId(com.glview.AndroidR.styleable.View_scrollbarThumbVertical, 0));
-        }
         if (thumb != null) {
             scrollabilityCache.scrollBar.setVerticalThumbDrawable(thumb);
         }
 
-        alwaysDraw = androidA.getBoolean(com.glview.AndroidR.styleable.View_scrollbarAlwaysDrawVerticalTrack,
-                false);
         alwaysDraw = a.getBoolean(com.glview.R.styleable.View_scrollbarAlwaysDrawVerticalTrack,
                 alwaysDraw);
         if (alwaysDraw) {
@@ -3011,7 +2660,6 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
         // Re-apply user/background padding so that scrollbar(s) get added
         resolvePadding();
         a.recycle();
-        androidA.recycle();
     }
 
     /**

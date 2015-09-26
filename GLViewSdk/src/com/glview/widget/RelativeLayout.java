@@ -1109,91 +1109,10 @@ public class RelativeLayout extends ViewGroup {
             final int[] rules = mRules;
             final int[] initialRules = mInitialRules;
 
-            TypedArray a = c.obtainStyledAttributes(attrs,
-            		com.glview.AndroidR.styleable.RelativeLayout_Layout);
-            
-            int N = a.getIndexCount();
-			for (int i = 0; i < N; i++) {
-				int attr = a.getIndex(i);
-				switch (attr) {
-	                case com.glview.AndroidR.styleable.RelativeLayout_Layout_layout_alignWithParentIfMissing:
-	                    alignWithParent = a.getBoolean(attr, false);
-	                    break;
-	                case com.glview.AndroidR.styleable.RelativeLayout_Layout_layout_toLeftOf:
-	                    rules[LEFT_OF] = a.getResourceId(attr, 0);
-	                    break;
-	                case com.glview.AndroidR.styleable.RelativeLayout_Layout_layout_toRightOf:
-	                    rules[RIGHT_OF] = a.getResourceId(attr, 0);
-	                    break;
-	                case com.glview.AndroidR.styleable.RelativeLayout_Layout_layout_above:
-	                    rules[ABOVE] = a.getResourceId(attr, 0);
-	                    break;
-	                case com.glview.AndroidR.styleable.RelativeLayout_Layout_layout_below:
-	                    rules[BELOW] = a.getResourceId(attr, 0);
-	                    break;
-	                case com.glview.AndroidR.styleable.RelativeLayout_Layout_layout_alignBaseline:
-	                    rules[ALIGN_BASELINE] = a.getResourceId(attr, 0);
-	                    break;
-	                case com.glview.AndroidR.styleable.RelativeLayout_Layout_layout_alignLeft:
-	                    rules[ALIGN_LEFT] = a.getResourceId(attr, 0);
-	                    break;
-	                case com.glview.AndroidR.styleable.RelativeLayout_Layout_layout_alignTop:
-	                    rules[ALIGN_TOP] = a.getResourceId(attr, 0);
-	                    break;
-	                case com.glview.AndroidR.styleable.RelativeLayout_Layout_layout_alignRight:
-	                    rules[ALIGN_RIGHT] = a.getResourceId(attr, 0);
-	                    break;
-	                case com.glview.AndroidR.styleable.RelativeLayout_Layout_layout_alignBottom:
-	                    rules[ALIGN_BOTTOM] = a.getResourceId(attr, 0);
-	                    break;
-	                case com.glview.AndroidR.styleable.RelativeLayout_Layout_layout_alignParentLeft:
-	                    rules[ALIGN_PARENT_LEFT] = a.getBoolean(attr, false) ? TRUE : 0;
-	                    break;
-	                case com.glview.AndroidR.styleable.RelativeLayout_Layout_layout_alignParentTop:
-	                    rules[ALIGN_PARENT_TOP] = a.getBoolean(attr, false) ? TRUE : 0;
-	                    break;
-	                case com.glview.AndroidR.styleable.RelativeLayout_Layout_layout_alignParentRight:
-	                    rules[ALIGN_PARENT_RIGHT] = a.getBoolean(attr, false) ? TRUE : 0;
-	                    break;
-	                case com.glview.AndroidR.styleable.RelativeLayout_Layout_layout_alignParentBottom:
-	                    rules[ALIGN_PARENT_BOTTOM] = a.getBoolean(attr, false) ? TRUE : 0;
-	                    break;
-	                case com.glview.AndroidR.styleable.RelativeLayout_Layout_layout_centerInParent:
-	                    rules[CENTER_IN_PARENT] = a.getBoolean(attr, false) ? TRUE : 0;
-	                    break;
-	                case com.glview.AndroidR.styleable.RelativeLayout_Layout_layout_centerHorizontal:
-	                    rules[CENTER_HORIZONTAL] = a.getBoolean(attr, false) ? TRUE : 0;
-	                    break;
-	                case com.glview.AndroidR.styleable.RelativeLayout_Layout_layout_centerVertical:
-	                    rules[CENTER_VERTICAL] = a.getBoolean(attr, false) ? TRUE : 0;
-	                   break;
-	                case com.glview.AndroidR.styleable.RelativeLayout_Layout_layout_toStartOf:
-	                    rules[START_OF] = a.getResourceId(attr, 0);
-	                    break;
-	                case com.glview.AndroidR.styleable.RelativeLayout_Layout_layout_toEndOf:
-	                    rules[END_OF] = a.getResourceId(attr, 0);
-	                    break;
-	                case com.glview.AndroidR.styleable.RelativeLayout_Layout_layout_alignStart:
-	                    rules[ALIGN_START] = a.getResourceId(attr, 0);
-	                    break;
-	                case com.glview.AndroidR.styleable.RelativeLayout_Layout_layout_alignEnd:
-	                    rules[ALIGN_END] = a.getResourceId(attr, 0);
-	                    break;
-	                case com.glview.AndroidR.styleable.RelativeLayout_Layout_layout_alignParentStart:
-	                    rules[ALIGN_PARENT_START] = a.getBoolean(attr, false) ? TRUE : 0;
-	                    break;
-	                case com.glview.AndroidR.styleable.RelativeLayout_Layout_layout_alignParentEnd:
-	                    rules[ALIGN_PARENT_END] = a.getBoolean(attr, false) ? TRUE : 0;
-	                    break;
-	            }
-			}
-
-            a.recycle();
-            
-            a = c.obtainStyledAttributes(attrs,
+            final TypedArray a = c.obtainStyledAttributes(attrs,
             		com.glview.R.styleable.RelativeLayout_Layout);
             
-            N = a.getIndexCount();
+            final int N = a.getIndexCount();
 			for (int i = 0; i < N; i++) {
 				int attr = a.getIndex(i);
 				if (attr == com.glview.R.styleable.RelativeLayout_Layout_layout_alignWithParentIfMissing) {

@@ -973,10 +973,6 @@ public abstract class Drawable {
      */
     public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs)
             throws XmlPullParserException, IOException {
-    	final TypedArray androidA = r.obtainAttributes(attrs, com.glview.AndroidR.styleable.Drawable);
-        inflateWithAttributes(r, parser, androidA, com.glview.AndroidR.styleable.Drawable_visible);
-        androidA.recycle();
-    	
     	final TypedArray a = r.obtainAttributes(attrs, com.glview.R.styleable.Drawable);
         inflateWithAttributes(r, parser, a, com.glview.R.styleable.Drawable_visible);
         a.recycle();

@@ -84,9 +84,9 @@ public final class RenderPolicy {
 		return task.mDrawingCache;
 	}
 	
-	public void setSize(int width, int height) {
+	public void setSize(Object surface, int width, int height) {
 		if (mExited) return;
-		mHandler.postAndWait(new PolicyTask(PolicyTask.TASK_SETSIZE, width, height, null));
+		mHandler.postAndWait(new PolicyTask(PolicyTask.TASK_SETSIZE, width, height, surface));
 	}
 	
 	public void destroy(boolean full) {
@@ -155,7 +155,7 @@ public final class RenderPolicy {
 				mCanvasContext.initialize(obj);
 				break;
 			case TASK_SETSIZE:
-				mCanvasContext.setSize(arg1, arg2);
+				mCanvasContext.setSize(obj, arg1, arg2);
 				break;
 			case TASK_DESTROY:
 				mCanvasContext.destroy((Boolean) obj);

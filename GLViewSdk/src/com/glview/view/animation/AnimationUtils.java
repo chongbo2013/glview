@@ -208,18 +208,18 @@ public class AnimationUtils {
      * @param fromLeft is the object to be animated coming from the left
      * @return The new animation
      */
-    public static Animation makeInAnimation(Context c, boolean fromLeft) {
-        Animation a;
-        if (fromLeft) {
-            a = AnimationUtils.loadAnimation(c, com.glview.AndroidR.anim.slide_in_left);
-        } else {
-            a = AnimationUtils.loadAnimation(c, com.glview.AndroidR.anim.slide_in_right);
-        }
-
-        a.setInterpolator(new DecelerateInterpolator());
-        a.setStartTime(currentAnimationTimeMillis());
-        return a;
-    }
+//    public static Animation makeInAnimation(Context c, boolean fromLeft) {
+//        Animation a;
+//        if (fromLeft) {
+//            a = AnimationUtils.loadAnimation(c, com.glview.AndroidR.anim.slide_in_left);
+//        } else {
+//            a = AnimationUtils.loadAnimation(c, com.glview.AndroidR.anim.slide_in_right);
+//        }
+//
+//        a.setInterpolator(new DecelerateInterpolator());
+//        a.setStartTime(currentAnimationTimeMillis());
+//        return a;
+//    }
 
     /**
      * Make an animation for objects becoming invisible. Uses a slide and fade
@@ -229,18 +229,18 @@ public class AnimationUtils {
      * @param toRight is the object to be animated exiting to the right
      * @return The new animation
      */
-    public static Animation makeOutAnimation(Context c, boolean toRight) {
-        Animation a;
-        if (toRight) {
-            a = AnimationUtils.loadAnimation(c, com.glview.AndroidR.anim.slide_out_right);
-        } else {
-            a = AnimationUtils.loadAnimation(c, com.glview.AndroidR.anim.slide_out_left);
-        }
-
-        a.setInterpolator(new AccelerateInterpolator());
-        a.setStartTime(currentAnimationTimeMillis());
-        return a;
-    }
+//    public static Animation makeOutAnimation(Context c, boolean toRight) {
+//        Animation a;
+//        if (toRight) {
+//            a = AnimationUtils.loadAnimation(c, com.glview.AndroidR.anim.slide_out_right);
+//        } else {
+//            a = AnimationUtils.loadAnimation(c, com.glview.AndroidR.anim.slide_out_left);
+//        }
+//
+//        a.setInterpolator(new AccelerateInterpolator());
+//        a.setStartTime(currentAnimationTimeMillis());
+//        return a;
+//    }
 
 
     /**
@@ -250,13 +250,13 @@ public class AnimationUtils {
      * @param c Context for loading resources
      * @return The new animation
      */
-    public static Animation makeInChildBottomAnimation(Context c) {
-        Animation a;
-        a = AnimationUtils.loadAnimation(c, com.glview.AndroidR.anim.slide_in_child_bottom);
-        a.setInterpolator(new AccelerateInterpolator());
-        a.setStartTime(currentAnimationTimeMillis());
-        return a;
-    }
+//    public static Animation makeInChildBottomAnimation(Context c) {
+//        Animation a;
+//        a = AnimationUtils.loadAnimation(c, com.glview.AndroidR.anim.slide_in_child_bottom);
+//        a.setInterpolator(new AccelerateInterpolator());
+//        a.setStartTime(currentAnimationTimeMillis());
+//        return a;
+//    }
 
     /**
      * Loads an {@link Interpolator} object from a resource

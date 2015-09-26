@@ -9,6 +9,7 @@ import javax.microedition.khronos.egl.EGLSurface;
 
 import android.opengl.GLSurfaceView;
 import android.util.Log;
+import android.view.SurfaceHolder;
 
 import com.glview.App;
 import com.glview.animation.Animator;
@@ -63,6 +64,8 @@ class CanvasContext {
     FPSUtils mFpsUtils = null;
     
     RenderState mRenderState;
+    
+    SurfaceHolder mSurfaceHolder;
     
     boolean mExited = false;
     
@@ -144,6 +147,13 @@ class CanvasContext {
      * @param surface
      */
 	public void initialize(Object surface) {
+		if (surface != mSurfaceHolder) {
+			if (surface instanceof SurfaceHolder) {
+				mSurfaceHolder = (SurfaceHolder) surface;
+			} else {
+				mSurfaceHolder = null;
+			}
+		}
         if (createSurface(surface)) {
         	if (mCanvas == null) {
         		mCanvas = createGLCanvas();
@@ -168,8 +178,11 @@ class CanvasContext {
 	 * @param width
 	 * @param height
 	 */
-	void setSize(int width, int height) {
+	void setSize(Object surface, int width, int height) {
 		if (DEBUG) Log.d(TAG, "setSize called in CanvasContext, width=" + width + ", height=" + height);
+		if (mEglSurface == null || mEglSurface == EGL10.EGL_NO_SURFACE) {
+			initialize(surface);
+		}
 		if (ensureCurrentSurface()) {
 			mWidth = width;
 			mHeight = height;
@@ -217,6 +230,7 @@ class CanvasContext {
     void destroy(boolean full) {
     	if (DEBUG) Log.d(TAG, "destroy called in CanvasContext, full=" + full);
         destroySurface();
+        mSurfaceHolder = null;
         if (full) {
         	mRootNode.destroy();
         	mCanvas = null;

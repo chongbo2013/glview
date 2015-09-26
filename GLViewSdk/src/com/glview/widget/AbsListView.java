@@ -697,7 +697,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Vi
         mOwnerThread = Thread.currentThread();
 
         setVerticalScrollBarEnabled(true);
-        initializeScrollbarsInternal(null, 0, 0);
+        TypedArray a = context.obtainStyledAttributes(com.glview.R.styleable.View);
+        initializeScrollbarsInternal(a);
+        a.recycle();
     }
 
     public AbsListView(Context context, AttributeSet attrs) {
@@ -716,8 +718,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Vi
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, com.glview.R.styleable.AbsListView, defStyleAttr, defStyleRes);
-        final TypedArray androidA = context.obtainStyledAttributes(
-                attrs, com.glview.AndroidR.styleable.AbsListView, defStyleAttr, defStyleRes);
 
         Drawable d = GLContext.get().getResources().getDrawable(a.getResourceId(com.glview.R.styleable.AbsListView_listSelector, 0));
         if (d != null) {
@@ -746,8 +746,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Vi
         boolean enableFastScroll = a.getBoolean(com.glview.R.styleable.AbsListView_fastScrollEnabled, false);
         setFastScrollEnabled(enableFastScroll);
 
-        int fastScrollStyle = androidA.getResourceId(com.glview.AndroidR.styleable.AbsListView_fastScrollStyle, 0);
-        fastScrollStyle = a.getResourceId(com.glview.R.styleable.AbsListView_fastScrollStyle, fastScrollStyle);
+        int fastScrollStyle = a.getResourceId(com.glview.R.styleable.AbsListView_fastScrollStyle, 0);
         setFastScrollStyle(fastScrollStyle);
 
         boolean smoothScrollbar = a.getBoolean(com.glview.R.styleable.AbsListView_smoothScrollbar, true);
@@ -758,7 +757,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Vi
                 a.getBoolean(com.glview.R.styleable.AbsListView_fastScrollAlwaysVisible, false));
 
         a.recycle();
-        androidA.recycle();
     }
 
     private void initAbsListView() {

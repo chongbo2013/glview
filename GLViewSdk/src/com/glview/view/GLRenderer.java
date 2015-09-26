@@ -41,10 +41,10 @@ class GLRenderer {
 		return mRenderer.buildDrawingCache(v.getDisplayList());
 	}
 	
-	public void setSize(int width, int height) {
+	public void setSize(Object surface, int width, int height) {
 		mWidth = width;
 		mHeight = height;
-		mRenderer.setSize(width, height);
+		mRenderer.setSize(surface, width, height);
 	}
 	
 	public void destroy(boolean full) {

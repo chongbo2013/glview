@@ -832,9 +832,9 @@ public abstract class LayoutInflater {
         int type;
 
         final TypedArray ta = mContext.obtainStyledAttributes(
-                attrs, com.glview.AndroidR.styleable.ViewTag);
-        final int key = ta.getResourceId(com.glview.AndroidR.styleable.ViewTag_id, 0);
-        final CharSequence value = ta.getText(com.glview.AndroidR.styleable.ViewTag_value);
+                attrs, com.glview.R.styleable.ViewTag);
+        final int key = ta.getResourceId(com.glview.R.styleable.ViewTag_id, 0);
+        final CharSequence value = ta.getText(com.glview.R.styleable.ViewTag_value);
         view.setTag(key, value);
         ta.recycle();
 
@@ -912,10 +912,10 @@ public abstract class LayoutInflater {
                         // Attempt to override the included layout's android:id with the
                         // one set on the <include /> tag itself.
                         TypedArray a = mContext.obtainStyledAttributes(attrs,
-                            com.glview.AndroidR.styleable.View, 0, 0);
-                        int id = a.getResourceId(com.glview.AndroidR.styleable.View_id, View.NO_ID);
+                            com.glview.R.styleable.View, 0, 0);
+                        int id = a.getResourceId(com.glview.R.styleable.View_id, View.NO_ID);
                         // While we're at it, let's try to override android:visibility.
-                        int visibility = a.getInt(com.glview.AndroidR.styleable.View_visibility, -1);
+                        int visibility = a.getInt(com.glview.R.styleable.View_visibility, -1);
                         a.recycle();
 
                         if (id != View.NO_ID) {

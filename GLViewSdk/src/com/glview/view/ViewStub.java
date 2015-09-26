@@ -100,16 +100,16 @@ public final class ViewStub extends View {
 
     public ViewStub(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         TypedArray a = context.obtainStyledAttributes(
-                attrs, com.glview.AndroidR.styleable.ViewStub, defStyleAttr, defStyleRes);
+                attrs, com.glview.R.styleable.ViewStub, defStyleAttr, defStyleRes);
 
-        mInflatedId = a.getResourceId(com.glview.AndroidR.styleable.ViewStub_inflatedId, NO_ID);
-        mLayoutResource = a.getResourceId(com.glview.AndroidR.styleable.ViewStub_layout, 0);
+        mInflatedId = a.getResourceId(com.glview.R.styleable.ViewStub_inflatedId, NO_ID);
+        mLayoutResource = a.getResourceId(com.glview.R.styleable.ViewStub_layout, 0);
 
         a.recycle();
 
         a = context.obtainStyledAttributes(
-                attrs, com.glview.AndroidR.styleable.View, defStyleAttr, defStyleRes);
-        mID = a.getResourceId(com.glview.AndroidR.styleable.View_id, NO_ID);
+                attrs, com.glview.R.styleable.View, defStyleAttr, defStyleRes);
+        mID = a.getResourceId(com.glview.R.styleable.View_id, NO_ID);
         a.recycle();
 
         initialize(context);

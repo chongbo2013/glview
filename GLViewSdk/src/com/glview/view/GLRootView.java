@@ -156,7 +156,7 @@ final public class GLRootView extends SurfaceView
 	public void surfaceChanged(SurfaceHolder holder, int format, int width,
 			int height) {
 		if (DEBUG) Log.d(TAG, String.format("surfaceChanged called; format=%s, width=%s, height=%s.", format, width, height));
-		mGLHandler.sendSyncMessage(GLHandler.MSG_SURFACE_CHANGED, width, height, null);
+		mGLHandler.sendSyncMessage(GLHandler.MSG_SURFACE_CHANGED, width, height, holder);
 	}
 	
 	@Override
@@ -642,7 +642,7 @@ final public class GLRootView extends SurfaceView
 				scheduleRender();
 				break;
 			case MSG_SURFACE_CHANGED:
-				getRenderer().setSize(msg.arg1, msg.arg2);
+				getRenderer().setSize(msg.obj, msg.arg1, msg.arg2);
 				scheduleRender();
 				break;
 			case MSG_SURFACE_DESTROYED:

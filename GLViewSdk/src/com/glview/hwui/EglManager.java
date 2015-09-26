@@ -157,19 +157,29 @@ class EglManager {
 	
 	EGLSurface createSurface(Object surface) {
 		initializeEgl();
-        EGLSurface eglSurface = sEgl.eglCreateWindowSurface(sEglDisplay, sEglConfig, surface, null);
-
+        EGLSurface eglSurface = null;
+        try {
+        	eglSurface = sEgl.eglCreateWindowSurface(sEglDisplay, sEglConfig, surface, null);
+        } catch (IllegalArgumentException e) {
+            // This exception indicates that the surface flinger surface
+            // is not valid. This can happen if the surface flinger surface has
+            // been torn down, but the application has not yet been
+            // notified via SurfaceHolder.Callback.surfaceDestroyed.
+            // In theory the application should be notified first,
+            // but in practice sometimes it is not. See b/4588890
+            Log.e(TAG, "eglCreateWindowSurface", e);
+        }
         if (eglSurface == null || eglSurface == EGL_NO_SURFACE) {
             int error = sEgl.eglGetError();
+            Log.e(TAG, "createWindowSurface failed "
+                    + GLUtils.getEGLErrorString(error));
             if (error == EGL_BAD_NATIVE_WINDOW) {
                 Log.e(TAG, "createWindowSurface returned EGL_BAD_NATIVE_WINDOW.");
-                return null;
             }
-            throw new RuntimeException("createWindowSurface failed "
-                    + GLUtils.getEGLErrorString(error));
+            return null;
         }
         if (!makeCurrent(eglSurface)) {
-        	throw new IllegalStateException("eglMakeCurrent failed " +
+        	Log.e(TAG, "eglMakeCurrent failed " +
                     GLUtils.getEGLErrorString(sEgl.eglGetError()));
         }
         return eglSurface;

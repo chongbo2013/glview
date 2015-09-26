@@ -258,69 +258,10 @@ public abstract class ViewGroup extends View{
     private void initFromAttributes(
             Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
     	
-    	TypedArray a = context.obtainStyledAttributes(attrs, com.glview.AndroidR.styleable.ViewGroup, defStyleAttr,
+        final TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ViewGroup, defStyleAttr,
                 defStyleRes);
 
-        int N = a.getIndexCount();
-        for (int i = 0; i < N; i++) {
-        	try {
-	            int attr = a.getIndex(i);
-	            switch (attr) {
-	                case com.glview.AndroidR.styleable.ViewGroup_clipChildren:
-	                    setClipChildren(a.getBoolean(attr, true));
-	                    break;
-	                case com.glview.AndroidR.styleable.ViewGroup_clipToPadding:
-	                    setClipToPadding(a.getBoolean(attr, true));
-	                    break;
-	                case com.glview.AndroidR.styleable.ViewGroup_animationCache:
-//	                    setAnimationCacheEnabled(a.getBoolean(attr, true));
-	                    break;
-	                case com.glview.AndroidR.styleable.ViewGroup_persistentDrawingCache:
-//	                    setPersistentDrawingCache(a.getInt(attr, PERSISTENT_SCROLLING_CACHE));
-	                    break;
-	                case com.glview.AndroidR.styleable.ViewGroup_addStatesFromChildren:
-//	                    setAddStatesFromChildren(a.getBoolean(attr, false));
-	                    break;
-	                case com.glview.AndroidR.styleable.ViewGroup_alwaysDrawnWithCache:
-//	                    setAlwaysDrawnWithCacheEnabled(a.getBoolean(attr, true));
-	                    break;
-	                case com.glview.AndroidR.styleable.ViewGroup_layoutAnimation:
-	                    int id = a.getResourceId(attr, -1);
-	                    if (id > 0) {
-	                        setLayoutAnimation(AnimationUtils.loadLayoutAnimation(mContext, id));
-	                    }
-	                    break;
-	                case com.glview.AndroidR.styleable.ViewGroup_descendantFocusability:
-//	                    setDescendantFocusability(DESCENDANT_FOCUSABILITY_FLAGS[a.getInt(attr, 0)]);
-	                    break;
-	                case com.glview.AndroidR.styleable.ViewGroup_splitMotionEvents:
-//	                    setMotionEventSplittingEnabled(a.getBoolean(attr, false));
-	                    break;
-	                case com.glview.AndroidR.styleable.ViewGroup_animateLayoutChanges:
-	                    boolean animateLayoutChanges = a.getBoolean(attr, false);
-	                    if (animateLayoutChanges) {
-	                        setLayoutTransition(new LayoutTransition());
-	                    }
-	                    break;
-	                case com.glview.AndroidR.styleable.ViewGroup_layoutMode:
-//	                    setLayoutMode(a.getInt(attr, LAYOUT_MODE_UNDEFINED));
-	                    break;
-	                case com.glview.AndroidR.styleable.ViewGroup_transitionGroup:
-//	                    setTransitionGroup(a.getBoolean(attr, false));
-	                    break;
-	                case com.glview.AndroidR.styleable.ViewGroup_touchscreenBlocksFocus:
-//	                    setTouchscreenBlocksFocus(a.getBoolean(attr, false));
-	                    break;
-	            }
-        	} catch (Throwable tr) {}
-        }
-
-        a.recycle();
-        
-        a = context.obtainStyledAttributes(attrs, R.styleable.ViewGroup, defStyleAttr,
-                defStyleRes);
-
-        N = a.getIndexCount();
+        final int N = a.getIndexCount();
 		for (int i = 0; i < N; i++) {
 			int attr = a.getIndex(i);
 			if (attr == R.styleable.ViewGroup_clipChildren) {
@@ -3211,17 +3152,9 @@ public abstract class ViewGroup extends View{
          */
         public LayoutParams(Context c, AttributeSet attrs) {
             TypedArray a = c.obtainStyledAttributes(attrs, com.glview.R.styleable.ViewGroup_Layout);
-            try {
-            	setBaseAttributes(a,
-            			com.glview.R.styleable.ViewGroup_Layout_layout_width,
-            			com.glview.R.styleable.ViewGroup_Layout_layout_height);
-            } catch (Throwable tr) {
-            	a.recycle();
-            	a = c.obtainStyledAttributes(attrs, com.glview.AndroidR.styleable.ViewGroup_Layout);
-            	setBaseAttributes(a,
-            			com.glview.AndroidR.styleable.ViewGroup_Layout_layout_width,
-            			com.glview.AndroidR.styleable.ViewGroup_Layout_layout_height);
-            }
+        	setBaseAttributes(a,
+        			com.glview.R.styleable.ViewGroup_Layout_layout_width,
+        			com.glview.R.styleable.ViewGroup_Layout_layout_height);
             a.recycle();
         }
 
@@ -3417,23 +3350,12 @@ public abstract class ViewGroup extends View{
             super();
 
             TypedArray a = c.obtainStyledAttributes(attrs, com.glview.R.styleable.ViewGroup_MarginLayout);
-            TypedArray androidA = c.obtainStyledAttributes(attrs, com.glview.AndroidR.styleable.ViewGroup_MarginLayout);
-            try {
-            	setBaseAttributes(a,
-            			com.glview.R.styleable.ViewGroup_MarginLayout_layout_width,
-            			com.glview.R.styleable.ViewGroup_MarginLayout_layout_height);
-            } catch (Throwable tr) {
-            	setBaseAttributes(androidA,
-            			com.glview.AndroidR.styleable.ViewGroup_Layout_layout_width,
-            			com.glview.AndroidR.styleable.ViewGroup_Layout_layout_height);
-            }
+        	setBaseAttributes(a,
+        			com.glview.R.styleable.ViewGroup_MarginLayout_layout_width,
+        			com.glview.R.styleable.ViewGroup_MarginLayout_layout_height);
 
             int margin = a.getDimensionPixelSize(
             		com.glview.R.styleable.ViewGroup_MarginLayout_layout_margin, -1);
-            if (margin < 0) {
-            	margin = androidA.getDimensionPixelSize(
-                		com.glview.AndroidR.styleable.ViewGroup_MarginLayout_layout_margin, -1);
-            }
             if (margin >= 0) {
                 leftMargin = margin;
                 topMargin = margin;
@@ -3444,22 +3366,12 @@ public abstract class ViewGroup extends View{
                 		com.glview.R.styleable.ViewGroup_MarginLayout_layout_marginLeft,
                         UNDEFINED_MARGIN);
                 if (leftMargin == UNDEFINED_MARGIN) {
-                	leftMargin = androidA.getDimensionPixelSize(
-                    		com.glview.AndroidR.styleable.ViewGroup_MarginLayout_layout_marginLeft,
-                            UNDEFINED_MARGIN);
-                }
-                if (leftMargin == UNDEFINED_MARGIN) {
                     mMarginFlags |= LEFT_MARGIN_UNDEFINED_MASK;
                     leftMargin = DEFAULT_MARGIN_RESOLVED;
                 }
                 rightMargin = a.getDimensionPixelSize(
                 		com.glview.R.styleable.ViewGroup_MarginLayout_layout_marginRight,
                         UNDEFINED_MARGIN);
-                if (rightMargin == UNDEFINED_MARGIN) {
-                	rightMargin = androidA.getDimensionPixelSize(
-                    		com.glview.AndroidR.styleable.ViewGroup_MarginLayout_layout_marginRight,
-                            UNDEFINED_MARGIN);
-                }
                 if (rightMargin == UNDEFINED_MARGIN) {
                     mMarginFlags |= RIGHT_MARGIN_UNDEFINED_MASK;
                     rightMargin = DEFAULT_MARGIN_RESOLVED;
@@ -3468,19 +3380,9 @@ public abstract class ViewGroup extends View{
                 topMargin = a.getDimensionPixelSize(
                 		com.glview.R.styleable.ViewGroup_MarginLayout_layout_marginTop,
                         DEFAULT_MARGIN_RESOLVED);
-                if (topMargin == UNDEFINED_MARGIN) {
-                	topMargin = androidA.getDimensionPixelSize(
-                    		com.glview.AndroidR.styleable.ViewGroup_MarginLayout_layout_marginTop,
-                            UNDEFINED_MARGIN);
-                }
                 bottomMargin = a.getDimensionPixelSize(
                 		com.glview.R.styleable.ViewGroup_MarginLayout_layout_marginBottom,
                         DEFAULT_MARGIN_RESOLVED);
-                if (bottomMargin == UNDEFINED_MARGIN) {
-                	bottomMargin = androidA.getDimensionPixelSize(
-                    		com.glview.AndroidR.styleable.ViewGroup_MarginLayout_layout_marginBottom,
-                            UNDEFINED_MARGIN);
-                }
                 
                 startMargin = a.getDimensionPixelSize(
                 		com.glview.R.styleable.ViewGroup_MarginLayout_layout_marginStart,
@@ -3488,18 +3390,6 @@ public abstract class ViewGroup extends View{
                 endMargin = a.getDimensionPixelSize(
                 		com.glview.R.styleable.ViewGroup_MarginLayout_layout_marginEnd,
                         DEFAULT_MARGIN_RELATIVE);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                	if (startMargin == DEFAULT_MARGIN_RELATIVE) {
-                		startMargin = androidA.getDimensionPixelSize(
-                				com.glview.AndroidR.styleable.ViewGroup_MarginLayout_layout_marginStart,
-                				DEFAULT_MARGIN_RELATIVE);
-                	}
-                	if (endMargin == DEFAULT_MARGIN_RELATIVE) {
-                		endMargin = androidA.getDimensionPixelSize(
-                				com.glview.AndroidR.styleable.ViewGroup_MarginLayout_layout_marginEnd,
-                				DEFAULT_MARGIN_RELATIVE);
-                	}
-                }
 
                 if (isMarginRelative()) {
                    mMarginFlags |= NEED_RESOLUTION_MASK;
@@ -3512,7 +3402,6 @@ public abstract class ViewGroup extends View{
             mMarginFlags |= LAYOUT_DIRECTION_LTR;
 
             a.recycle();
-            androidA.recycle();
         }
 
         /**
