@@ -20,8 +20,10 @@ public class TextureCache {
 	
 	final static String TAG = "TextureCache";
 	
-	final static int DEFAULT_TEXTURE_CACHE_SIZE = 24 * 1024 * 1024; //24MB
-	final static int LARGE_TEXTURE_CACHE_SIZE = 32 * 1024 * 1024; //32MB
+	final static int MB = 1024 * 1024;
+	final static int DEFAULT_TEXTURE_CACHE_SIZE = 24 * MB; //24MB
+	final static int LARGE_TEXTURE_CACHE_SIZE = 32 * MB; //32MB
+	final static int LARGER_TEXTURE_CACHE_SIZE = 64 * MB; //32MB
 	final static float DEFAULT_TEXTURE_CACHE_FLUSH_RATE = 0.6f;
 	
 	TextureLruCache mCache;
@@ -32,7 +34,17 @@ public class TextureCache {
 	int mSize;
 	
 	public TextureCache() {
-		mSize = GLContext.get().isLargeHeap() ? LARGE_TEXTURE_CACHE_SIZE : DEFAULT_TEXTURE_CACHE_SIZE;
+		final boolean isLargeHeap = GLContext.get().isLargeHeap();
+		mSize = DEFAULT_TEXTURE_CACHE_SIZE;
+		final int memoryClass = isLargeHeap ? GLContext.get().getLargeMemoryClass() : GLContext.get().getMemoryClass();
+		if (memoryClass <= 48) {
+			mSize = memoryClass / 2 * MB;
+		} else if (memoryClass >= 256) {
+			mSize = LARGER_TEXTURE_CACHE_SIZE;
+		} else if (memoryClass >= 128) {
+			mSize = LARGE_TEXTURE_CACHE_SIZE;
+		}
+		Log.d(TAG, "TextureCache size=" + mSize);
 		mFlushRate = DEFAULT_TEXTURE_CACHE_FLUSH_RATE;
 		mCache = new TextureLruCache(mSize);
 	}

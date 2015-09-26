@@ -1,5 +1,6 @@
 package com.glview.content;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -15,6 +16,9 @@ public final class GLContext {
 	final Context mApplicationContext;
 	
 	boolean mLargeHeap = false;
+	
+	int mMemoryClass = 32;
+	int mLargeMemoryClass = 64;
 
 	private GLContext(Context context) {
 		sInstance = this;
@@ -24,10 +28,21 @@ public final class GLContext {
 			mLargeHeap = (context.getPackageManager().getPackageInfo(context.getPackageName(), 0).applicationInfo.flags & ApplicationInfo.FLAG_LARGE_HEAP) == ApplicationInfo.FLAG_LARGE_HEAP;
 		} catch (NameNotFoundException e) {
 		}
+		ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+		mMemoryClass = am.getMemoryClass();
+		mLargeMemoryClass = am.getLargeMemoryClass();
 	}
 	
 	public boolean isLargeHeap() {
 		return mLargeHeap;
+	}
+	
+	public int getMemoryClass() {
+		return mMemoryClass;
+	}
+	
+	public int getLargeMemoryClass() {
+		return mLargeMemoryClass;
 	}
 	
 	/**

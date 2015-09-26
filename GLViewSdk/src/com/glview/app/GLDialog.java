@@ -19,21 +19,23 @@ public class GLDialog extends Dialog  implements GLRootView.Callback {
 
 	public GLDialog(Context context) {
 		super(context);
+		GLContext.initialize(context);
 	}
 
 	public GLDialog(Context context, int theme) {
 		super(context, theme);
+		GLContext.initialize(context);
 	}
 
 	public GLDialog(Context context, boolean cancelable,
 			OnCancelListener cancelListener) {
 		super(context, cancelable, cancelListener);
+		GLContext.initialize(context);
 	}
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		GLContext.initialize(getContext());
 	}
 	
 	public void setGLContentView(int layout) {
