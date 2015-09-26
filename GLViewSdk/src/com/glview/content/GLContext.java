@@ -1,10 +1,9 @@
 package com.glview.content;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.os.Build;
+
 import com.glview.content.res.GLResources;
 
 public final class GLContext {

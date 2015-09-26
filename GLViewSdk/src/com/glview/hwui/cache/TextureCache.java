@@ -21,7 +21,7 @@ public class TextureCache {
 	final static String TAG = "TextureCache";
 	
 	final static int DEFAULT_TEXTURE_CACHE_SIZE = 24 * 1024 * 1024; //24MB
-	final static int LARGE_TEXTURE_CACHE_SIZE = 128 * 1024 * 1024; //128MB
+	final static int LARGE_TEXTURE_CACHE_SIZE = 32 * 1024 * 1024; //32MB
 	final static float DEFAULT_TEXTURE_CACHE_FLUSH_RATE = 0.6f;
 	
 	TextureLruCache mCache;
@@ -41,7 +41,7 @@ public class TextureCache {
 		if (bitmap == null) return null;
 		
 		try {
-			Texture texture = mCache.get(bitmap.toString());
+			Texture texture = mCache.get(bitmap);
 			boolean sizeChanged = false;
 			if (texture == null) {
 				if (!canMakeTextureFromBitmap(bitmap)) {
@@ -55,9 +55,10 @@ public class TextureCache {
 			} else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1 && texture.mGenerationId != bitmap.getGenerationId()) {
 				if (bitmap.getRowBytes() * bitmap.getHeight() != texture.getByteCount()) {
 					sizeChanged = true;
+					mCache.remove(bitmap);
 				}
 				if (!generateTexture(bitmap, texture, true)) {
-					mCache.remove(bitmap.toString());
+					mCache.remove(bitmap);
 					return null;
 				}
 			}
@@ -67,7 +68,7 @@ public class TextureCache {
 				} else if (mCache.maxSize() > mSize) {
 					mCache.resize(mSize);
 				}
-				mCache.put(bitmap.toString(), texture);
+				mCache.put(bitmap, texture);
 			}
 			return texture;
 		} catch (Throwable throwable) {
