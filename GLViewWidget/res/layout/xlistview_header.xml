@@ -1,65 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:gravity="bottom" >
+    xmlns:glview="http://schemas.android.com/apk/res-auto"
+    glview:layout_width="fill_parent"
+    glview:layout_height="wrap_content"
+    glview:gravity="bottom" >
 
     <RelativeLayout
-        android:id="@+id/xlistview_header_content"
-        android:layout_width="fill_parent"
-        android:layout_height="60dp" >
+        glview:id="@+id/xlistview_header_content"
+        glview:layout_width="fill_parent"
+        glview:layout_height="60dp" >
 
         <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:gravity="center"
-            android:orientation="vertical" android:id="@+id/xlistview_header_text">
+            glview:layout_width="wrap_content"
+            glview:layout_height="wrap_content"
+            glview:layout_centerInParent="true"
+            glview:gravity="center"
+            glview:orientation="vertical" 
+            glview:id="@+id/xlistview_header_text">
 
             <TextView
-                android:id="@+id/xlistview_header_hint_textview"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/xlistview_header_hint_normal" />
+                glview:id="@+id/xlistview_header_hint_textview"
+                glview:layout_width="wrap_content"
+                glview:layout_height="wrap_content"
+                glview:text="@string/xlistview_header_hint_normal" />
 
             <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="3dp" >
+                glview:layout_width="wrap_content"
+                glview:layout_height="wrap_content"
+                glview:layout_marginTop="3dp" >
 
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/xlistview_header_last_time"
-                    android:textSize="12sp" />
+                    glview:layout_width="wrap_content"
+                    glview:layout_height="wrap_content"
+                    glview:text="@string/xlistview_header_last_time"
+                    glview:textSize="12sp" />
 
                 <TextView
-                    android:id="@+id/xlistview_header_time"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="12sp" />
+                    glview:id="@+id/xlistview_header_time"
+                    glview:layout_width="wrap_content"
+                    glview:layout_height="wrap_content"
+                    glview:textSize="12sp" />
             </LinearLayout>
         </LinearLayout>
 
         <ImageView
-            android:id="@+id/xlistview_header_arrow"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignLeft="@id/xlistview_header_text"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="-35dp"
-            android:src="@drawable/xlistview_arrow" />
+            glview:id="@+id/xlistview_header_arrow"
+            glview:layout_width="wrap_content"
+            glview:layout_height="wrap_content"
+            glview:layout_alignLeft="@id/xlistview_header_text"
+            glview:layout_centerVertical="true"
+            glview:layout_marginLeft="-35dp"
+            glview:src="@drawable/xlistview_arrow" />
 
         <ProgressBar
-            android:id="@+id/xlistview_header_progressbar"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_alignLeft="@id/xlistview_header_text"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="-40dp"
-            android:indeterminate="true"
-            android:indeterminateDrawable="@drawable/progress_medium_white"
-            android:visibility="invisible" />
+            glview:id="@+id/xlistview_header_progressbar"
+            glview:layout_width="30dp"
+            glview:layout_height="30dp"
+            glview:layout_alignLeft="@id/xlistview_header_text"
+            glview:layout_centerVertical="true"
+            glview:layout_marginLeft="-40dp"
+            glview:indeterminate="true"
+            glview:indeterminateDrawable="@drawable/progress_medium_white"
+            glview:visibility="invisible" />
     </RelativeLayout>
 
 </LinearLayout>

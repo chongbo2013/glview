@@ -1,29 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content" >
+    xmlns:glview="http://schemas.android.com/apk/res-auto"
+    glview:layout_width="fill_parent"
+    glview:layout_height="wrap_content" >
 
     <RelativeLayout
-        android:id="@+id/xlistview_footer_content"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:padding="10dp" >
+        glview:id="@+id/xlistview_footer_content"
+        glview:layout_width="fill_parent"
+        glview:layout_height="wrap_content"
+        glview:padding="10dp" >
 
         <ProgressBar
-            android:id="@+id/xlistview_footer_progressbar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:indeterminate="true"
-            android:indeterminateDrawable="@drawable/progress_medium_white"
-            android:visibility="invisible" />
+            glview:id="@+id/xlistview_footer_progressbar"
+            glview:layout_width="wrap_content"
+            glview:layout_height="wrap_content"
+            glview:layout_centerInParent="true"
+            glview:indeterminate="true"
+            glview:indeterminateDrawable="@drawable/progress_medium_white"
+            glview:visibility="invisible" />
 
         <TextView
-            android:id="@+id/xlistview_footer_hint_textview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:text="@string/xlistview_footer_hint_normal" />
+            glview:id="@+id/xlistview_footer_hint_textview"
+            glview:layout_width="wrap_content"
+            glview:layout_height="wrap_content"
+            glview:layout_centerInParent="true"
+            glview:text="@string/xlistview_footer_hint_normal" />
     </RelativeLayout>
 
 </LinearLayout>
