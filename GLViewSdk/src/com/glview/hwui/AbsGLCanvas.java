@@ -127,6 +127,11 @@ public abstract class AbsGLCanvas implements GLCanvas {
 	}
 	
 	@Override
+	public void drawBitmapBatch(Bitmap bitmap, Rect source, Rect target,
+			GLPaint paint) {
+	}
+	
+	@Override
 	public void drawPatch(NinePatch patch, Rect rect, GLPaint paint) {
 	}
 	

@@ -25,7 +25,7 @@ import com.glview.util.Utils;
  * 
  * @author lijing.lj
  */
-class GL20Canvas extends StatefullBaseCanvas {
+class GL20Canvas extends StatefullBaseCanvas implements Batch.BatchMatrix {
 
 	private static final String TAG = "GL20Canvas";
 
@@ -48,6 +48,7 @@ class GL20Canvas extends StatefullBaseCanvas {
 
 	Mesh mMesh;
 	float mVertices[];
+	Batch mBatch;
 
 	ShaderManager mShaderManager;
 
@@ -60,11 +61,11 @@ class GL20Canvas extends StatefullBaseCanvas {
 		mCaches = Caches.getInstance();
 		mGL = App.getGL20();
 		mRenderState = renderState;
-
+		
 		initialize();
 
 		mShaderManager = new ShaderManager();
-
+		mBatch = new Batch(renderState, this);
 		initialMesh();
 	}
 
@@ -170,7 +171,14 @@ class GL20Canvas extends StatefullBaseCanvas {
 	}
 	
 	@Override
+	public void translate(float x, float y) {
+		mBatch.flush();
+		super.translate(x, y);
+	}
+	
+	@Override
 	public void translate(float x, float y, float z) {
+		mBatch.flush();
 		if (z != 0) {
 			float[] center = MatrixUtil.mapPoint(currentSnapshot().transform, 0, 0);
 			setCameraAndProject(center[0], center[1]);
@@ -182,12 +190,37 @@ class GL20Canvas extends StatefullBaseCanvas {
 	@Override
 	public void rotate(float degrees, float x, float y, float z) {
 		if (degrees == 0) return;
+		mBatch.flush();
 		if (x != 0 || y != 0) {
 			float[] center = MatrixUtil.mapPoint(currentSnapshot().transform, 0, 0);
 			setCameraAndProject(center[0], center[1]);
 			mRenderState.setDepthEnabled(true);
 		}
 		super.rotate(degrees, x, y, z);
+	}
+	
+	@Override
+	public void rotate(float degrees) {
+		mBatch.flush();
+		super.rotate(degrees);
+	}
+	
+	@Override
+	public void scale(float sx, float sy, float sz) {
+		mBatch.flush();
+		super.scale(sx, sy, sz);
+	}
+	
+	@Override
+	public void restore() {
+		mBatch.flush();
+		super.restore();
+	}
+	
+	@Override
+	public void restoreToCount(int saveCount) {
+		mBatch.flush();
+		super.restoreToCount(saveCount);
 	}
 
 	private void initialize() {
@@ -208,9 +241,11 @@ class GL20Canvas extends StatefullBaseCanvas {
 
 	@Override
 	public void endFrame() {
+		mBatch.flush();
 	}
 
 	private void setupDraw() {
+		mBatch.flush();
 		if (mDirtyClip) {
 			if (mCaches.scissorEnabled) {
 	            setScissorFromClip();
@@ -368,6 +403,23 @@ class GL20Canvas extends StatefullBaseCanvas {
 		textureRect(mDrawTextureTargetRect.left, mDrawTextureTargetRect.top,
 				mDrawTextureTargetRect.width(),
 				mDrawTextureTargetRect.height(), bitmap.hasAlpha(), paint);
+	}
+	
+	@Override
+	public void drawBitmapBatch(Bitmap bitmap, Rect source, Rect target,
+			GLPaint paint) {
+		if (source == null || source.isEmpty()) {
+			mBatch.drawBitmap(bitmap, target.left, target.top, target.width(), target.height(), 0, 0, bitmap.getWidth(), bitmap.getHeight(), currentSnapshot().alpha, paint);
+		} else {
+			mBatch.drawBitmap(bitmap, target.left, target.top, target.width(), target.height(), source.left, source.top, source.width(), source.height(), currentSnapshot().alpha, paint);
+		}
+	}
+	
+	@Override
+	public void applyMatrix(BaseShader shader) {
+		// 将最终变换矩阵传入shader程序
+		float[] m = getFinalMatrix(mFinalMatrix, currentSnapshot().transform);
+		shader.setupViewModelMatrices(m);
 	}
 
 	// This function changes the source coordinate to the texture coordinates.

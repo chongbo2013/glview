@@ -7,6 +7,7 @@ import com.glview.graphics.drawable.ninepatch.NinePatch;
 import com.glview.graphics.mesh.BasicMesh;
 import com.glview.hwui.op.ClipRectOp;
 import com.glview.hwui.op.DisplayListData;
+import com.glview.hwui.op.DrawBitmapBatchRectOp;
 import com.glview.hwui.op.DrawBitmapMeshOp;
 import com.glview.hwui.op.DrawBitmapOp;
 import com.glview.hwui.op.DrawBitmapRectFOp;
@@ -208,6 +209,12 @@ class GLRecordingCanvas extends AbsGLCanvas implements Poolable {
 	public void drawBitmap(Bitmap bitmap, Rect source, Rect target,
 			GLPaint paint) {
 		addDrawOp(DrawBitmapRectOp.obtain(bitmap, source, target, paint));
+	}
+	
+	@Override
+	public void drawBitmapBatch(Bitmap bitmap, Rect source, Rect target,
+			GLPaint paint) {
+		addDrawOp(DrawBitmapBatchRectOp.obtain(bitmap, source, target, paint));
 	}
 	
 	@Override

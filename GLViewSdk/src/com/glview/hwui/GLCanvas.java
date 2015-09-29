@@ -72,6 +72,8 @@ public interface GLCanvas {
 	
 	public void drawBitmap(Bitmap bitmap, Rect source, Rect target, GLPaint paint);
 	
+	public void drawBitmapBatch(Bitmap bitmap, Rect source, Rect target, GLPaint paint);
+	
 	public void drawPatch(NinePatch patch, Rect rect, GLPaint paint);
 	
 	public void drawMesh(BasicMesh mesh, GLPaint paint);

@@ -153,7 +153,7 @@ abstract class StatefullBaseCanvas extends AbsGLCanvas {
     {
     	float[] mMVPMatrix = outPut;
     	Matrix.multiplyMM(mMVPMatrix, 0, currentSnapshot().transform, 16, spec, 0);
-        Matrix.multiplyMM(mMVPMatrix, 0, currentSnapshot().transform, 32, mMVPMatrix, 0);        
+        Matrix.multiplyMM(mMVPMatrix, 0, currentSnapshot().transform, 32, mMVPMatrix, 0);
         return mMVPMatrix;
     }
     

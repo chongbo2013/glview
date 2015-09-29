@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.glview.widget"
     android:versionCode="020000"
-    android:versionName="2.0.0_D" >
+    android:versionName="2.0.0" >
 
     <uses-sdk
         android:minSdkVersion="10"
