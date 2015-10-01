@@ -61,7 +61,8 @@ class Batch {
 		mMesh.setIndices(indices);
 		mDefaultShader = new DefaultTextureShader();
 		mDefaultShader.setHasTexcoordsAttr(true);
-		mDefaultShader.setHasColorAttr(true);;
+		mDefaultShader.setHasColorAttr(true);
+		mDefaultShader.setHasTotalColor(false);
 	}
 	
 	protected void switchTexture (Texture texture) {

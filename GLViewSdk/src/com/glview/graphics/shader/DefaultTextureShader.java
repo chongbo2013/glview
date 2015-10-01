@@ -9,6 +9,7 @@ public class DefaultTextureShader extends BaseShader {
 	
 	boolean mHasTexcoordsAttr = false;
 	boolean mHasColorAttr = false;
+	boolean mHasTotalColor = true;
 	
 	public DefaultTextureShader() {
 		mTexSizeHandle = new HandleInfo("u_texSize");
@@ -24,6 +25,13 @@ public class DefaultTextureShader extends BaseShader {
 	public void setHasColorAttr(boolean hasColorAttr) {
 		if (mHasColorAttr != hasColorAttr) {
 			mHasColorAttr = hasColorAttr;
+			invalidate();
+		}
+	}
+	
+	public void setHasTotalColor(boolean hasTotalColor) {
+		if (mHasTotalColor != hasTotalColor) {
+			mHasTotalColor = hasTotalColor;
 			invalidate();
 		}
 	}
@@ -73,16 +81,33 @@ public class DefaultTextureShader extends BaseShader {
 		}
 		fragmentShader.append("varying vec2 v_texCoords;\n"); //
 		fragmentShader.append("uniform sampler2D u_texture;\n"); //
-		fragmentShader.append("uniform vec4 u_ColorTotal; \n");//
+		if (mHasTotalColor) {
+			fragmentShader.append("uniform vec4 u_ColorTotal; \n");//
+		}
 		fragmentShader.append("void main()\n");//
 		fragmentShader.append("{\n"); //
-		if (mHasColorAttr) {
-			fragmentShader.append("  gl_FragColor = texture2D(u_texture, v_texCoords)*u_ColorTotal*v_color;\n"); //
+		if (mHasTotalColor) {
+			if (mHasColorAttr) {
+				fragmentShader.append("  gl_FragColor = texture2D(u_texture, v_texCoords)*u_ColorTotal*v_color;\n"); //
+			} else {
+				fragmentShader.append("  gl_FragColor = texture2D(u_texture, v_texCoords)*u_ColorTotal;\n"); //
+			}
 		} else {
-			fragmentShader.append("  gl_FragColor = texture2D(u_texture, v_texCoords)*u_ColorTotal;\n"); //
+			if (mHasColorAttr) {
+				fragmentShader.append("  gl_FragColor = texture2D(u_texture, v_texCoords)*v_color;\n"); //
+			} else {
+				fragmentShader.append("  gl_FragColor = texture2D(u_texture, v_texCoords);\n"); //
+			}
 		}
 		fragmentShader.append("}");
 		return fragmentShader.toString();
+	}
+	
+	@Override
+	public void setupColor(float r, float g, float b, float a) {
+		if (mHasTotalColor) {
+			super.setupColor(r, g, b, a);
+		}
 	}
 	
 	@Override
