@@ -11,6 +11,9 @@ public class Texture {
 	
 	int mByteCount;
 	
+	int mFormat;
+	int mType;
+	
 	public int getWidth() {
 		return mWidth;
 	}
@@ -41,6 +44,22 @@ public class Texture {
 	
 	public int getByteCount() {
 		return mByteCount;
+	}
+
+	public int getFormat() {
+		return mFormat;
+	}
+
+	public void setFormat(int format) {
+		mFormat = format;
+	}
+
+	public int getType() {
+		return mType;
+	}
+
+	public void setType(int type) {
+		mType = type;
 	}
 	
 }

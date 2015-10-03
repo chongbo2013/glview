@@ -24,6 +24,8 @@ public abstract class BaseShader {
 	protected int key = -1;
 	
 	protected String mVertexShader, mFragmentShader;
+	
+	protected boolean mA8Format = false;
 
 	public BaseShader() {
 		mPositionAttrHandle = new HandleInfo(ShaderProgram.POSITION_ATTRIBUTE);
@@ -50,12 +52,31 @@ public abstract class BaseShader {
 	
 	protected abstract String generateFragmentShader();
 	
+	protected final String generateTextureA8() {
+		if (isA8Format()) {
+			return ".a";
+		} else {
+			return "";
+		}
+	}
+	
 	/**
 	 * @hide
 	 * @param hasTexture
 	 */
 	public void setHasTexture(boolean hasTexture) {
 		mHasTexture = hasTexture;
+	}
+	
+	public void setA8Format(boolean a8Format) {
+		if (a8Format != mA8Format) {
+			mA8Format = a8Format;
+			invalidate();
+		}
+	}
+	
+	public boolean isA8Format() {
+		return mA8Format;
 	}
 	
 	public void invalidate() {

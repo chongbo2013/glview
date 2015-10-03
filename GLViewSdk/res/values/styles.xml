@@ -4,6 +4,13 @@
     <style name="Widget">
     </style>
     
+    <style name="Widget.Button">
+        <item name="background">@drawable/btn_default</item>
+        <item name="focusable">true</item>
+        <item name="clickable">true</item>
+        <item name="gravity">center_vertical|center_horizontal</item>
+    </style>
+    
     <style name="Widget.FastScroll">
         <item name="thumbDrawable">@drawable/scrollbar_handle_accelerated_anim2</item>
         <item name="trackDrawable">@null</item>

@@ -23,8 +23,6 @@ import com.glview.App;
 import com.glview.libgdx.graphics.VertexAttribute;
 import com.glview.libgdx.graphics.VertexAttributes;
 import com.glview.libgdx.graphics.VertexAttributes.Usage;
-import com.glview.libgdx.graphics.opengl.GL10;
-import com.glview.libgdx.graphics.opengl.GL11;
 import com.glview.libgdx.graphics.opengl.GL20;
 import com.glview.libgdx.graphics.utils.BufferUtils;
 
@@ -95,87 +93,6 @@ public class VertexArray implements VertexData {
 		buffer.limit(count);
 	}
 
-	@Override
-	public void bind () {
-		GL10 gl = App.getGL11();
-		int textureUnit = 0;
-		int numAttributes = attributes.size();
-
-		byteBuffer.limit(buffer.limit() * 4);
-
-		for (int i = 0; i < numAttributes; i++) {
-			VertexAttribute attribute = attributes.get(i);
-
-			switch (attribute.usage) {
-			case Usage.Position:
-				byteBuffer.position(attribute.offset);
-				gl.glEnableClientState(GL11.GL_VERTEX_ARRAY);
-				gl.glVertexPointer(attribute.numComponents, GL10.GL_FLOAT, attributes.vertexSize, byteBuffer);
-				break;
-
-			case Usage.Color:
-			case Usage.ColorPacked:
-				int colorType = GL10.GL_FLOAT;
-				if (attribute.usage == Usage.ColorPacked) colorType = GL11.GL_UNSIGNED_BYTE;
-				byteBuffer.position(attribute.offset);
-				gl.glEnableClientState(GL10.GL_COLOR_ARRAY);
-				gl.glColorPointer(attribute.numComponents, colorType, attributes.vertexSize, byteBuffer);
-				break;
-
-			case Usage.Normal:
-				byteBuffer.position(attribute.offset);
-				gl.glEnableClientState(GL10.GL_NORMAL_ARRAY);
-				gl.glNormalPointer(GL10.GL_FLOAT, attributes.vertexSize, byteBuffer);
-				break;
-
-			case Usage.TextureCoordinates:
-				gl.glClientActiveTexture(GL10.GL_TEXTURE0 + textureUnit);
-				gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
-				byteBuffer.position(attribute.offset);
-				gl.glTexCoordPointer(attribute.numComponents, GL10.GL_FLOAT, attributes.vertexSize, byteBuffer);
-				textureUnit++;
-				break;
-
-			default:
-				// throw new GdxRuntimeException("unkown vertex attribute type: " + attribute.usage);
-			}
-		}
-
-		isBound = true;
-	}
-
-	@Override
-	public void unbind () {
-		GL10 gl = App.getGL11();
-		int textureUnit = 0;
-		int numAttributes = attributes.size();
-
-		for (int i = 0; i < numAttributes; i++) {
-
-			VertexAttribute attribute = attributes.get(i);
-			switch (attribute.usage) {
-			case Usage.Position:
-				break; // no-op, we always need a position bound in gles
-			case Usage.Color:
-			case Usage.ColorPacked:
-				gl.glDisableClientState(GL11.GL_COLOR_ARRAY);
-				break;
-			case Usage.Normal:
-				gl.glDisableClientState(GL11.GL_NORMAL_ARRAY);
-				break;
-			case Usage.TextureCoordinates:
-				gl.glClientActiveTexture(GL11.GL_TEXTURE0 + textureUnit);
-				gl.glDisableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
-				textureUnit++;
-				break;
-			default:
-				// throw new GdxRuntimeException("unkown vertex attribute type: " + attribute.usage);
-			}
-		}
-		byteBuffer.position(0);
-		isBound = false;
-	}
-	
 	@Override
 	public void bind (final ShaderProgram shader) {
 		bind(shader, null);

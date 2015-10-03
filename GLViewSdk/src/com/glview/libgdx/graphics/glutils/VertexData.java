@@ -59,12 +59,6 @@ public interface VertexData extends Disposable {
 	public FloatBuffer getBuffer ();
 
 	/** Binds this VertexData for rendering via glDrawArrays or glDrawElements. */
-	public void bind ();
-
-	/** Unbinds this VertexData. */
-	public void unbind ();
-
-	/** Binds this VertexData for rendering via glDrawArrays or glDrawElements. */
 	public void bind (ShaderProgram shader);
 	
 	/** Binds this VertexData for rendering via glDrawArrays or glDrawElements.

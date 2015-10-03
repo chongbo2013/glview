@@ -52,7 +52,7 @@ public class BitmapShader extends DefaultTextureShader {
 		fragmentShader.append("void main()\n");//
 		fragmentShader.append("{\n"); //
 		fragmentShader.append("  vec2 texCoords = wrap(v_texCoords);\n");
-		fragmentShader.append("  gl_FragColor = texture2D(u_texture, texCoords)*u_ColorTotal;\n"); //
+		fragmentShader.append("  gl_FragColor = u_ColorTotal*texture2D(u_texture, texCoords);\n"); //
 		fragmentShader.append("}");
 		return fragmentShader.toString();
 	}

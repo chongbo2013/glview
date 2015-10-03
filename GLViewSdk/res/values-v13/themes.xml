@@ -2,6 +2,7 @@
 <resources>
     
     <style name="Theme.Holo" parent="@android:style/Theme.Holo">
+        <item name="buttonStyle">@style/Widget.Button</item>
         <item name="fastScrollStyle">@style/Widget.FastScroll</item>
         <item name="progressBarStyle">@style/Widget.ProgressBar</item>
         <item name="progressBarStyleSmall">@style/Widget.ProgressBar.Small</item>

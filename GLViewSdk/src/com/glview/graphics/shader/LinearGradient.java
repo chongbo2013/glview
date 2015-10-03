@@ -164,7 +164,7 @@ public class LinearGradient extends DefaultTextureShader {
 		fragmentShader.append("{\n"); //
 		generateLinearColor(fragmentShader);
 		if (mHasTexture) {
-			fragmentShader.append("  gl_FragColor = texture2D(u_texture, v_texCoords)*gradientColor*u_ColorTotal;\n"); //
+			fragmentShader.append("  gl_FragColor = gradientColor*u_ColorTotal*texture2D(u_texture, v_texCoords);\n"); //
 		} else {
 			fragmentShader.append("  gl_FragColor = gradientColor * u_ColorTotal;\n"); //
 		}

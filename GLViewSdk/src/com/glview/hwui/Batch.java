@@ -13,8 +13,7 @@ import com.glview.libgdx.graphics.opengl.GL20;
 class Batch {
 	
 	private Mesh mMesh;
-	final RenderState mRenderState;
-	final BatchMatrix mBatchMatrix;
+	final GLCanvas mCanvas;
 	
 	final float[] mVertices;
 	int mIndex = 0;
@@ -26,15 +25,14 @@ class Batch {
 	
 	Caches mCaches;
 	
-	public Batch(RenderState renderState, BatchMatrix batchMatrix) {
-		this(renderState, batchMatrix, 1000);
+	public Batch(GLCanvas canvas) {
+		this(canvas, 1000);
 	}
 	
-	public Batch(RenderState renderState, BatchMatrix batchMatrix, int size) {
+	public Batch(GLCanvas canvas, int size) {
 		// 32767 is max index, so 32767 / 6 - (32767 / 6 % 3) = 5460.
 		if (size > 5460) throw new IllegalArgumentException("Can't have more than 5460 sprites per batch: " + size);
-		mRenderState = renderState;
-		mBatchMatrix = batchMatrix;
+		mCanvas = canvas;
 		
 		mCaches = Caches.getInstance();
 		
@@ -82,9 +80,6 @@ class Batch {
 			switchTexture(texture);
 		else if (this.mIndex == vertices.length) //
 			flush();
-		
-		paint = getGLPaint(paint);
-		
 
 		final float u = srcX * mInvTexWidth;
 		final float v = srcY * mInvTexHeight;
@@ -135,7 +130,7 @@ class Batch {
 		ShaderProgram program = mDefaultShader.getShaderProgram();
 		mCaches.useProgram(program);
 		mDefaultShader.setupColor(1, 1, 1, 1);
-		mBatchMatrix.applyMatrix(mDefaultShader);
+		mCanvas.applyMatrix(mDefaultShader);
 		mDefaultShader.setupCustomValues();
 		
 		mesh.render(program, GL20.GL_TRIANGLES, 0, count);
@@ -145,21 +140,11 @@ class Batch {
 	int packColor(float alpha, int color) {
 		float prealpha = ((color >>> 24) & 0xFF) * alpha / 255;
 		float colorR = Math.round(((color >> 16) & 0xFF)) * 1.0f / 255;
-		float colorG = Math.round(((color >> 8) & 0xFF) ) * 1.0f / 255;
-		float colorB = Math.round((color & 0xFF) ) * 1.0f / 255;
-		float colorA = Math.round(255) * 1.0f / 255;
+		float colorG = Math.round(((color >> 8) & 0xFF)) * 1.0f / 255;
+		float colorB = Math.round((color & 0xFF)) * 1.0f / 255;
+		float colorA = Math.round(255 * prealpha) * 1.0f / 255;
 		int intBits = (int)(255 * colorA) << 24 | (int)(255 * colorB) << 16 | (int)(255 * colorG) << 8 | (int)(255 * colorR);
 		return intBits;
 	}
 	
-	private GLPaint getGLPaint(GLPaint paint) {
-		if (paint != null)
-			return paint;
-		return mRenderState.getDefaultPaint();
-	}
-	
-	public interface BatchMatrix {
-		public void applyMatrix(BaseShader shader);
-	}
-
 }

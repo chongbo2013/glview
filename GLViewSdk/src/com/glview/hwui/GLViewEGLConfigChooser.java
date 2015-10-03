@@ -36,8 +36,8 @@ public class GLViewEGLConfigChooser extends SimpleEGLConfigChooser {
 	protected int mStencilSize;
 	protected int mNumSamples;
 
-	public GLViewEGLConfigChooser (int r, int g, int b, int a, int depth, int stencil, int numSamples) {
-		super(new int[] {EGL10.EGL_RED_SIZE, 4, EGL10.EGL_GREEN_SIZE, 4, EGL10.EGL_BLUE_SIZE, 4, EGL10.EGL_NONE});
+	public GLViewEGLConfigChooser (int r, int g, int b, int a, int depth, int stencil, int numSamples, int glVersion) {
+		super(new int[] {EGL10.EGL_RED_SIZE, 4, EGL10.EGL_GREEN_SIZE, 4, EGL10.EGL_BLUE_SIZE, 4, EGL10.EGL_NONE}, glVersion);
 		mRedSize = r;
 		mGreenSize = g;
 		mBlueSize = b;

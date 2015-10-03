@@ -1,10 +1,9 @@
 package com.glview.hwui;
 
 import android.graphics.Color;
-import android.graphics.Typeface;
 
+import com.glview.graphics.Typeface;
 import com.glview.graphics.shader.BaseShader;
-
 
 public class GLPaint {
 	
@@ -17,6 +16,9 @@ public class GLPaint {
     BaseShader mShader;
     
     int mFlags = 0;
+    
+    int mTextSize;
+    Typeface mTypeface;
     
     /**
      * Paint flag that enables antialiasing when drawing.
@@ -149,6 +151,8 @@ public class GLPaint {
     		mColor = paint.mColor;
     		mAlpha = paint.mAlpha;
     		mStyle = paint.mStyle;
+    		mTextSize = paint.mTextSize;
+    		mTypeface = paint.mTypeface;
     		mShader = paint.mShader;
     	} else {
     		reset();
@@ -160,6 +164,8 @@ public class GLPaint {
     	mColor = Color.WHITE;
     	mAlpha = 255;
     	mStyle = Style.FILL;
+    	mTextSize = 25;
+    	mTypeface = null;
     	mShader = null;
     }
     
@@ -263,6 +269,22 @@ public class GLPaint {
     
     public void setStyle(Style style) {
     	mStyle = style;
+    }
+    
+    public int getTextSize() {
+    	return mTextSize;
+    }
+    
+    public void setTextSize(int textSize) {
+    	mTextSize = textSize;
+    }
+    
+    public Typeface getTypeface() {
+    	return mTypeface != null ? mTypeface : Typeface.DEFAULT;
+    }
+    
+    public void setTypeface(Typeface typeface) {
+    	mTypeface = typeface;
     }
     
     public void setShader(BaseShader shader) {

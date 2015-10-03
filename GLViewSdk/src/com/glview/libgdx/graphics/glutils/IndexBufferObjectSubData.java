@@ -23,7 +23,6 @@ import java.nio.ShortBuffer;
 import com.glview.App;
 import com.glview.exception.GLViewRuntimeException;
 import com.glview.hwui.GLId;
-import com.glview.libgdx.graphics.opengl.GL11;
 import com.glview.libgdx.graphics.opengl.GL20;
 import com.glview.libgdx.graphics.utils.BufferUtils;
 
@@ -72,7 +71,7 @@ public class IndexBufferObjectSubData implements IndexData {
 		byteBuffer = BufferUtils.newByteBuffer(maxIndices * 2);
 		isDirect = true;
 // }
-		usage = isStatic ? GL11.GL_STATIC_DRAW : GL11.GL_DYNAMIC_DRAW;
+		usage = isStatic ? GL20.GL_STATIC_DRAW : GL20.GL_DYNAMIC_DRAW;
 		buffer = byteBuffer.asShortBuffer();
 		buffer.flip();
 		byteBuffer.flip();
@@ -86,7 +85,7 @@ public class IndexBufferObjectSubData implements IndexData {
 		byteBuffer = BufferUtils.newByteBuffer(maxIndices * 2);
 		this.isDirect = true;
 
-		usage = GL11.GL_STATIC_DRAW;
+		usage = GL20.GL_STATIC_DRAW;
 		buffer = byteBuffer.asShortBuffer();
 		buffer.flip();
 		byteBuffer.flip();
@@ -130,12 +129,7 @@ public class IndexBufferObjectSubData implements IndexData {
 		byteBuffer.limit(count << 1);
 
 		if (isBound) {
-			if (App.getGL11() != null) {
-				GL11 gl = App.getGL11();
-// gl.glBufferData(GL11.GL_ELEMENT_ARRAY_BUFFER, byteBuffer
-// .limit(), byteBuffer, usage);
-				gl.glBufferSubData(GL11.GL_ELEMENT_ARRAY_BUFFER, 0, byteBuffer.limit(), byteBuffer);
-			} else if (App.getGL20() != null) {
+			if (App.getGL20() != null) {
 				GL20 gl = App.getGL20();
 // gl.glBufferData(GL20.GL_ELEMENT_ARRAY_BUFFER, byteBuffer
 // .limit(), byteBuffer, usage);
@@ -161,36 +155,20 @@ public class IndexBufferObjectSubData implements IndexData {
 	public void bind () {
 		if (bufferHandle == 0) throw new GLViewRuntimeException("buuh");
 
-		if (App.getGL11() != null) {
-			GL11 gl = App.getGL11();
-			gl.glBindBuffer(GL11.GL_ELEMENT_ARRAY_BUFFER, bufferHandle);
-			if (isDirty) {
-// gl.glBufferData(GL11.GL_ELEMENT_ARRAY_BUFFER, byteBuffer
-// .limit(), byteBuffer, usage);
-				byteBuffer.limit(buffer.limit() * 2);
-				gl.glBufferSubData(GL11.GL_ELEMENT_ARRAY_BUFFER, 0, byteBuffer.limit(), byteBuffer);
-				isDirty = false;
-			}
-		} else {
-			GL20 gl = App.getGL20();
-			gl.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, bufferHandle);
-			if (isDirty) {
-// gl.glBufferData(GL20.GL_ELEMENT_ARRAY_BUFFER, byteBuffer
-// .limit(), byteBuffer, usage);
-				byteBuffer.limit(buffer.limit() * 2);
-				gl.glBufferSubData(GL20.GL_ELEMENT_ARRAY_BUFFER, 0, byteBuffer.limit(), byteBuffer);
-				isDirty = false;
-			}
+		GL20 gl = App.getGL20();
+		gl.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, bufferHandle);
+		if (isDirty) {
+			byteBuffer.limit(buffer.limit() * 2);
+			gl.glBufferSubData(GL20.GL_ELEMENT_ARRAY_BUFFER, 0, byteBuffer.limit(), byteBuffer);
+			isDirty = false;
 		}
 		isBound = true;
 	}
 
 	/** Unbinds this IndexBufferObject. */
 	public void unbind () {
-		if (App.getGL11() != null) {
-			App.getGL11().glBindBuffer(GL11.GL_ELEMENT_ARRAY_BUFFER, 0);
-		} else if (App.getGL20() != null) {
-			App.getGL20().glBindBuffer(GL11.GL_ELEMENT_ARRAY_BUFFER, 0);
+		if (App.getGL20() != null) {
+			App.getGL20().glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, 0);
 		}
 		isBound = false;
 	}
@@ -209,14 +187,6 @@ public class IndexBufferObjectSubData implements IndexData {
 			tmpHandle.flip();
 			GL20 gl = App.getGL20();
 			gl.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, 0);
-			gl.glDeleteBuffers(1, tmpHandle);
-			bufferHandle = 0;
-		} else if (App.getGL11() != null) {
-			tmpHandle.clear();
-			tmpHandle.put(bufferHandle);
-			tmpHandle.flip();
-			GL11 gl = App.getGL11();
-			gl.glBindBuffer(GL11.GL_ELEMENT_ARRAY_BUFFER, 0);
 			gl.glDeleteBuffers(1, tmpHandle);
 			bufferHandle = 0;
 		}

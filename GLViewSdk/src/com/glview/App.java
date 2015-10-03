@@ -2,7 +2,6 @@ package com.glview;
 
 import com.glview.libgdx.graphics.opengl.AndroidGL20;
 import com.glview.libgdx.graphics.opengl.GL;
-import com.glview.libgdx.graphics.opengl.GL11;
 import com.glview.libgdx.graphics.opengl.GL20;
 
 public class App {
@@ -23,10 +22,6 @@ public class App {
 	
 	public static void setGL20(GL20 gl) {
 		sGL20ThreadInstance.set(gl);
-	}
-	
-	public static GL11 getGL11() {
-		return null;
 	}
 
 }

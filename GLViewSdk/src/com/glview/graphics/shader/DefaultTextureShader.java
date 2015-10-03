@@ -88,15 +88,15 @@ public class DefaultTextureShader extends BaseShader {
 		fragmentShader.append("{\n"); //
 		if (mHasTotalColor) {
 			if (mHasColorAttr) {
-				fragmentShader.append("  gl_FragColor = texture2D(u_texture, v_texCoords)*u_ColorTotal*v_color;\n"); //
+				fragmentShader.append("  gl_FragColor = u_ColorTotal*v_color*texture2D(u_texture, v_texCoords)").append(generateTextureA8()).append(";\n"); //
 			} else {
-				fragmentShader.append("  gl_FragColor = texture2D(u_texture, v_texCoords)*u_ColorTotal;\n"); //
+				fragmentShader.append("  gl_FragColor = u_ColorTotal*texture2D(u_texture, v_texCoords)").append(generateTextureA8()).append(";\n"); //
 			}
 		} else {
 			if (mHasColorAttr) {
-				fragmentShader.append("  gl_FragColor = texture2D(u_texture, v_texCoords)*v_color;\n"); //
+				fragmentShader.append("  gl_FragColor = v_color*texture2D(u_texture, v_texCoords)").append(generateTextureA8()).append(";\n"); //
 			} else {
-				fragmentShader.append("  gl_FragColor = texture2D(u_texture, v_texCoords);\n"); //
+				fragmentShader.append("  gl_FragColor = texture2D(u_texture, v_texCoords)").append(generateTextureA8()).append(";\n"); //
 			}
 		}
 		fragmentShader.append("}");

@@ -11,7 +11,7 @@ import android.util.Log;
  * 通过{@link #getGLLooper()} 取得GLThread主线程
  * @author lijing.lj
  */
-class GLLooper {
+final class GLLooper {
 	
 	private final static String TAG = "GLLooper";
 	

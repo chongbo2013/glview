@@ -29,10 +29,15 @@ public final class Caches {
 	
 	final GL20 mGL;
 	
+	int maxTextureSize;
+	
 	private Caches() {
 		mGL = App.getGL20();
 		
 		scissorEnabled = mGL.glIsEnabled(GL20.GL_SCISSOR_TEST);
+		IntBuffer intbuf = BufferUtils.newIntBuffer(1);
+		mGL.glGetIntegerv(GL20.GL_MAX_TEXTURE_SIZE, intbuf);
+		maxTextureSize = intbuf.get(0);
 	}
 	
 	public FboCache fboCache = new FboCache();

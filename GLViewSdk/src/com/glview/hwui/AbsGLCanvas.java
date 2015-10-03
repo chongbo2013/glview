@@ -5,6 +5,7 @@ import com.glview.graphics.Rect;
 import com.glview.graphics.RectF;
 import com.glview.graphics.drawable.ninepatch.NinePatch;
 import com.glview.graphics.mesh.BasicMesh;
+import com.glview.graphics.shader.BaseShader;
 
 /**
  * @author lijing.lj
@@ -144,6 +145,21 @@ public abstract class AbsGLCanvas implements GLCanvas {
 	}
 	
 	@Override
+	public void drawText(String text, float x, float y, GLPaint paint) {
+		drawText(text, 0, text.length(), x, y, paint);
+	}
+
+	@Override
+	public void drawText(String text, int start, int end, float x, float y,
+			GLPaint paint) {
+	}
+	
+	@Override
+	public void drawText(CharSequence text, int start, int end, float x,
+			float y, GLPaint paint) {
+	}
+	
+	@Override
 	public void drawCircle(float cx, float cy, float radius, GLPaint paint) {
 	}
 	
@@ -174,5 +190,9 @@ public abstract class AbsGLCanvas implements GLCanvas {
 
 	@Override
 	public void endFrame() {
+	}
+	
+	@Override
+	public void applyMatrix(BaseShader shader) {
 	}
 }

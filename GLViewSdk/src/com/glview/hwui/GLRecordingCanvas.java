@@ -17,6 +17,7 @@ import com.glview.hwui.op.DrawMeshOp;
 import com.glview.hwui.op.DrawOp;
 import com.glview.hwui.op.DrawPatchOp;
 import com.glview.hwui.op.DrawRectOp;
+import com.glview.hwui.op.DrawTextOp;
 import com.glview.hwui.op.RenderNodeOp;
 import com.glview.hwui.op.RestoreOp;
 import com.glview.hwui.op.RestoreToCountOp;
@@ -230,5 +231,17 @@ class GLRecordingCanvas extends AbsGLCanvas implements Poolable {
 	@Override
 	public void drawBitmapMesh(Bitmap bitmap, BasicMesh mesh, GLPaint paint) {
 		addDrawOp(DrawBitmapMeshOp.obtain(bitmap, mesh, paint));
+	}
+	
+	@Override
+	public void drawText(String text, int start, int end, float x, float y,
+			GLPaint paint) {
+		addDrawOp(DrawTextOp.obtain(text, start, end, x, y, paint));
+	}
+	
+	@Override
+	public void drawText(CharSequence text, int start, int end, float x,
+			float y, GLPaint paint) {
+		// TODO
 	}
 }

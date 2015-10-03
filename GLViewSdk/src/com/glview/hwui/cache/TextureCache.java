@@ -23,7 +23,7 @@ public class TextureCache {
 	final static int MB = 1024 * 1024;
 	final static int DEFAULT_TEXTURE_CACHE_SIZE = 24 * MB; //24MB
 	final static int LARGE_TEXTURE_CACHE_SIZE = 32 * MB; //32MB
-	final static int LARGER_TEXTURE_CACHE_SIZE = 64 * MB; //32MB
+	final static int LARGER_TEXTURE_CACHE_SIZE = 64 * MB; //64MB
 	final static float DEFAULT_TEXTURE_CACHE_FLUSH_RATE = 0.6f;
 	
 	TextureLruCache mCache;
@@ -100,6 +100,13 @@ public class TextureCache {
 		Texture texture = new Texture();
 		texture.setWidth(bitmap.getWidth());
 		texture.setHeight(bitmap.getHeight());
+		android.graphics.Bitmap aBitmap = bitmap.getBitmap();
+		if (aBitmap != null && !aBitmap.isRecycled()) {
+			int format = GLUtils.getInternalFormat(aBitmap);
+			int type = GLUtils.getType(aBitmap);
+			texture.setFormat(format);
+			texture.setType(type);
+		}
 		return texture;
 	}
 	
@@ -121,9 +128,9 @@ public class TextureCache {
 			texture.mId = mBuffer[0];
 		}
 		Caches.getInstance().bindTexture(texture);
-		gl.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA,
+		gl.glTexImage2D(GL11.GL_TEXTURE_2D, 0, texture.getFormat(),
 				texture.getWidth(), texture.getHeight(),
-				0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, null);
+				0, texture.getFormat(), texture.getType(), null);
 		if (!regenerate) {
 			gl.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_WRAP_S,
 					GL20.GL_CLAMP_TO_EDGE);
@@ -165,12 +172,11 @@ public class TextureCache {
 		
 		GL gl = App.getGL();
 		
-		int format = GLUtils.getInternalFormat(aBitmap);
-		int type = GLUtils.getType(aBitmap);
+		
 		if (resize) {
-			GLUtils.texImage2D(GL20.GL_TEXTURE_2D, 0, format, aBitmap, type, 0);
+			GLUtils.texImage2D(GL20.GL_TEXTURE_2D, 0, texture.getFormat(), aBitmap, texture.getType(), 0);
 		} else {
-			GLUtils.texSubImage2D(GL20.GL_TEXTURE_2D, 0, 0, 0, aBitmap, format, type);
+			GLUtils.texSubImage2D(GL20.GL_TEXTURE_2D, 0, 0, 0, aBitmap, texture.getFormat(), texture.getType());
 		}
 		
 		if (canMipMap) {

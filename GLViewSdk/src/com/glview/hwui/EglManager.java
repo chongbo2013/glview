@@ -29,17 +29,15 @@ class EglManager {
 	final static String TAG = "EglManager";
 	final static boolean DEBUG = true;
 	
-	int mEGLContextClientVersion = 1;
+	int mEGLContextClientVersion = 2;
 
 	static EGL10 sEgl;
     static EGLDisplay sEglDisplay;
     static EGLConfig sEglConfig;
-    static EGLConfigChooser sEglConfigChooser;
     
     EGLContext mEglContext;
     
-    EglManager(int glVersion) {
-    	mEGLContextClientVersion = glVersion;
+    EglManager() {
     	initializeEgl();
 	}
     
@@ -66,7 +64,6 @@ class EglManager {
 
             checkEglErrorsForced();
 
-            sEglConfigChooser = new GLViewEGLConfigChooser(8, 8, 8, 8, 0, 0, 0);
             sEglConfig = loadEglConfig();
         }
 
@@ -93,7 +90,7 @@ class EglManager {
     }
 	
 	private EGLConfig loadEglConfig() {
-		return sEglConfigChooser.chooseConfig(sEgl, sEglDisplay);
+		return new GLViewEGLConfigChooser(8, 8, 8, 8, 0, 0, 0, mEGLContextClientVersion).chooseConfig(sEgl, sEglDisplay);
 //		int[] attribs;
 //		attribs = new int[] {
 //				EGL10.EGL_RED_SIZE, 8,

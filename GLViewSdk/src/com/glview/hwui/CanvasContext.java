@@ -17,6 +17,7 @@ import com.glview.animation.AnimatorListenerAdapter;
 import com.glview.animation.ValueAnimator;
 import com.glview.animation.ValueAnimator.AnimatorUpdateListener;
 import com.glview.graphics.Bitmap;
+import com.glview.hwui.font.FontRenderer;
 import com.glview.hwui.task.Task;
 import com.glview.hwui.task.TaskHandler;
 import com.glview.libgdx.graphics.opengl.AndroidGL20;
@@ -133,12 +134,8 @@ class CanvasContext {
     
     public static void ensureEglManager() {
     	// now we only support OpenGL 2.0.
-    	if (sEglManager == null) sEglManager = new EglManager(Constant.EGL_CONTEXT_CLIENT_VERSION);
+    	if (sEglManager == null) sEglManager = new EglManager();
     	sEglManager.initializeEgl();
-    }
-    
-    public boolean isOpenGL20() {
-    	return Constant.EGL_CONTEXT_CLIENT_VERSION == 2 || Constant.EGL_CONTEXT_CLIENT_VERSION == 3;
     }
     
     /**
@@ -420,10 +417,12 @@ class CanvasContext {
 				Log.v(TAG, "trimMemory level=" + level);
 				sEglManager.initializeEgl();
 				if (level >= TRIM_MEMORY_COMPLETE) {
+					FontRenderer.instance().release();
 					Caches.getInstance().clear();
 					sEglManager.destroy();
 					sEglManager.initializeEgl();
 				} else if (level >= TRIM_MEMORY_UI_HIDDEN) {
+					FontRenderer.instance().release();
 					Caches.getInstance().textureCache.flush();
 				} else {
 					if (level >= TRIM_MEMORY_UI_HIDDEN) {

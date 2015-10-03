@@ -26,8 +26,6 @@ import com.glview.hwui.GLId;
 import com.glview.libgdx.graphics.VertexAttribute;
 import com.glview.libgdx.graphics.VertexAttributes;
 import com.glview.libgdx.graphics.VertexAttributes.Usage;
-import com.glview.libgdx.graphics.opengl.GL10;
-import com.glview.libgdx.graphics.opengl.GL11;
 import com.glview.libgdx.graphics.opengl.GL20;
 import com.glview.libgdx.graphics.utils.BufferUtils;
 
@@ -85,7 +83,7 @@ public class VertexBufferObjectSubData implements VertexData {
 		byteBuffer = BufferUtils.newByteBuffer(this.attributes.vertexSize * numVertices);
 		isDirect = true;
 // }
-		usage = isStatic ? GL11.GL_STATIC_DRAW : GL11.GL_DYNAMIC_DRAW;
+		usage = isStatic ? GL20.GL_STATIC_DRAW : GL20.GL_DYNAMIC_DRAW;
 		buffer = byteBuffer.asFloatBuffer();
 		bufferHandle = createBufferObject();
 		buffer.flip();
@@ -142,67 +140,9 @@ public class VertexBufferObjectSubData implements VertexData {
 			if (App.getGL20() != null) {
 				GL20 gl = App.getGL20();
 				gl.glBufferSubData(GL20.GL_ARRAY_BUFFER, 0, byteBuffer.limit(), byteBuffer);
-			} else {
-				GL11 gl = App.getGL11();
-				gl.glBufferSubData(GL11.GL_ARRAY_BUFFER, 0, byteBuffer.limit(), byteBuffer);
 			}
 			isDirty = false;
 		}
-	}
-
-	/** {@inheritDoc} */
-	@Override
-	public void bind () {
-		GL11 gl = App.getGL11();
-
-		gl.glBindBuffer(GL11.GL_ARRAY_BUFFER, bufferHandle);
-		if (isDirty) {
-			byteBuffer.limit(buffer.limit() * 4);
-			gl.glBufferSubData(GL11.GL_ARRAY_BUFFER, 0, byteBuffer.limit(), byteBuffer);
-// gl.glBufferData(GL11.GL_ARRAY_BUFFER, byteBuffer.limit(),
-// byteBuffer, usage);
-			isDirty = false;
-		}
-
-		int textureUnit = 0;
-		int numAttributes = attributes.size();
-
-		for (int i = 0; i < numAttributes; i++) {
-			VertexAttribute attribute = attributes.get(i);
-
-			switch (attribute.usage) {
-			case Usage.Position:
-				gl.glEnableClientState(GL11.GL_VERTEX_ARRAY);
-				gl.glVertexPointer(attribute.numComponents, GL10.GL_FLOAT, attributes.vertexSize, attribute.offset);
-				break;
-
-			case Usage.Color:
-			case Usage.ColorPacked:
-				int colorType = GL10.GL_FLOAT;
-				if (attribute.usage == Usage.ColorPacked) colorType = GL11.GL_UNSIGNED_BYTE;
-
-				gl.glEnableClientState(GL10.GL_COLOR_ARRAY);
-				gl.glColorPointer(attribute.numComponents, colorType, attributes.vertexSize, attribute.offset);
-				break;
-
-			case Usage.Normal:
-				gl.glEnableClientState(GL10.GL_NORMAL_ARRAY);
-				gl.glNormalPointer(GL10.GL_FLOAT, attributes.vertexSize, attribute.offset);
-				break;
-
-			case Usage.TextureCoordinates:
-				gl.glClientActiveTexture(GL10.GL_TEXTURE0 + textureUnit);
-				gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
-				gl.glTexCoordPointer(attribute.numComponents, GL10.GL_FLOAT, attributes.vertexSize, attribute.offset);
-				textureUnit++;
-				break;
-
-			default:
-				throw new GLViewRuntimeException("unkown vertex attribute type: " + attribute.usage);
-			}
-		}
-
-		isBound = true;
 	}
 
 	/** Binds this VertexBufferObject for rendering via glDrawArrays or glDrawElements
@@ -259,39 +199,6 @@ public class VertexBufferObjectSubData implements VertexData {
 		isBound = true;
 	}
 
-	@Override
-	public void unbind () {
-		GL11 gl = App.getGL11();
-		int textureUnit = 0;
-		int numAttributes = attributes.size();
-
-		for (int i = 0; i < numAttributes; i++) {
-
-			VertexAttribute attribute = attributes.get(i);
-			switch (attribute.usage) {
-			case Usage.Position:
-				break; // no-op, we also need a position bound in gles
-			case Usage.Color:
-			case Usage.ColorPacked:
-				gl.glDisableClientState(GL11.GL_COLOR_ARRAY);
-				break;
-			case Usage.Normal:
-				gl.glDisableClientState(GL11.GL_NORMAL_ARRAY);
-				break;
-			case Usage.TextureCoordinates:
-				gl.glClientActiveTexture(GL11.GL_TEXTURE0 + textureUnit);
-				gl.glDisableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
-				textureUnit++;
-				break;
-			default:
-				throw new GLViewRuntimeException("unkown vertex attribute type: " + attribute.usage);
-			}
-		}
-
-		gl.glBindBuffer(GL11.GL_ARRAY_BUFFER, 0);
-		isBound = false;
-	}
-
 	/** Unbinds this VertexBufferObject.
 	 * 
 	 * @param shader the shader */
@@ -336,19 +243,6 @@ public class VertexBufferObjectSubData implements VertexData {
 			
 			GL20 gl = App.getGL20();
 			gl.glBindBuffer(GL20.GL_ARRAY_BUFFER, 0);
-			gl.glDeleteBuffers(1, tmpHandle);
-			
-//			if(Gdx.canvas != null){
-//				Gdx.canvas.deleteBuffer(bufferHandle);
-//			}
-			
-			bufferHandle = 0;
-		} else {
-			tmpHandle.clear();
-			tmpHandle.put(bufferHandle);
-			tmpHandle.flip();
-			GL11 gl = App.getGL11();
-			gl.glBindBuffer(GL11.GL_ARRAY_BUFFER, 0);
 			gl.glDeleteBuffers(1, tmpHandle);
 			
 //			if(Gdx.canvas != null){

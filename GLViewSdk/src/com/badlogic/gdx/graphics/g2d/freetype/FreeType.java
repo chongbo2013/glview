@@ -17,12 +17,7 @@
 package com.badlogic.gdx.graphics.g2d.freetype;
 
 import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
-import java.text.Format;
 
-import android.support.v4.util.LongSparseArray;
-
-import com.glview.libgdx.graphics.Color;
 import com.glview.libgdx.graphics.utils.BufferUtils;
 import com.glview.libgdx.graphics.utils.Disposable;
 
@@ -40,10 +35,13 @@ public class FreeType {
 		Pointer(long address) {
 			this.address = address;
 		}
+		
+		public long address() {
+			return address;
+		}
 	}
 	
 	public static class Library extends Pointer implements Disposable {
-		LongSparseArray<ByteBuffer> fontData = new LongSparseArray<ByteBuffer>();
 		
 		Library (long address) {
 			super(address);
@@ -52,10 +50,6 @@ public class FreeType {
 		@Override
 		public void dispose () {
 			doneFreeType(address);
-			for(int i = 0; i < fontData.size(); i ++) {
-				ByteBuffer buffer = fontData.valueAt(i);
-				BufferUtils.disposeUnsafeByteBuffer(buffer);
-			}
 		}
 
 		private static native void doneFreeType(long library); /*
@@ -75,7 +69,7 @@ public class FreeType {
 				throw new RuntimeException("Couldn't load font");
 			}
 			else {
-				fontData.put(face, buffer);
+				BufferUtils.disposeUnsafeByteBuffer(buffer);
 				return new Face(face, this);
 			}
 		}
@@ -112,11 +106,6 @@ public class FreeType {
 		@Override
 		public void dispose() {
 			doneFace(address);
-			ByteBuffer buffer = library.fontData.get(address);
-			if(buffer != null) {
-				library.fontData.remove(address);
-				BufferUtils.disposeUnsafeByteBuffer(buffer);
-			}
 		}
 
 		private static native void doneFace(long face); /*

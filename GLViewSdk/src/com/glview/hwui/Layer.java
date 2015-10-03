@@ -1,6 +1,7 @@
 package com.glview.hwui;
 
 import com.glview.graphics.Bitmap;
+import com.glview.libgdx.graphics.opengl.GL20;
 
 
 /**
@@ -28,6 +29,8 @@ public final class Layer {
 		mTexture = new Texture();
 		mTexture.setWidth(width);
 		mTexture.setHeight(height);
+		mTexture.setFormat(GL20.GL_RGBA);
+		mTexture.setType(GL20.GL_UNSIGNED_BYTE);
 	}
 	
 	public int getWidth() {

@@ -75,7 +75,7 @@ public class RippleShader extends DefaultTextureShader {
 //		fragmentShader.append("  if (texCoords.x < 0.0 || v_texCoords.y < 0.0 || texCoords.x > 1.0 || texCoords.y > 1.0)\n"); //
 //		fragmentShader.append("    gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);\n"); //
 //		fragmentShader.append("  else\n"); //
-		fragmentShader.append("  gl_FragColor = texture2D(u_texture, texCoords) * u_ColorTotal;\n"); //
+		fragmentShader.append("  gl_FragColor = u_ColorTotal*texture2D(u_texture, texCoords);\n"); //
 		fragmentShader.append("}");
 		return fragmentShader.toString();
 	}

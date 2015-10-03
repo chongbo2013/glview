@@ -12,6 +12,7 @@ import com.glview.graphics.shader.BaseShader;
 import com.glview.graphics.shader.DefaultColorShader;
 import com.glview.graphics.shader.DefaultTextureShader;
 import com.glview.hwui.GLPaint.Style;
+import com.glview.hwui.font.FontRenderer;
 import com.glview.libgdx.graphics.Mesh;
 import com.glview.libgdx.graphics.VertexAttribute;
 import com.glview.libgdx.graphics.VertexAttributes.Usage;
@@ -25,7 +26,7 @@ import com.glview.util.Utils;
  * 
  * @author lijing.lj
  */
-class GL20Canvas extends StatefullBaseCanvas implements Batch.BatchMatrix {
+class GL20Canvas extends StatefullBaseCanvas {
 
 	private static final String TAG = "GL20Canvas";
 
@@ -49,6 +50,7 @@ class GL20Canvas extends StatefullBaseCanvas implements Batch.BatchMatrix {
 	Mesh mMesh;
 	float mVertices[];
 	Batch mBatch;
+	FontRenderer mFontRenderer;
 
 	ShaderManager mShaderManager;
 
@@ -65,7 +67,8 @@ class GL20Canvas extends StatefullBaseCanvas implements Batch.BatchMatrix {
 		initialize();
 
 		mShaderManager = new ShaderManager();
-		mBatch = new Batch(renderState, this);
+		mBatch = new Batch(this);
+		mFontRenderer = FontRenderer.instance();
 		initialMesh();
 	}
 
@@ -172,13 +175,13 @@ class GL20Canvas extends StatefullBaseCanvas implements Batch.BatchMatrix {
 	
 	@Override
 	public void translate(float x, float y) {
-		mBatch.flush();
+		flushBatch();
 		super.translate(x, y);
 	}
 	
 	@Override
 	public void translate(float x, float y, float z) {
-		mBatch.flush();
+		flushBatch();
 		if (z != 0) {
 			float[] center = MatrixUtil.mapPoint(currentSnapshot().transform, 0, 0);
 			setCameraAndProject(center[0], center[1]);
@@ -190,7 +193,7 @@ class GL20Canvas extends StatefullBaseCanvas implements Batch.BatchMatrix {
 	@Override
 	public void rotate(float degrees, float x, float y, float z) {
 		if (degrees == 0) return;
-		mBatch.flush();
+		flushBatch();
 		if (x != 0 || y != 0) {
 			float[] center = MatrixUtil.mapPoint(currentSnapshot().transform, 0, 0);
 			setCameraAndProject(center[0], center[1]);
@@ -201,25 +204,25 @@ class GL20Canvas extends StatefullBaseCanvas implements Batch.BatchMatrix {
 	
 	@Override
 	public void rotate(float degrees) {
-		mBatch.flush();
+		flushBatch();
 		super.rotate(degrees);
 	}
 	
 	@Override
 	public void scale(float sx, float sy, float sz) {
-		mBatch.flush();
+		flushBatch();
 		super.scale(sx, sy, sz);
 	}
 	
 	@Override
 	public void restore() {
-		mBatch.flush();
+		flushBatch();
 		super.restore();
 	}
 	
 	@Override
 	public void restoreToCount(int saveCount) {
-		mBatch.flush();
+		flushBatch();
 		super.restoreToCount(saveCount);
 	}
 
@@ -232,6 +235,8 @@ class GL20Canvas extends StatefullBaseCanvas implements Batch.BatchMatrix {
 		mGL.glClearDepthf(1f);
 		mGL.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
+		mFontRenderer.setGLCanvas(this);
+		
 		mRenderState.setDepthEnabled(false);
 		mRenderState.setBlendEnabled(false);
 		dirtyClip();
@@ -241,11 +246,11 @@ class GL20Canvas extends StatefullBaseCanvas implements Batch.BatchMatrix {
 
 	@Override
 	public void endFrame() {
-		mBatch.flush();
+		flushBatch();
+		mFontRenderer.setGLCanvas(null);
 	}
 
 	private void setupDraw() {
-		mBatch.flush();
 		if (mDirtyClip) {
 			if (mCaches.scissorEnabled) {
 	            setScissorFromClip();
@@ -296,6 +301,8 @@ class GL20Canvas extends StatefullBaseCanvas implements Batch.BatchMatrix {
 		
 		setupDraw();
 		
+		flushBatch();
+		
 		// If a shader is set, preserve only the alpha
 		if (paint.getShader() != null) {
 	        color |= 0x00ffffff;
@@ -303,9 +310,9 @@ class GL20Canvas extends StatefullBaseCanvas implements Batch.BatchMatrix {
 		
 		float alpha = currentSnapshot().alpha * paint.getAlpha() / 255;
 		float prealpha = ((color >>> 24) & 0xFF) * alpha / 255;
-		float colorR = Math.round(((color >> 16) & 0xFF) * prealpha) * 1.0f / 255;
-		float colorG = Math.round(((color >> 8) & 0xFF) * prealpha) * 1.0f / 255;
-		float colorB = Math.round((color & 0xFF) * prealpha) * 1.0f / 255;
+		float colorR = Math.round(((color >> 16) & 0xFF)) * 1.0f / 255;
+		float colorG = Math.round(((color >> 8) & 0xFF)) * 1.0f / 255;
+		float colorB = Math.round((color & 0xFF)) * 1.0f / 255;
 		float colorA = Math.round(255 * prealpha) * 1.0f / 255;
 		
 		BaseShader useShader = mShaderManager.setupColorShader(colorR, colorG, colorB, colorA, paint, false);
@@ -318,6 +325,8 @@ class GL20Canvas extends StatefullBaseCanvas implements Batch.BatchMatrix {
 			GLPaint paint) {
 		
 		setupDraw();
+		
+		flushBatch();
 		
 		setVerticesXY(x, y, x + width, y + height);
 		mMesh.setVertices(mVertices);
@@ -408,6 +417,7 @@ class GL20Canvas extends StatefullBaseCanvas implements Batch.BatchMatrix {
 	@Override
 	public void drawBitmapBatch(Bitmap bitmap, Rect source, Rect target,
 			GLPaint paint) {
+		paint = getGLPaint(paint);
 		if (source == null || source.isEmpty()) {
 			mBatch.drawBitmap(bitmap, target.left, target.top, target.width(), target.height(), 0, 0, bitmap.getWidth(), bitmap.getHeight(), currentSnapshot().alpha, paint);
 		} else {
@@ -451,6 +461,8 @@ class GL20Canvas extends StatefullBaseCanvas implements Batch.BatchMatrix {
 
 		setupDraw();
 		
+		flushBatch();
+		
 		mCaches.bindTexture(texture);
 
 		translate(rect.left, rect.top);
@@ -474,14 +486,16 @@ class GL20Canvas extends StatefullBaseCanvas implements Batch.BatchMatrix {
 		
 		setupDraw();
 		
+		flushBatch();
+		
 		mRenderState.setLineWidth(paint.getStrokeWidth());
 		
 		int color = paint.getColor();
 		float alpha = currentSnapshot().alpha * paint.getAlpha() / 255;
 		float prealpha = ((color >>> 24) & 0xFF) * alpha / 255;
-		float colorR = Math.round(((color >> 16) & 0xFF) * prealpha) * 1.0f / 255;
-		float colorG = Math.round(((color >> 8) & 0xFF) * prealpha) * 1.0f / 255;
-		float colorB = Math.round((color & 0xFF) * prealpha) * 1.0f / 255;
+		float colorR = Math.round(((color >> 16) & 0xFF)) * 1.0f / 255;
+		float colorG = Math.round(((color >> 8) & 0xFF)) * 1.0f / 255;
+		float colorB = Math.round((color & 0xFF)) * 1.0f / 255;
 		float colorA = Math.round(255 * prealpha) * 1.0f / 255;
 		
 		BaseShader useShader = mShaderManager.setupColorShader(colorR, colorG, colorB, colorA, paint, basicMesh.hasColorAttr());
@@ -503,8 +517,9 @@ class GL20Canvas extends StatefullBaseCanvas implements Batch.BatchMatrix {
 		Mesh mesh = mCaches.meshCache.get(basicMesh);
 		if (mesh == null)
 			return;
-		
 		setupDraw();
+
+		flushBatch();
 
 		mCaches.bindTexture(texture);
 		BaseShader useShader = mShaderManager.setupTextureShader(paint, 0, 0,
@@ -517,6 +532,12 @@ class GL20Canvas extends StatefullBaseCanvas implements Batch.BatchMatrix {
 
 	public void setTextureTarget(int target) {
 		mRenderState.setTextureTarget(target);
+	}
+	
+	@Override
+	public void drawText(String text, int start, int end, float x, float y,
+			GLPaint paint) {
+		mFontRenderer.renderText(this, text, start, end, x, y, currentSnapshot().alpha, getGLPaint(paint));
 	}
 
 	class ShaderManager {
@@ -587,9 +608,9 @@ class GL20Canvas extends StatefullBaseCanvas implements Batch.BatchMatrix {
 			mCaches.useProgram(useShader.getShaderProgram());
 			// 设置alpha值
 			float prealpha = ((color >>> 24) & 0xFF) * alpha / 255;
-			float colorR = Math.round(((color >> 16) & 0xFF) * prealpha) * 1.0f / 255;
-			float colorG = Math.round(((color >> 8) & 0xFF) * prealpha) * 1.0f / 255;
-			float colorB = Math.round((color & 0xFF) * prealpha) * 1.0f / 255;
+			float colorR = Math.round(((color >> 16) & 0xFF)) * 1.0f / 255;
+			float colorG = Math.round(((color >> 8) & 0xFF)) * 1.0f / 255;
+			float colorB = Math.round((color & 0xFF)) * 1.0f / 255;
 			float colorA = Math.round(255 * prealpha) * 1.0f / 255;
 			if (hasAlpha) {
 				mRenderState.setBlendEnabled(true);
@@ -653,9 +674,15 @@ class GL20Canvas extends StatefullBaseCanvas implements Batch.BatchMatrix {
 	
 	@Override
 	public void clipRect(float left, float top, float right, float bottom) {
+		flushBatch();
 		super.clipRect(left, top, right, bottom);
 		if (mDirtyClip) {
 			Caches.getInstance().enableScissor();
 		}
+	}
+	
+	private void flushBatch() {
+		mBatch.flush();
+		mFontRenderer.flushBatch();
 	}
 }

@@ -19,13 +19,15 @@ public class SimpleEGLConfigChooser implements EGLConfigChooser {
     protected int mAlphaSize;
     protected int mDepthSize;
     protected int mStencilSize;
+    protected final int mEGLContextClientVersion;
     
-    public SimpleEGLConfigChooser(int[] configSpec) {
+    public SimpleEGLConfigChooser(int[] configSpec, int glVersion) {
+    	mEGLContextClientVersion = glVersion;
     	mConfigSpec = filterConfigSpec(configSpec);
     }
     
     public SimpleEGLConfigChooser(int redSize, int greenSize, int blueSize,
-            int alphaSize, int depthSize, int stencilSize) {
+            int alphaSize, int depthSize, int stencilSize, int glVersion) {
     	this(new int[] {
                 EGL10.EGL_RED_SIZE, redSize,
                 EGL10.EGL_GREEN_SIZE, greenSize,
@@ -33,7 +35,7 @@ public class SimpleEGLConfigChooser implements EGLConfigChooser {
                 EGL10.EGL_ALPHA_SIZE, alphaSize,
                 EGL10.EGL_DEPTH_SIZE, depthSize,
                 EGL10.EGL_STENCIL_SIZE, stencilSize,
-                EGL10.EGL_NONE});
+                EGL10.EGL_NONE}, glVersion);
         mRedSize = redSize;
         mGreenSize = greenSize;
         mBlueSize = blueSize;
@@ -43,7 +45,7 @@ public class SimpleEGLConfigChooser implements EGLConfigChooser {
 	}
     
     private int[] filterConfigSpec(int[] configSpec) {
-        if (Constant.EGL_CONTEXT_CLIENT_VERSION != 2 && Constant.EGL_CONTEXT_CLIENT_VERSION != 3) {
+        if (mEGLContextClientVersion != 2 && mEGLContextClientVersion != 3) {
             return configSpec;
         }
         /* We know none of the subclasses define EGL_RENDERABLE_TYPE.
@@ -53,7 +55,7 @@ public class SimpleEGLConfigChooser implements EGLConfigChooser {
         int[] newConfigSpec = new int[len + 2];
         System.arraycopy(configSpec, 0, newConfigSpec, 0, len-1);
         newConfigSpec[len-1] = EGL10.EGL_RENDERABLE_TYPE;
-        if (Constant.EGL_CONTEXT_CLIENT_VERSION == 2) {
+        if (mEGLContextClientVersion == 2) {
             newConfigSpec[len] = EGL14.EGL_OPENGL_ES2_BIT;  /* EGL_OPENGL_ES2_BIT */
         } else {
             newConfigSpec[len] = EGLExt.EGL_OPENGL_ES3_BIT_KHR; /* EGL_OPENGL_ES3_BIT_KHR */
