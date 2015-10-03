@@ -310,9 +310,9 @@ class GL20Canvas extends StatefullBaseCanvas {
 		
 		float alpha = currentSnapshot().alpha * paint.getAlpha() / 255;
 		float prealpha = ((color >>> 24) & 0xFF) * alpha / 255;
-		float colorR = Math.round(((color >> 16) & 0xFF)) * 1.0f / 255;
-		float colorG = Math.round(((color >> 8) & 0xFF)) * 1.0f / 255;
-		float colorB = Math.round((color & 0xFF)) * 1.0f / 255;
+		float colorR = Math.round(((color >> 16) & 0xFF) * prealpha) * 1.0f / 255;
+		float colorG = Math.round(((color >> 8) & 0xFF) * prealpha) * 1.0f / 255;
+		float colorB = Math.round((color & 0xFF) * prealpha) * 1.0f / 255;
 		float colorA = Math.round(255 * prealpha) * 1.0f / 255;
 		
 		BaseShader useShader = mShaderManager.setupColorShader(colorR, colorG, colorB, colorA, paint, false);
@@ -493,9 +493,9 @@ class GL20Canvas extends StatefullBaseCanvas {
 		int color = paint.getColor();
 		float alpha = currentSnapshot().alpha * paint.getAlpha() / 255;
 		float prealpha = ((color >>> 24) & 0xFF) * alpha / 255;
-		float colorR = Math.round(((color >> 16) & 0xFF)) * 1.0f / 255;
-		float colorG = Math.round(((color >> 8) & 0xFF)) * 1.0f / 255;
-		float colorB = Math.round((color & 0xFF)) * 1.0f / 255;
+		float colorR = Math.round(((color >> 16) & 0xFF) * prealpha) * 1.0f / 255;
+		float colorG = Math.round(((color >> 8) & 0xFF) * prealpha) * 1.0f / 255;
+		float colorB = Math.round((color & 0xFF) * prealpha) * 1.0f / 255;
 		float colorA = Math.round(255 * prealpha) * 1.0f / 255;
 		
 		BaseShader useShader = mShaderManager.setupColorShader(colorR, colorG, colorB, colorA, paint, basicMesh.hasColorAttr());
@@ -608,9 +608,9 @@ class GL20Canvas extends StatefullBaseCanvas {
 			mCaches.useProgram(useShader.getShaderProgram());
 			// 设置alpha值
 			float prealpha = ((color >>> 24) & 0xFF) * alpha / 255;
-			float colorR = Math.round(((color >> 16) & 0xFF)) * 1.0f / 255;
-			float colorG = Math.round(((color >> 8) & 0xFF)) * 1.0f / 255;
-			float colorB = Math.round((color & 0xFF)) * 1.0f / 255;
+			float colorR = Math.round(((color >> 16) & 0xFF) * prealpha) * 1.0f / 255;
+			float colorG = Math.round(((color >> 8) & 0xFF) * prealpha) * 1.0f / 255;
+			float colorB = Math.round((color & 0xFF) * prealpha) * 1.0f / 255;
 			float colorA = Math.round(255 * prealpha) * 1.0f / 255;
 			if (hasAlpha) {
 				mRenderState.setBlendEnabled(true);
