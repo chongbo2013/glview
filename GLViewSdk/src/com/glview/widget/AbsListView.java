@@ -703,7 +703,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Vi
     }
 
     public AbsListView(Context context, AttributeSet attrs) {
-        this(context, attrs, android.R.attr.absListViewStyle);
+        this(context, attrs, com.glview.R.attr.absListViewStyle);
     }
 
     public AbsListView(Context context, AttributeSet attrs, int defStyleAttr) {

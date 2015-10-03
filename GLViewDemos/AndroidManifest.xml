@@ -72,8 +72,7 @@
         </activity>
         <activity
             android:name=".demos.transition.TransitionActivity"
-            android:label="@string/title_activity_transition"
-            android:theme="@android:style/Theme.Black.NoTitleBar" >
+            android:label="@string/title_activity_transition" >
         </activity>
         <activity
             android:name=".demos.transition.SceneTransitionActivity"

@@ -102,7 +102,7 @@ public class GridView extends AbsListView {
     }
 
     public GridView(Context context, AttributeSet attrs) {
-        this(context, attrs, android.R.attr.gridViewStyle);
+        this(context, attrs, com.glview.R.attr.gridViewStyle);
     }
 
     public GridView(Context context, AttributeSet attrs, int defStyleAttr) {

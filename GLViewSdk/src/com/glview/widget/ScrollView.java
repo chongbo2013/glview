@@ -144,7 +144,7 @@ public class ScrollView extends FrameLayout {
     }
 
     public ScrollView(Context context, AttributeSet attrs) {
-        this(context, attrs, android.R.attr.scrollViewStyle);
+        this(context, attrs, com.glview.R.attr.scrollViewStyle);
     }
 
     public ScrollView(Context context, AttributeSet attrs, int defStyleAttr) {

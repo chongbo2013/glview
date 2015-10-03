@@ -54,7 +54,7 @@ public class TextView extends View {
     }
 
     public TextView(Context context, AttributeSet attrs) {
-        this(context, attrs, android.R.attr.textViewStyle);
+        this(context, attrs, com.glview.R.attr.textViewStyle);
     }
 
     public TextView(Context context, AttributeSet attrs, int defStyleAttr) {
