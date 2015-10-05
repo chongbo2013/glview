@@ -13,6 +13,10 @@
 	        android:layout_width="wrap_content"
 	        android:layout_height="300dp"
 	        android:textSize="@dimen/text_size_1"
+	        android:shadowColor="@color/red"
+	        android:shadowDx="5"
+	        android:shadowDy="5"
+	        android:shadowRadius="5"
 	        android:padding="10dp"
 	        android:focusable="true"
 	        android:text="Text1" />

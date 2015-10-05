@@ -318,7 +318,7 @@ class GL20Canvas extends StatefullBaseCanvas {
 		BaseShader useShader = mShaderManager.setupColorShader(colorR, colorG, colorB, colorA, paint, false);
 		mMesh.setVertices(mVertices);
 		mMesh.render(useShader.getShaderProgram(), mode, offset, count, true);
-		mGL.glDepthMask(true);
+		mRenderState.setDepthMask(true);
 	}
 
 	private void textureRect(float x, float y, float width, float height, boolean hasAlpha,
@@ -335,7 +335,7 @@ class GL20Canvas extends StatefullBaseCanvas {
 				width, height, hasAlpha, true, false);
 		mMesh.render(useShader.getShaderProgram(), GL20.GL_TRIANGLES,
 				OFFSET_FILL_RECT, COUNT_DRAW_TXETURE, true);
-		mGL.glDepthMask(true);
+		mRenderState.setDepthMask(true);
 	}
 	
 	public void drawTexture(Texture texture, float x, float y, float width, float height, GLPaint paint) {
@@ -472,7 +472,7 @@ class GL20Canvas extends StatefullBaseCanvas {
 
 		mesh.render(useShader.getShaderProgram(), GL20.GL_TRIANGLE_STRIP, 0,
 				mesh.getNumIndices(), true);
-		mGL.glDepthMask(true);
+		mRenderState.setDepthMask(true);
 		// 恢复现状
 		translate(-rect.left, -rect.top);
 	}
@@ -504,7 +504,7 @@ class GL20Canvas extends StatefullBaseCanvas {
 		} else {
 			mesh.render(useShader.getShaderProgram(), GL20.GL_LINE_LOOP);
 		}
-		mGL.glDepthMask(true);
+		mRenderState.setDepthMask(true);
 	}
 
 	@Override
@@ -527,7 +527,7 @@ class GL20Canvas extends StatefullBaseCanvas {
 				basicMesh.hasTexCoordsAttr(), basicMesh.hasColorAttr());
 
 		mesh.render(useShader.getShaderProgram(), basicMesh.getDrawMode());
-		mGL.glDepthMask(true);
+		mRenderState.setDepthMask(true);
 	}
 
 	public void setTextureTarget(int target) {
@@ -537,6 +537,7 @@ class GL20Canvas extends StatefullBaseCanvas {
 	@Override
 	public void drawText(String text, int start, int end, float x, float y,
 			GLPaint paint) {
+		setupDraw();
 		mFontRenderer.renderText(this, text, start, end, x, y, currentSnapshot().alpha, getGLPaint(paint));
 	}
 

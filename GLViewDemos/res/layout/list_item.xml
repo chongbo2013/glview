@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent" android:id="@+id/list_item_textview" android:textSize="16sp" android:textColor="#000" android:padding="5dp">
+    xmlns:glview="http://schemas.android.com/apk/res-auto"
+    glview:layout_width="fill_parent"
+    glview:layout_height="fill_parent" glview:id="@+id/list_item_textview" glview:textSize="16sp" glview:textColor="#000" glview:padding="5dp">
     
 
 </TextView>

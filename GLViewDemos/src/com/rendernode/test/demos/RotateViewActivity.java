@@ -34,13 +34,13 @@ public class RotateViewActivity extends BaseActivity {
 		
 		View v = new RotateView(this);
 		l.addView(v, lp1);
+		v.setAlpha(0.5f);
+		v = new RotateView(this);
+		l.addView(v, lp1);
+		v.setAlpha(0.5f);
+		v = new RotateView(this);
+		l.addView(v, lp1);
 //		v.setAlpha(0.5f);
-		v = new RotateView(this);
-		l.addView(v, lp1);
-		v.setAlpha(0.5f);
-		v = new RotateView(this);
-		l.addView(v, lp1);
-		v.setAlpha(0.5f);
 		ObjectAnimator animator = ObjectAnimator.ofFloat(l, "rotationX", 0, 1000);
 		animator.setDuration(5000);
 		animator.setRepeatCount(ValueAnimator.INFINITE);

@@ -11,6 +11,7 @@ class RenderState {
 	private int mTextureTarget = GL20.GL_TEXTURE_2D;
     private boolean mBlendEnabled = false;
     private boolean mDepthEnabled = false;
+    private boolean mDepthMask = true;
     private float mLineWidth = 1.0f;
 	
     GLPaint mDefaultPaint = new GLPaint();
@@ -86,13 +87,13 @@ class RenderState {
         if (mBlendEnabled == enabled) {
         	return;
         }
+        setDepthMask(!enabled);
         mBlendEnabled = enabled;
-        if (enabled) {
+//        if (enabled) {
 //        	mGL.glEnable(GL20.GL_BLEND);
-        	mGL.glDepthMask(false);
-        } else {
+//        } else {
 //        	mGL.glDisable(GL20.GL_BLEND);
-        }
+//        }
     }
 	
 	public void setDepthEnabled(boolean enabled) {
@@ -105,5 +106,13 @@ class RenderState {
         } else {
         	mGL.glDisable(GL20.GL_DEPTH_TEST);
         }
+	}
+	
+	public void setDepthMask(boolean mask) {
+		if (mDepthMask == mask) {
+			return;
+		}
+		mDepthMask = mask;
+		mGL.glDepthMask(mask);
 	}
 }

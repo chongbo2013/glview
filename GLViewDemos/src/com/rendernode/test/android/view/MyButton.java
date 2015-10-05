@@ -26,9 +26,6 @@ public class MyButton extends Button {
 	
 	@Override
 	public void setPressed(boolean pressed) {
-		if (isPressed() != pressed) {
-			Log.d("lijing", "setPressed=" + pressed, new Throwable());
-		}
 		super.setPressed(pressed);
 	}
 

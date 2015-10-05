@@ -5,7 +5,6 @@ import java.nio.IntBuffer;
 import android.graphics.Color;
 import android.graphics.Bitmap.Config;
 import android.opengl.Matrix;
-import android.util.Log;
 
 import com.glview.graphics.Bitmap;
 import com.glview.libgdx.graphics.opengl.GL20;

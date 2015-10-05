@@ -90,7 +90,7 @@ class EglManager {
     }
 	
 	private EGLConfig loadEglConfig() {
-		return new GLViewEGLConfigChooser(8, 8, 8, 8, 0, 0, 0, mEGLContextClientVersion).chooseConfig(sEgl, sEglDisplay);
+		return new GLViewEGLConfigChooser(8, 8, 8, 8, 8, 0, 0, mEGLContextClientVersion).chooseConfig(sEgl, sEglDisplay);
 //		int[] attribs;
 //		attribs = new int[] {
 //				EGL10.EGL_RED_SIZE, 8,

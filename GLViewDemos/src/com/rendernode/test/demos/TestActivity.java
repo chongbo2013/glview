@@ -3,14 +3,14 @@ package com.rendernode.test.demos;
 import android.os.Bundle;
 
 import com.glview.view.View;
-import com.rendernode.test.view.FreeTypeView;
+import com.rendernode.test.view.BlurView;
 
 public class TestActivity extends BaseActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setGLContentView(new FreeTypeView(this));
+		setGLContentView(new BlurView(this));
 	}
 	
 	@Override
