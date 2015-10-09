@@ -1,9 +1,9 @@
 package com.glview.stackblur;
 
-import android.graphics.Bitmap;
-
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Blur using Java code.
@@ -33,6 +33,9 @@ import java.util.concurrent.Callable;
  * @license: Apache License 2.0
  */
 class JavaBlurProcess implements BlurProcess {
+	
+	static final int EXECUTOR_THREADS = Runtime.getRuntime().availableProcessors();
+	static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(EXECUTOR_THREADS);
 
 	private static final short[] stackblur_mul = {
 			512, 512, 456, 512, 328, 456, 335, 512, 405, 328, 271, 456, 388, 335, 292, 512,
@@ -73,33 +76,222 @@ class JavaBlurProcess implements BlurProcess {
 	};
 
 	@Override
-	public Bitmap blur(Bitmap original, float radius) {
-		int w = original.getWidth();
-		int h = original.getHeight();
-		int[] currentPixels = new int[w * h];
-		original.getPixels(currentPixels, 0, w, 0, 0, w, h);
-		int cores = StackBlurManager.EXECUTOR_THREADS;
+	public byte[] blur(byte[] original, int w, int h, float radius) {
+		byte[] currentPixels = new byte[w * h];
+		System.arraycopy(original, 0, currentPixels, 0, currentPixels.length);
+		int cores = EXECUTOR_THREADS;
 
-		ArrayList<BlurTask> horizontal = new ArrayList<BlurTask>(cores);
-		ArrayList<BlurTask> vertical = new ArrayList<BlurTask>(cores);
+		ArrayList<A8BlurTask> horizontal = new ArrayList<A8BlurTask>(cores);
+		ArrayList<A8BlurTask> vertical = new ArrayList<A8BlurTask>(cores);
 		for (int i = 0; i < cores; i++) {
-			horizontal.add(new BlurTask(currentPixels, w, h, (int) radius, cores, i, 1));
-			vertical.add(new BlurTask(currentPixels, w, h, (int) radius, cores, i, 2));
+			horizontal.add(new A8BlurTask(currentPixels, w, h, (int) radius, cores, i, 1));
+			vertical.add(new A8BlurTask(currentPixels, w, h, (int) radius, cores, i, 2));
 		}
 
 		try {
-			StackBlurManager.EXECUTOR.invokeAll(horizontal);
+			EXECUTOR.invokeAll(horizontal);
 		} catch (InterruptedException e) {
 			return null;
 		}
 
 		try {
-			StackBlurManager.EXECUTOR.invokeAll(vertical);
+			EXECUTOR.invokeAll(vertical);
 		} catch (InterruptedException e) {
 			return null;
 		}
 
-		return Bitmap.createBitmap(currentPixels, w, h, Bitmap.Config.ARGB_8888);
+		return original;
+	}
+	
+	@Override
+	public int[] blur(int[] original, int w, int h, float radius) {
+		int[] currentPixels = new int[w * h];
+		System.arraycopy(original, 0, currentPixels, 0, currentPixels.length);
+		int cores = EXECUTOR_THREADS;
+
+		ArrayList<RGBABlurTask> horizontal = new ArrayList<RGBABlurTask>(cores);
+		ArrayList<RGBABlurTask> vertical = new ArrayList<RGBABlurTask>(cores);
+		for (int i = 0; i < cores; i++) {
+			horizontal.add(new RGBABlurTask(currentPixels, w, h, (int) radius, cores, i, 1));
+			vertical.add(new RGBABlurTask(currentPixels, w, h, (int) radius, cores, i, 2));
+		}
+
+		try {
+			EXECUTOR.invokeAll(horizontal);
+		} catch (InterruptedException e) {
+			return null;
+		}
+
+		try {
+			EXECUTOR.invokeAll(vertical);
+		} catch (InterruptedException e) {
+			return null;
+		}
+
+		return original;
+	}
+	
+	private static void blurIteration(byte[] src, int w, int h, int radius, int cores, int core, int step) {
+		int x, y, xp, yp, i;
+		int sp;
+		int stack_start;
+		int stack_i;
+
+		int src_i;
+		int dst_i;
+
+		long sum_a,
+				sum_in_a,
+				sum_out_a;
+
+		int wm = w - 1;
+		int hm = h - 1;
+		int div = (radius * 2) + 1;
+		int mul_sum = stackblur_mul[radius];
+		byte shr_sum = stackblur_shr[radius];
+		byte[] stack = new byte[div];
+
+		if (step == 1)
+		{
+			int minY = core * h / cores;
+			int maxY = (core + 1) * h / cores;
+
+			for(y = minY; y < maxY; y++)
+			{
+				sum_a = 
+				sum_in_a = 
+				sum_out_a = 0;
+
+				src_i = w * y; // start of line (0,y)
+
+				for(i = 0; i <= radius; i++)
+				{
+					stack_i    = i;
+					stack[stack_i] = src[src_i];
+					sum_a += (src[src_i] & 0xff) * (i + 1);
+					sum_out_a += (src[src_i] & 0xff);
+				}
+
+
+				for(i = 1; i <= radius; i++)
+				{
+					if (i <= wm) src_i += 1;
+					stack_i = i + radius;
+					stack[stack_i] = src[src_i];
+					sum_a += (src[src_i] & 0xff) * (radius + 1 - i);
+					sum_in_a += (src[src_i] & 0xff);
+				}
+
+
+				sp = radius;
+				xp = radius;
+				if (xp > wm) xp = wm;
+				src_i = xp + y * w; //   img.pix_ptr(xp, y);
+				dst_i = y * w; // img.pix_ptr(0, y);
+				for(x = 0; x < w; x++)
+				{
+					src[dst_i] = (byte) (((sum_a * mul_sum) >>> shr_sum) & 0xff);
+					dst_i += 1;
+
+					sum_a -= sum_out_a;
+
+					stack_start = sp + div - radius;
+					if (stack_start >= div) stack_start -= div;
+					stack_i = stack_start;
+
+					sum_out_a -= (stack[stack_i] & 0xff);
+
+					if(xp < wm)
+					{
+						src_i += 1;
+						++xp;
+					}
+
+					stack[stack_i] = src[src_i];
+
+					sum_in_a += (src[src_i] & 0xff);
+					sum_a    += sum_in_a;
+
+					++sp;
+					if (sp >= div) sp = 0;
+					stack_i = sp;
+
+					sum_out_a += (stack[stack_i] & 0xff);
+					sum_in_a  -= (stack[stack_i] & 0xff);
+				}
+
+			}
+		}
+
+		// step 2
+		else if (step == 2)
+		{
+			int minX = core * w / cores;
+			int maxX = (core + 1) * w / cores;
+
+			for(x = minX; x < maxX; x++)
+			{
+				sum_a =   
+				sum_in_a =
+				sum_out_a = 0;
+
+				src_i = x; // x,0
+				for(i = 0; i <= radius; i++)
+				{
+					stack_i    = i;
+					stack[stack_i] = src[src_i];
+					sum_a           += (src[src_i] & 0xff) * (i + 1);
+					sum_out_a       += (src[src_i] & 0xff);
+				}
+				for(i = 1; i <= radius; i++)
+				{
+					if(i <= hm) src_i += w; // +stride
+
+					stack_i = i + radius;
+					stack[stack_i] = src[src_i];
+					sum_a += (src[src_i] & 0xff) * (radius + 1 - i);
+					sum_in_a += (src[src_i] & 0xff);
+				}
+
+				sp = radius;
+				yp = radius;
+				if (yp > hm) yp = hm;
+				src_i = x + yp * w; // img.pix_ptr(x, yp);
+				dst_i = x;               // img.pix_ptr(x, 0);
+				for(y = 0; y < h; y++)
+				{
+					src[dst_i] = (byte) (((sum_a * mul_sum) >>> shr_sum) & 0xff);
+					dst_i += w;
+
+					sum_a -= sum_out_a;
+
+					stack_start = sp + div - radius;
+					if(stack_start >= div) stack_start -= div;
+					stack_i = stack_start;
+
+					sum_out_a -= (stack[stack_i] & 0xff);
+
+					if(yp < hm)
+					{
+						src_i += w; // stride
+						++yp;
+					}
+
+					stack[stack_i] = src[src_i];
+
+					sum_in_a += (src[src_i] & 0xff);
+					sum_a    += sum_in_a;
+
+					++sp;
+					if (sp >= div) sp = 0;
+					stack_i = sp;
+
+					sum_out_a += (stack[stack_i] & 0xff);
+					sum_in_a  -= (stack[stack_i] & 0xff);
+				}
+			}
+		}
+
 	}
 
 	private static void blurIteration(int[] src, int w, int h, int radius, int cores, int core, int step) {
@@ -313,7 +505,7 @@ class JavaBlurProcess implements BlurProcess {
 
 	}
 
-	private static class BlurTask implements Callable<Void> {
+	private static class RGBABlurTask implements Callable<Void> {
 		private final int[] _src;
 		private final int _w;
 		private final int _h;
@@ -322,7 +514,33 @@ class JavaBlurProcess implements BlurProcess {
 		private final int _coreIndex;
 		private final int _round;
 
-		public BlurTask(int[] src, int w, int h, int radius, int totalCores, int coreIndex, int round) {
+		public RGBABlurTask(int[] src, int w, int h, int radius, int totalCores, int coreIndex, int round) {
+			_src = src;
+			_w = w;
+			_h = h;
+			_radius = radius;
+			_totalCores = totalCores;
+			_coreIndex = coreIndex;
+			_round = round;
+		}
+
+		@Override public Void call() throws Exception {
+			blurIteration(_src, _w, _h, _radius, _totalCores, _coreIndex, _round);
+			return null;
+		}
+
+	}
+	
+	private static class A8BlurTask implements Callable<Void> {
+		private final byte[] _src;
+		private final int _w;
+		private final int _h;
+		private final int _radius;
+		private final int _totalCores;
+		private final int _coreIndex;
+		private final int _round;
+
+		public A8BlurTask(byte[] src, int w, int h, int radius, int totalCores, int coreIndex, int round) {
 			_src = src;
 			_w = w;
 			_h = h;

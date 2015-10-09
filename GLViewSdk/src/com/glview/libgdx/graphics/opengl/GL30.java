@@ -895,17 +895,6 @@ public interface GL30 extends GL20 {
         java.nio.IntBuffer type
     );
 
-    // C function void glVertexAttribIPointer ( GLuint index, GLint size, GLenum type, GLsizei stride, const GLvoid *pointer )
-
-    public void glVertexAttribIPointerBounds(
-        int index,
-        int size,
-        int type,
-        int stride,
-        java.nio.Buffer pointer,
-        int remaining
-    );
-
     // C function void glVertexAttribIPointer ( GLuint index, GLint size, GLenum type, GLsizei stride, GLsizei offset )
 
     public void glVertexAttribIPointer(
