@@ -32,7 +32,7 @@ import java.util.concurrent.Executors;
  * @copyright: Enrique López Mañas
  * @license: Apache License 2.0
  */
-class JavaBlurProcess implements BlurProcess {
+public class JavaBlurProcess implements BlurProcess {
 	
 	static final int EXECUTOR_THREADS = Runtime.getRuntime().availableProcessors();
 	static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(EXECUTOR_THREADS);
@@ -100,7 +100,7 @@ class JavaBlurProcess implements BlurProcess {
 			return null;
 		}
 
-		return original;
+		return currentPixels;
 	}
 	
 	@Override
@@ -128,7 +128,7 @@ class JavaBlurProcess implements BlurProcess {
 			return null;
 		}
 
-		return original;
+		return currentPixels;
 	}
 	
 	private static void blurIteration(byte[] src, int w, int h, int radius, int cores, int core, int step) {

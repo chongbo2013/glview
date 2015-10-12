@@ -32,6 +32,24 @@ public abstract class Layout {
         mSpacingMult = spacingMult;
         mSpacingAdd = spacingAdd;
     }
+    
+    /**
+     * Replace constructor properties of this Layout with new ones.  Be careful.
+     */
+    /* package */ void replaceWith(CharSequence text, GLPaint paint,
+                              int width, Alignment align,
+                              float spacingmult, float spacingadd) {
+        if (width < 0) {
+            throw new IllegalArgumentException("Layout: " + width + " < 0");
+        }
+
+        mText = text;
+        mPaint = paint;
+        mWidth = width;
+        mAlignment = align;
+        mSpacingMult = spacingmult;
+        mSpacingAdd = spacingadd;
+    }
 
 	public void draw(GLCanvas canvas) {
 		int firstLine = 0;
@@ -73,6 +91,57 @@ public abstract class Layout {
             canvas.drawText(buf, start, end, x, lbaseline, paint);
         }
     }
+    
+    /**
+     * Return the text that is displayed by this Layout.
+     */
+    public final CharSequence getText() {
+        return mText;
+    }
+
+    /**
+     * Return the base Paint properties for this layout.
+     * Do NOT change the paint, which may result in funny
+     * drawing for this layout.
+     */
+    public final GLPaint getPaint() {
+        return mPaint;
+    }
+
+    /**
+     * Return the width of this layout.
+     */
+    public final int getWidth() {
+        return mWidth;
+    }
+
+    /**
+     * Return the width to which this Layout is ellipsizing, or
+     * {@link #getWidth} if it is not doing anything special.
+     */
+    public int getEllipsizedWidth() {
+        return mWidth;
+    }
+
+    /**
+     * Increase the width of this layout to the specified width.
+     * Be careful to use this only when you know it is appropriate&mdash;
+     * it does not cause the text to reflow to use the full new width.
+     */
+    public final void increaseWidthTo(int wid) {
+        if (wid < mWidth) {
+            throw new RuntimeException("attempted to reduce Layout width");
+        }
+
+        mWidth = wid;
+    }
+
+    /**
+     * Return the total height of this layout.
+     */
+    public int getHeight() {
+        return getLineTop(getLineCount());
+    }
 	
     /**
      * Return the number of lines of text in this layout.
@@ -95,6 +164,44 @@ public abstract class Layout {
             bounds.bottom = getLineTop(line + 1);
         }
         return getLineBaseline(line);
+    }
+    
+    /**
+     * Gets the unsigned horizontal extent of the specified line, including
+     * leading margin indent, but excluding trailing whitespace.
+     */
+    public float getLineMax(int line) {
+        float margin = 0f;//getParagraphLeadingMargin(line);
+        float signedExtent = getLineExtent(line, false);
+        return margin + (signedExtent >= 0 ? signedExtent : -signedExtent);
+    }
+
+    /**
+     * Gets the unsigned horizontal extent of the specified line, including
+     * leading margin indent and trailing whitespace.
+     */
+    public float getLineWidth(int line) {
+        float margin = 0f;//getParagraphLeadingMargin(line);
+        float signedExtent = getLineExtent(line, true);
+        return margin + (signedExtent >= 0 ? signedExtent : -signedExtent);
+    }
+    
+    /**
+     * Like {@link #getLineExtent(int,TabStops,boolean)} but determines the
+     * tab stops instead of using the ones passed in.
+     * @param line the index of the line
+     * @param full whether to include trailing whitespace
+     * @return the extent of the line
+     */
+    private float getLineExtent(int line, boolean full) {
+        int start = getLineStart(line);
+        int end = full ? getLineEnd(line) : getLineVisibleEnd(line);
+
+//        TextLine tl = TextLine.obtain();
+//        tl.set(mPaint, mText, start, end, dir, directions, hasTabsOrEmoji, tabStops);
+//        float width = tl.metrics(null);
+//        TextLine.recycle(tl);
+        return 0f;//width;
     }
 
     /**
@@ -123,6 +230,18 @@ public abstract class Layout {
      * count, returns the length of the text.
      */
     public abstract int getLineStart(int line);
+    
+    /**
+     * Returns the (negative) number of extra pixels of ascent padding in the
+     * top line of the Layout.
+     */
+    public abstract int getTopPadding();
+
+    /**
+     * Returns the number of extra pixels of descent padding in the
+     * bottom line of the Layout.
+     */
+    public abstract int getBottomPadding();
     
     /**
      * Return the text offset after the last character on the specified line.
@@ -185,6 +304,19 @@ public abstract class Layout {
         // getLineTop(line+1) - getLineDescent(line) == getLineBaseLine(line)
         return getLineTop(line) - (getLineTop(line+1) - getLineDescent(line));
     }
+    
+    /**
+     * Return the offset of the first character to be ellipsized away,
+     * relative to the start of the line.  (So 0 if the beginning of the
+     * line is ellipsized, not getLineStart().)
+     */
+    public abstract int getEllipsisStart(int line);
+
+    /**
+     * Returns the number of characters to be ellipsized away, or 0 if
+     * no ellipsis is to take place.
+     */
+    public abstract int getEllipsisCount(int line);
     
     private CharSequence mText;
     private GLPaint mPaint;

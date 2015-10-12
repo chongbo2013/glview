@@ -9,10 +9,13 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeType;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeType.Face;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeType.SizeMetrics;
 import com.glview.graphics.Typeface;
+import com.glview.graphics.font.GlyphMetrics;
+import com.glview.graphics.font.GlyphSlot;
 import com.glview.hwui.GLCanvas;
 import com.glview.hwui.GLPaint;
 import com.glview.hwui.packer.PackerRect;
 import com.glview.libgdx.graphics.opengl.GL20;
+import com.glview.stackblur.JavaBlurProcess;
 
 public class FontRenderer {
 	
@@ -22,6 +25,8 @@ public class FontRenderer {
 			return new FontRenderer();
 		}
 	};
+	
+	final static int FONT_BORDER_SIZE = 0;
 	
 	private FontRenderer() {}
 	
@@ -141,7 +146,7 @@ public class FontRenderer {
 			}
 		}
 		
-		float baseline = y + fontData.ascent;
+		float baseline = y;
 		
 		for (int index = 0; index < end - start; index ++) {
 			char c = text.charAt(index + start);
@@ -170,21 +175,34 @@ public class FontRenderer {
 					continue;
 				}
 				FreeType.Bitmap mainBitmap = mainGlyph.getBitmap();
+				FreeType.GlyphMetrics metrics = slot.getMetrics();
 				int w = mainBitmap.getWidth();
 				int h = mainBitmap.getRows();
 				for (CacheTexture cacheTexture : mACacheTextures) {
-					PackerRect rect = cacheTexture.mPacker.insert(w, h);
+					PackerRect rect = cacheTexture.mPacker.insert(w + FONT_BORDER_SIZE * 2, h + FONT_BORDER_SIZE * 2);
 					if (rect != null) {
-						r = new FontRect(cacheTexture, rect, mainGlyph.getLeft(), mainGlyph.getTop());
+						r = new FontRect(cacheTexture, rect, new GlyphSlot(FreeType.toInt(slot.getAdvanceX()), FreeType.toInt(slot.getAdvanceY()), new GlyphMetrics(metrics.getWidth(), metrics.getHeight())), mainGlyph.getLeft(), mainGlyph.getTop());
 						if (cacheTexture.getPixelBuffer() == null) {
 							cacheTexture.allocateTexture();
 						}
 						ByteBuffer byteBuffer = cacheTexture.getPixelBuffer().map();
 						ByteBuffer buffer = mainBitmap.getBuffer();
 						int pitch = mainBitmap.getPitch();
+//						byte[] tmp = new byte[rect.width() * rect.height()];
+//						for (int i = 0; i < rect.height(); i ++) {
+//							for (int j = 0; j < rect.width(); j ++) {
+//								if (i < FONT_BORDER_SIZE || i >= rect.height() - FONT_BORDER_SIZE || j < FONT_BORDER_SIZE || j >= rect.width() - FONT_BORDER_SIZE) {
+//									tmp[i * rect.width() + j] = 0;
+//								} else {
+//									tmp[i * rect.width() + j] = buffer.get((i - FONT_BORDER_SIZE) * pitch + j - FONT_BORDER_SIZE);
+//								}
+//							}
+//						}
+//						tmp = new JavaBlurProcess().blur(tmp, rect.width(), rect.height(), 15);
 						for (int i = rect.rect().top; i < rect.rect().bottom; i ++) {
 							for (int j = rect.rect().left; j < rect.rect().right; j ++) {
 								byteBuffer.put(i * cacheTexture.mWidth + j, buffer.get((i - rect.rect().top) * pitch + j - rect.rect().left));
+//								byteBuffer.put(i * cacheTexture.mWidth + j, tmp[(i - rect.rect().top) * rect.width() + j - rect.rect().left]);
 							}
 						}
 						cacheTexture.mDirtyRect.union(rect.rect());
@@ -197,8 +215,8 @@ public class FontRenderer {
 			}
 			if (r != null) {
 				r.mTexture.allocateMesh();
-				r.mTexture.mFontBatch.draw(x + r.mLeft, baseline - r.mRect.height(), r.mRect.width(), r.mRect.height(), r.mRect.rect().left, r.mRect.rect().top, r.mRect.width(), r.mRect.height(), alpha, paint);
-				x += r.mRect.width() + r.mLeft;
+				r.mTexture.mFontBatch.draw(x + r.mLeft, baseline/* - r.mRect.height()*/ - r.mTop, r.mRect.width(), r.mRect.height(), r.mRect.rect().left, r.mRect.rect().top, r.mRect.width(), r.mRect.height(), alpha, paint);
+				x += r.mGlyphSlot.getAdvanceX();
 			} else {
 			}
 		}

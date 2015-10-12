@@ -3,6 +3,7 @@ package com.glview.hwui;
 import android.graphics.Color;
 
 import com.glview.graphics.Typeface;
+import com.glview.graphics.font.FontUtils;
 import com.glview.graphics.shader.BaseShader;
 
 public class GLPaint {
@@ -276,6 +277,9 @@ public class GLPaint {
     }
     
     public void setTextSize(int textSize) {
+    	if (textSize > 500 || textSize < 5) {
+    		throw new IllegalArgumentException("textSize should be in range[5-500], set=" + textSize);
+    	}
     	mTextSize = textSize;
     }
     
@@ -318,5 +322,54 @@ public class GLPaint {
          * either FILL or STROKE.
          */
         FILL_AND_STROKE;
+    }
+    
+    public float measureText(char[] text, int index, int count) {
+        return FontUtils.measureText(this, text, index, count);
+    }
+    
+    public float measureText(CharSequence text, int start, int end) {
+        return FontUtils.measureText(this, text, start, end);
+    }
+    public float measureText(CharSequence text) {
+    	return measureText(text, 0, text.length());
+    }
+    
+    /**
+     * Return the font's interline spacing, given the Paint's settings for
+     * typeface, textSize, etc. If metrics is not null, return the fontmetric
+     * values in it. Note: all values have been converted to integers from
+     * floats, in such a way has to make the answers useful for both spacing
+     * and clipping. If you want more control over the rounding, call
+     * getFontMetrics().
+     *
+     * @return the font's interline spacing.
+     */
+    public int getFontMetricsInt(FontMetricsInt fmi) {
+    	return FontUtils.getFontMetricsInt(this, fmi);
+    }
+
+    public FontMetricsInt getFontMetricsInt() {
+        FontMetricsInt fm = new FontMetricsInt();
+        getFontMetricsInt(fm);
+        return fm;
+    }
+
+    /**
+     * Convenience method for callers that want to have FontMetrics values as
+     * integers.
+     */
+    public static class FontMetricsInt {
+        public int   top;
+        public int   ascent;
+        public int   descent;
+        public int   bottom;
+        public int   leading;
+
+        @Override public String toString() {
+            return "FontMetricsInt: top=" + top + " ascent=" + ascent +
+                    " descent=" + descent + " bottom=" + bottom +
+                    " leading=" + leading;
+        }
     }
 }
