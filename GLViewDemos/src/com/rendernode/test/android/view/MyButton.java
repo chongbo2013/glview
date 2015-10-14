@@ -3,13 +3,13 @@ package com.rendernode.test.android.view;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
+import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.widget.Button;
 
 public class MyButton extends Button {
 	
-	Paint mPaint;
+	TextPaint mPaint;
 
 	public MyButton(Context context) {
 		super(context);
@@ -33,7 +33,7 @@ public class MyButton extends Button {
 	}
 	
 	void init() {
-		mPaint = new Paint();
+		mPaint = new TextPaint();
 		mPaint.setTextSize(100);
 		mPaint.setColor(Color.RED);
 	}

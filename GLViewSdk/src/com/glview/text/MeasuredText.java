@@ -27,7 +27,6 @@ class MeasuredText {
     int mTextStart;
     float[] mWidths;
     char[] mChars;
-    byte[] mLevels;
     int mLen;
 
     private int mPos;

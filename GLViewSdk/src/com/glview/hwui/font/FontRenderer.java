@@ -26,8 +26,6 @@ public class FontRenderer {
 		}
 	};
 	
-	final static int FONT_BORDER_SIZE = 0;
-	
 	private FontRenderer() {}
 	
 	public static FontRenderer instance() {
@@ -179,7 +177,7 @@ public class FontRenderer {
 				int w = mainBitmap.getWidth();
 				int h = mainBitmap.getRows();
 				for (CacheTexture cacheTexture : mACacheTextures) {
-					PackerRect rect = cacheTexture.mPacker.insert(w + FONT_BORDER_SIZE * 2, h + FONT_BORDER_SIZE * 2);
+					PackerRect rect = cacheTexture.mPacker.insert(w, h);
 					if (rect != null) {
 						r = new FontRect(cacheTexture, rect, new GlyphSlot(FreeType.toInt(slot.getAdvanceX()), FreeType.toInt(slot.getAdvanceY()), new GlyphMetrics(metrics.getWidth(), metrics.getHeight())), mainGlyph.getLeft(), mainGlyph.getTop());
 						if (cacheTexture.getPixelBuffer() == null) {

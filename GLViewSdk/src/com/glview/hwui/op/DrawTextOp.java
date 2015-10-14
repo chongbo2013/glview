@@ -5,14 +5,14 @@ import com.glview.hwui.GLPaint;
 
 public class DrawTextOp extends DrawOp {
 
-	String mText;
+	CharSequence mText;
 	float mX, mY;
 	int mStart, mEnd;
 	
 	public DrawTextOp() {
 	}
 	
-	public static DrawTextOp obtain(String text, int start, int end, float x, float y, GLPaint paint) {
+	public static DrawTextOp obtain(CharSequence text, int start, int end, float x, float y, GLPaint paint) {
 		DrawTextOp op = (DrawTextOp) OpFactory.get().poll(DrawTextOp.class);
 		op.mText = text;
 		op.mX = x;

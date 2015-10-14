@@ -94,21 +94,4 @@ public class FontUtils {
         return totalAdvance;
 	}
 	
-	/**
-	 * For the purpose of layout, a word break is a boundary with no
-	 * kerning or complex script processing. This is necessarily a
-	 * heuristic, but should be accurate most of the time.
-	 */
-	public static boolean isWordBreak(char c) {
-	    if (c == ' ' || (c >= 0x2000 && c <= 0x200a) || c == 0x3000) {
-	        // spaces
-	        return true;
-	    }
-	    if ((c >= 0x3400 && c <= 0x9fff)) {
-	        // CJK ideographs (and yijing hexagram symbols)
-	        return true;
-	    }
-	    // Note: kana is not included, as sophisticated fonts may kern kana
-	    return false;
-	}
 }

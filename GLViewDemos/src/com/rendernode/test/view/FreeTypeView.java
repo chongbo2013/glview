@@ -7,15 +7,14 @@ import android.util.Log;
 
 import com.glview.hwui.GLCanvas;
 import com.glview.hwui.GLPaint;
-import com.glview.text.BoringLayout;
 import com.glview.text.Layout;
-import com.glview.text.TextUtils;
+import com.glview.text.StaticLayout;
 import com.glview.widget.FrameLayout;
 import com.glview.widget.TextView;
 
 public class FreeTypeView extends FrameLayout {
 	
-	String s = "这是abcdefg啥玩意儿啊我去哦";
+	String s = "Helloeverybody,thisislijingspeaking,whoareyoune";
 	
 	GLPaint mPaint = new GLPaint();
 	Paint mAndroidPaint = new Paint();
@@ -32,10 +31,11 @@ public class FreeTypeView extends FrameLayout {
 //		addView(tv);
 		mAndroidPaint.setTextSize(100);
 		
-		BoringLayout.Metrics metrics = BoringLayout.isBoring(s, mPaint);
-		if (metrics != null) {
-			mLayout = BoringLayout.make(s, mPaint, 1000, Layout.Alignment.ALIGN_NORMAL, 1, 0, metrics, false, TextUtils.TruncateAt.END, 1000);
-		}
+//		BoringLayout.Metrics metrics = BoringLayout.isBoring(s, mPaint);
+//		if (metrics != null) {
+//			mLayout = BoringLayout.make(s, mPaint, 1000, Layout.Alignment.ALIGN_NORMAL, 1, 0, metrics, false, TextUtils.TruncateAt.END, 1000);
+//		}
+		mLayout = new StaticLayout(s, mPaint, 1000, Layout.Alignment.ALIGN_OPPOSITE, 1f, 0, false);
 	}
 	
 	@Override

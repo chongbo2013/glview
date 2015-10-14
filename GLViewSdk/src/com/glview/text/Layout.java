@@ -86,8 +86,25 @@ public abstract class Layout {
             
             // Determine whether the line aligns to normal, opposite, or center.
             Alignment align = paraAlign;
+            if (align == Alignment.ALIGN_LEFT) {
+                align = Alignment.ALIGN_NORMAL;
+            } else if (align == Alignment.ALIGN_RIGHT) {
+                align = Alignment.ALIGN_OPPOSITE;
+            }
+
+            int x;
+            if (align == Alignment.ALIGN_NORMAL) {
+                x = left;
+            } else {
+                int max = (int)getLineExtent(i, false);
+                if (align == Alignment.ALIGN_OPPOSITE) {
+                    x = right - max;
+                } else { // Alignment.ALIGN_CENTER
+                    max = max & ~1;
+                    x = (right + left - max) >> 1;
+                }
+            }
             
-            int x = left;
             canvas.drawText(buf, start, end, x, lbaseline, paint);
         }
     }
@@ -141,6 +158,27 @@ public abstract class Layout {
      */
     public int getHeight() {
         return getLineTop(getLineCount());
+    }
+    
+    /**
+     * Return the base alignment of this layout.
+     */
+    public final Alignment getAlignment() {
+        return mAlignment;
+    }
+
+    /**
+     * Return what the text height is multiplied by to get the line height.
+     */
+    public final float getSpacingMultiplier() {
+        return mSpacingMult;
+    }
+
+    /**
+     * Return the number of units of leading that are added to each line.
+     */
+    public final float getSpacingAdd() {
+        return mSpacingAdd;
     }
 	
     /**
@@ -201,7 +239,7 @@ public abstract class Layout {
 //        tl.set(mPaint, mText, start, end, dir, directions, hasTabsOrEmoji, tabStops);
 //        float width = tl.metrics(null);
 //        TextLine.recycle(tl);
-        return 0f;//width;
+        return mPaint.measureText(mText, start, end);
     }
 
     /**
@@ -242,6 +280,53 @@ public abstract class Layout {
      * bottom line of the Layout.
      */
     public abstract int getBottomPadding();
+    
+    /**
+     * Get the line number corresponding to the specified vertical position.
+     * If you ask for a position above 0, you get 0; if you ask for a position
+     * below the bottom of the text, you get the last line.
+     */
+    // FIXME: It may be faster to do a linear search for layouts without many lines.
+    public int getLineForVertical(int vertical) {
+        int high = getLineCount(), low = -1, guess;
+
+        while (high - low > 1) {
+            guess = (high + low) / 2;
+
+            if (getLineTop(guess) > vertical)
+                high = guess;
+            else
+                low = guess;
+        }
+
+        if (low < 0)
+            return 0;
+        else
+            return low;
+    }
+
+    /**
+     * Get the line number on which the specified text offset appears.
+     * If you ask for a position before 0, you get 0; if you ask for a position
+     * beyond the end of the text, you get the last line.
+     */
+    public int getLineForOffset(int offset) {
+        int high = getLineCount(), low = -1, guess;
+
+        while (high - low > 1) {
+            guess = (high + low) / 2;
+
+            if (getLineStart(guess) > offset)
+                high = guess;
+            else
+                low = guess;
+        }
+
+        if (low < 0)
+            return 0;
+        else
+            return low;
+    }
     
     /**
      * Return the text offset after the last character on the specified line.
@@ -318,6 +403,89 @@ public abstract class Layout {
      */
     public abstract int getEllipsisCount(int line);
     
+    private char getEllipsisChar(TextUtils.TruncateAt method) {
+        return (method == TextUtils.TruncateAt.END_SMALL) ?
+                ELLIPSIS_TWO_DOTS[0] :
+                ELLIPSIS_NORMAL[0];
+    }
+    
+	private void ellipsize(int start, int end, int line, char[] dest,
+			int destoff, TextUtils.TruncateAt method) {
+		int ellipsisCount = getEllipsisCount(line);
+
+		if (ellipsisCount == 0) {
+			return;
+		}
+
+		int ellipsisStart = getEllipsisStart(line);
+		int linestart = getLineStart(line);
+
+		for (int i = ellipsisStart; i < ellipsisStart + ellipsisCount; i++) {
+			char c;
+
+			if (i == ellipsisStart) {
+				c = getEllipsisChar(method); // ellipsis
+			} else {
+				c = '\uFEFF'; // 0-width space
+			}
+
+			int a = i + linestart;
+
+			if (a >= start && a < end) {
+				dest[destoff + a - start] = c;
+			}
+		}
+	}
+    
+    /* package */ static class Ellipsizer implements CharSequence, GetChars {
+        /* package */ CharSequence mText;
+        /* package */ Layout mLayout;
+        /* package */ int mWidth;
+        /* package */ TextUtils.TruncateAt mMethod;
+
+        public Ellipsizer(CharSequence s) {
+            mText = s;
+        }
+
+        public char charAt(int off) {
+            char[] buf = TextUtils.obtain(1);
+            getChars(off, off + 1, buf, 0);
+            char ret = buf[0];
+
+            TextUtils.recycle(buf);
+            return ret;
+        }
+
+        public void getChars(int start, int end, char[] dest, int destoff) {
+            int line1 = mLayout.getLineForOffset(start);
+            int line2 = mLayout.getLineForOffset(end);
+
+            TextUtils.getChars(mText, start, end, dest, destoff);
+
+            for (int i = line1; i <= line2; i++) {
+                mLayout.ellipsize(start, end, i, dest, destoff, mMethod);
+            }
+        }
+
+        public int length() {
+            return mText.length();
+        }
+
+        public CharSequence subSequence(int start, int end) {
+            char[] s = new char[end - start];
+            getChars(start, end, s, 0);
+            return new String(s);
+        }
+
+        @Override
+        public String toString() {
+            char[] s = new char[length()];
+            getChars(0, length(), s, 0);
+            return new String(s);
+        }
+
+    }
+    
     private CharSequence mText;
     private GLPaint mPaint;
     private int mWidth;
@@ -336,4 +504,6 @@ public abstract class Layout {
         ALIGN_RIGHT,
     }
 
+    /* package */ static final char[] ELLIPSIS_NORMAL = { '\u2026' }; // this is "..."
+    /* package */ static final char[] ELLIPSIS_TWO_DOTS = { '\u2025' }; // this is ".."
 }
