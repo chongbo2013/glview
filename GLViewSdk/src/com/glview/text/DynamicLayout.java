@@ -40,9 +40,9 @@ public class DynamicLayout extends Layout
                          GLPaint paint,
                          int width, Alignment align,
                          float spacingmult, float spacingadd,
-                         boolean includepad) {
+                         boolean includepad, boolean drawDeffer) {
         this(base, base, paint, width, align, spacingmult, spacingadd,
-             includepad);
+             includepad, drawDeffer);
     }
 
     /**
@@ -54,9 +54,9 @@ public class DynamicLayout extends Layout
                          GLPaint paint,
                          int width, Alignment align,
                          float spacingmult, float spacingadd,
-                         boolean includepad) {
+                         boolean includepad, boolean drawDeffer) {
         this(base, display, paint, width, align, spacingmult, spacingadd,
-             includepad, null, 0);
+             includepad, null, 0, drawDeffer);
     }
 
     /**
@@ -71,11 +71,11 @@ public class DynamicLayout extends Layout
                          int width, Alignment align, 
                          float spacingmult, float spacingadd,
                          boolean includepad,
-                         TextUtils.TruncateAt ellipsize, int ellipsizedWidth) {
+                         TextUtils.TruncateAt ellipsize, int ellipsizedWidth, boolean drawDeffer) {
         super((ellipsize == null)
                 ? display
                 : new Ellipsizer(display),
-              paint, width, align, spacingmult, spacingadd);
+              paint, width, align, spacingmult, spacingadd, drawDeffer);
 
         mBase = base;
         mDisplay = display;

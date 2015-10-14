@@ -8,6 +8,7 @@ import android.support.v4.util.LongSparseArray;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeType;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeType.Face;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeType.SizeMetrics;
+import com.glview.graphics.Rect;
 import com.glview.graphics.Typeface;
 import com.glview.graphics.font.GlyphMetrics;
 import com.glview.graphics.font.GlyphSlot;
@@ -15,7 +16,6 @@ import com.glview.hwui.GLCanvas;
 import com.glview.hwui.GLPaint;
 import com.glview.hwui.packer.PackerRect;
 import com.glview.libgdx.graphics.opengl.GL20;
-import com.glview.stackblur.JavaBlurProcess;
 
 public class FontRenderer {
 	
@@ -122,7 +122,7 @@ public class FontRenderer {
 	}
  	
 	public void renderText(GLCanvas canvas, CharSequence text, int start, int end, float x, float y,
-			float alpha, GLPaint paint) {
+			float alpha, GLPaint paint, Rect clip, float[] matrix, boolean forceFinish) {
 		checkInit();
 		Typeface typeface = paint.getTypeface();
 		Face face = typeface.face();
@@ -217,6 +217,9 @@ public class FontRenderer {
 				x += r.mGlyphSlot.getAdvanceX();
 			} else {
 			}
+		}
+		if (forceFinish) {
+			flushBatch();
 		}
 	}
 	

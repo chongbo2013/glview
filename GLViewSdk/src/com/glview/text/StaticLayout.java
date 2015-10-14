@@ -40,18 +40,18 @@ public class StaticLayout extends Layout {
     public StaticLayout(CharSequence source, GLPaint paint,
                         int width,
                         Alignment align, float spacingmult, float spacingadd,
-                        boolean includepad) {
+                        boolean includepad, boolean drawDeffer) {
         this(source, 0, source.length(), paint, width, align,
-             spacingmult, spacingadd, includepad);
+             spacingmult, spacingadd, includepad, drawDeffer);
     }
 
     public StaticLayout(CharSequence source, int bufstart, int bufend,
     					GLPaint paint, int outerwidth,
                         Alignment align,
                         float spacingmult, float spacingadd,
-                        boolean includepad) {
+                        boolean includepad, boolean drawDeffer) {
         this(source, bufstart, bufend, paint, outerwidth, align,
-             spacingmult, spacingadd, includepad, null, 0);
+             spacingmult, spacingadd, includepad, null, 0, drawDeffer);
     }
 
     public StaticLayout(CharSequence source, int bufstart, int bufend,
@@ -59,9 +59,9 @@ public class StaticLayout extends Layout {
             Alignment align,
             float spacingmult, float spacingadd,
             boolean includepad,
-            TextUtils.TruncateAt ellipsize, int ellipsizedWidth) {
+            TextUtils.TruncateAt ellipsize, int ellipsizedWidth, boolean drawDeffer) {
         this(source, bufstart, bufend, paint, outerwidth, align,
-                spacingmult, spacingadd, includepad, ellipsize, ellipsizedWidth, Integer.MAX_VALUE);
+                spacingmult, spacingadd, includepad, ellipsize, ellipsizedWidth, Integer.MAX_VALUE, drawDeffer);
     }
 
     /**
@@ -72,11 +72,11 @@ public class StaticLayout extends Layout {
                         Alignment align,
                         float spacingmult, float spacingadd,
                         boolean includepad,
-                        TextUtils.TruncateAt ellipsize, int ellipsizedWidth, int maxLines) {
+                        TextUtils.TruncateAt ellipsize, int ellipsizedWidth, int maxLines, boolean drawDeffer) {
         super((ellipsize == null)
                 ? source
                 : new Ellipsizer(source),
-              paint, outerwidth, align, spacingmult, spacingadd);
+              paint, outerwidth, align, spacingmult, spacingadd, drawDeffer);
 
         /*
          * This is annoying, but we can't refer to the layout until
@@ -114,7 +114,7 @@ public class StaticLayout extends Layout {
     }
 
     /* package */ StaticLayout(CharSequence text) {
-        super(text, null, 0, null, 0, 0);
+        super(text, null, 0, null, 0, 0, false);
 
         mColumns = COLUMNS_ELLIPSIZE;
         mLines = new int[2 * mColumns];

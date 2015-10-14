@@ -536,9 +536,9 @@ class GL20Canvas extends StatefullBaseCanvas {
 	
 	@Override
 	public void drawText(CharSequence text, int start, int end, float x, float y,
-			GLPaint paint) {
+			GLPaint paint, boolean drawDeffer) {
 		setupDraw();
-		mFontRenderer.renderText(this, text, start, end, x, y, currentSnapshot().alpha, getGLPaint(paint));
+		mFontRenderer.renderText(this, text, start, end, x, y, currentSnapshot().alpha, getGLPaint(paint), currentSnapshot().clipRect, currentSnapshot().transform, !drawDeffer);
 	}
 
 	class ShaderManager {

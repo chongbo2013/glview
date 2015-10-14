@@ -145,18 +145,19 @@ public abstract class AbsGLCanvas implements GLCanvas {
 	}
 	
 	@Override
-	public void drawText(String text, float x, float y, GLPaint paint) {
-		drawText(text, 0, text.length(), x, y, paint);
-	}
-
-	@Override
-	public void drawText(String text, int start, int end, float x, float y,
-			GLPaint paint) {
+	public void drawText(CharSequence text, float x, float y, GLPaint paint) {
+		drawText(text, 0, text.length(), x, y, paint, true);
 	}
 	
 	@Override
 	public void drawText(CharSequence text, int start, int end, float x,
 			float y, GLPaint paint) {
+		drawText(text, start, end, x, y, paint, true);
+	}
+	
+	@Override
+	public void drawText(CharSequence text, int start, int end, float x,
+			float y, GLPaint paint, boolean drawDeffer) {
 	}
 	
 	@Override

@@ -234,14 +234,8 @@ class GLRecordingCanvas extends AbsGLCanvas implements Poolable {
 	}
 	
 	@Override
-	public void drawText(String text, int start, int end, float x, float y,
-			GLPaint paint) {
-		addDrawOp(DrawTextOp.obtain(text, start, end, x, y, paint));
-	}
-	
-	@Override
 	public void drawText(CharSequence text, int start, int end, float x,
-			float y, GLPaint paint) {
-		addDrawOp(DrawTextOp.obtain(text, start, end, x, y, paint));
+			float y, GLPaint paint, boolean drawDeffer) {
+		addDrawOp(DrawTextOp.obtain(text, start, end, x, y, paint, drawDeffer));
 	}
 }

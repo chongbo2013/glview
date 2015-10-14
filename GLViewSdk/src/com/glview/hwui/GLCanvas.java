@@ -81,13 +81,13 @@ public interface GLCanvas {
 	
 	public void drawBitmapMesh(Bitmap bitmap, BasicMesh mesh, GLPaint paint);
 
-    public void drawText(String text, float x, float y, GLPaint paint);
-
-    public void drawText(String text, int start, int end, float x, float y,
-            GLPaint paint);
+    public void drawText(CharSequence text, float x, float y, GLPaint paint);
 
     public void drawText(CharSequence text, int start, int end, float x, float y,
             GLPaint paint);
+    
+    public void drawText(CharSequence text, int start, int end, float x, float y,
+            GLPaint paint, boolean drawDeffer);
 	
 	public void drawCircle(float cx, float cy, float radius, GLPaint paint);
 	

@@ -21,7 +21,7 @@ public abstract class Layout {
      */
     protected Layout(CharSequence text, GLPaint paint,
                      int width, Alignment align,
-                     float spacingMult, float spacingAdd) {
+                     float spacingMult, float spacingAdd, boolean drawDeffer) {
     	if (width < 0)
             throw new IllegalArgumentException("Layout: " + width + " < 0");
 
@@ -31,6 +31,7 @@ public abstract class Layout {
         mAlignment = align;
         mSpacingMult = spacingMult;
         mSpacingAdd = spacingAdd;
+        mDrawDeffer = drawDeffer;
     }
     
     /**
@@ -104,8 +105,8 @@ public abstract class Layout {
                     x = (right + left - max) >> 1;
                 }
             }
-            
-            canvas.drawText(buf, start, end, x, lbaseline, paint);
+            boolean drawDeffer = i == lastLine ? mDrawDeffer : true;
+            canvas.drawText(buf, start, end, x, lbaseline, paint, drawDeffer);
         }
     }
     
@@ -486,13 +487,17 @@ public abstract class Layout {
 
     }
     
+    public void setDrawDeffer(boolean drawDeffer) {
+    	mDrawDeffer = drawDeffer;
+    }
+    
     private CharSequence mText;
     private GLPaint mPaint;
     private int mWidth;
     private Alignment mAlignment = Alignment.ALIGN_NORMAL;
     private float mSpacingMult;
     private float mSpacingAdd;
-    private static final Rect sTempRect = new Rect();
+    protected boolean mDrawDeffer;
     
     public enum Alignment {
         ALIGN_NORMAL,

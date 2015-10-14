@@ -1,23 +1,23 @@
 package com.glview.widget;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.graphics.Bitmap.Config;
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Paint.FontMetricsInt;
-import android.graphics.PorterDuff.Mode;
-import android.graphics.Typeface;
-import android.os.Build;
+import android.text.BoringLayout;
 import android.text.TextPaint;
-import android.text.TextUtils;
 import android.util.AttributeSet;
 
 import com.glview.graphics.Bitmap;
 import com.glview.graphics.Rect;
+import com.glview.graphics.Typeface;
+import com.glview.graphics.drawable.Drawable;
 import com.glview.hwui.GLCanvas;
+import com.glview.hwui.GLPaint;
+import com.glview.text.Layout;
+import com.glview.text.TextUtils;
 import com.glview.util.FastMath;
 import com.glview.view.Gravity;
 import com.glview.view.View;
@@ -26,29 +26,206 @@ public class TextView extends View {
 	
 	private final static String TAG = "TextView";
 	
-	public boolean isScaleView;
-//	protected MarqueeRender mTileRender;
-    private final TextPaint mTextPaint;
-    private float mTextSize;
-    private String mText;
-    private String mOldText;
-    private int mTextColor;
-    private Bitmap mTextBitmap;
-    private Canvas mTextCanvas;
-    private final Config mConfig;
-    
-    private int mMaxWidth = Integer.MAX_VALUE;
-    private int mMinWidth = 0;
-    
-    private final static int DEFAULT_TEXT_SIZE = 24;
-    private final static int DEFAULT_TEXT_COLOR = 0xffffffff;
-	
-    TruncateAt mEllipsize = TruncateAt.END;	
-	
-    private int mGravity = Gravity.TOP | Gravity.START;
+	private static final int LINES = 1;
+    private static final int EMS = LINES;
+    private static final int PIXELS = 2;
     
     private float mShadowRadius, mShadowDx, mShadowDy;
-	
+    private int mShadowColor;
+
+
+    private boolean mPreDrawRegistered;
+    private boolean mPreDrawListenerDetached;
+
+    // A flag to prevent repeated movements from escaping the enclosing text view. The idea here is
+    // that if a user is holding down a movement key to traverse text, we shouldn't also traverse
+    // the view hierarchy. On the other hand, if the user is using the movement key to traverse views
+    // (i.e. the first movement was to traverse out of this view, or this view was traversed into by
+    // the user holding the movement key down) then we shouldn't prevent the focus from changing.
+    private boolean mPreventDefaultMovement;
+
+    private TextUtils.TruncateAt mEllipsize;
+    
+    static class Drawables {
+        final static int DRAWABLE_NONE = -1;
+        final static int DRAWABLE_RIGHT = 0;
+        final static int DRAWABLE_LEFT = 1;
+
+        final Rect mCompoundRect = new Rect();
+
+        Drawable mDrawableTop, mDrawableBottom, mDrawableLeft, mDrawableRight,
+                mDrawableStart, mDrawableEnd, mDrawableError, mDrawableTemp;
+
+        Drawable mDrawableLeftInitial, mDrawableRightInitial;
+        boolean mOverride;
+
+        int mDrawableSizeTop, mDrawableSizeBottom, mDrawableSizeLeft, mDrawableSizeRight,
+                mDrawableSizeStart, mDrawableSizeEnd, mDrawableSizeError, mDrawableSizeTemp;
+
+        int mDrawableWidthTop, mDrawableWidthBottom, mDrawableHeightLeft, mDrawableHeightRight,
+                mDrawableHeightStart, mDrawableHeightEnd, mDrawableHeightError, mDrawableHeightTemp;
+
+        int mDrawablePadding;
+
+        int mDrawableSaved = DRAWABLE_NONE;
+
+        public Drawables(Context context) {
+            final int targetSdkVersion = context.getApplicationInfo().targetSdkVersion;
+            mOverride = false;
+        }
+
+        public void resolveWithLayoutDirection(int layoutDirection) {
+            // First reset "left" and "right" drawables to their initial values
+            mDrawableLeft = mDrawableLeftInitial;
+            mDrawableRight = mDrawableRightInitial;
+
+            // JB-MR1+ normal case: "start" / "end" drawables are overriding "left" / "right"
+            // drawable if and only if they have been defined
+            switch(layoutDirection) {
+                case LAYOUT_DIRECTION_RTL:
+                    if (mOverride) {
+                        mDrawableRight = mDrawableStart;
+                        mDrawableSizeRight = mDrawableSizeStart;
+                        mDrawableHeightRight = mDrawableHeightStart;
+
+                        mDrawableLeft = mDrawableEnd;
+                        mDrawableSizeLeft = mDrawableSizeEnd;
+                        mDrawableHeightLeft = mDrawableHeightEnd;
+                    }
+                    break;
+
+                case LAYOUT_DIRECTION_LTR:
+                default:
+                    if (mOverride) {
+                        mDrawableLeft = mDrawableStart;
+                        mDrawableSizeLeft = mDrawableSizeStart;
+                        mDrawableHeightLeft = mDrawableHeightStart;
+
+                        mDrawableRight = mDrawableEnd;
+                        mDrawableSizeRight = mDrawableSizeEnd;
+                        mDrawableHeightRight = mDrawableHeightEnd;
+                    }
+                    break;
+            }
+            applyErrorDrawableIfNeeded(layoutDirection);
+            updateDrawablesLayoutDirection(layoutDirection);
+        }
+
+        private void updateDrawablesLayoutDirection(int layoutDirection) {
+            if (mDrawableLeft != null) {
+                mDrawableLeft.setLayoutDirection(layoutDirection);
+            }
+            if (mDrawableRight != null) {
+                mDrawableRight.setLayoutDirection(layoutDirection);
+            }
+            if (mDrawableTop != null) {
+                mDrawableTop.setLayoutDirection(layoutDirection);
+            }
+            if (mDrawableBottom != null) {
+                mDrawableBottom.setLayoutDirection(layoutDirection);
+            }
+        }
+
+        public void setErrorDrawable(Drawable dr, TextView tv) {
+            if (mDrawableError != dr && mDrawableError != null) {
+                mDrawableError.setCallback(null);
+            }
+            mDrawableError = dr;
+
+            final Rect compoundRect = mCompoundRect;
+            int[] state = tv.getDrawableState();
+
+            if (mDrawableError != null) {
+                mDrawableError.setState(state);
+                mDrawableError.copyBounds(compoundRect);
+                mDrawableError.setCallback(tv);
+                mDrawableSizeError = compoundRect.width();
+                mDrawableHeightError = compoundRect.height();
+            } else {
+                mDrawableSizeError = mDrawableHeightError = 0;
+            }
+        }
+
+        private void applyErrorDrawableIfNeeded(int layoutDirection) {
+            // first restore the initial state if needed
+            switch (mDrawableSaved) {
+                case DRAWABLE_LEFT:
+                    mDrawableLeft = mDrawableTemp;
+                    mDrawableSizeLeft = mDrawableSizeTemp;
+                    mDrawableHeightLeft = mDrawableHeightTemp;
+                    break;
+                case DRAWABLE_RIGHT:
+                    mDrawableRight = mDrawableTemp;
+                    mDrawableSizeRight = mDrawableSizeTemp;
+                    mDrawableHeightRight = mDrawableHeightTemp;
+                    break;
+                case DRAWABLE_NONE:
+                default:
+            }
+            // then, if needed, assign the Error drawable to the correct location
+            if (mDrawableError != null) {
+                switch(layoutDirection) {
+                    case LAYOUT_DIRECTION_RTL:
+                        mDrawableSaved = DRAWABLE_LEFT;
+
+                        mDrawableTemp = mDrawableLeft;
+                        mDrawableSizeTemp = mDrawableSizeLeft;
+                        mDrawableHeightTemp = mDrawableHeightLeft;
+
+                        mDrawableLeft = mDrawableError;
+                        mDrawableSizeLeft = mDrawableSizeError;
+                        mDrawableHeightLeft = mDrawableHeightError;
+                        break;
+                    case LAYOUT_DIRECTION_LTR:
+                    default:
+                        mDrawableSaved = DRAWABLE_RIGHT;
+
+                        mDrawableTemp = mDrawableRight;
+                        mDrawableSizeTemp = mDrawableSizeRight;
+                        mDrawableHeightTemp = mDrawableHeightRight;
+
+                        mDrawableRight = mDrawableError;
+                        mDrawableSizeRight = mDrawableSizeError;
+                        mDrawableHeightRight = mDrawableHeightError;
+                        break;
+                }
+            }
+        }
+    }
+
+    Drawables mDrawables;
+    
+    private CharSequence mText;
+    
+    private final GLPaint mTextPaint;
+    private boolean mUserSetTextScaleX;
+    private Layout mLayout;
+    
+    private int mGravity = Gravity.TOP | Gravity.START;
+    
+    private float mSpacingMult = 1.0f;
+    private float mSpacingAdd = 0.0f;
+
+    private int mMaximum = Integer.MAX_VALUE;
+    private int mMaxMode = LINES;
+    private int mMinimum = 0;
+    private int mMinMode = LINES;
+
+    private int mOldMaximum = mMaximum;
+    private int mOldMaxMode = mMaxMode;
+
+    private int mMaxWidth = Integer.MAX_VALUE;
+    private int mMaxWidthMode = PIXELS;
+    private int mMinWidth = 0;
+    private int mMinWidthMode = PIXELS;
+
+    private boolean mSingleLine;
+    private int mDesiredHeightAtMeasure = -1;
+    private boolean mIncludePad = true;
+    
+    private BoringLayout.Metrics mBoring, mHintBoring;
+    private BoringLayout mSavedLayout, mSavedHintLayout;
+    
     public TextView(Context context) {
         this(context, null);
     }
@@ -63,15 +240,28 @@ public class TextView extends View {
 
     public TextView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-    	mConfig = Config.ARGB_4444;
-    	
-		isScaleView = true;
-		mTextSize = DEFAULT_TEXT_SIZE;
-		mTextColor = DEFAULT_TEXT_COLOR;
+
+        mText = "";
+
+        final Resources res = context.getResources();
+        
+        mTextPaint = new GLPaint();
 		
-		int ellipsize = -1;
-        float dx = 0, dy = 0, r = 0;
+        int textColor = Color.WHITE;
+        int textSize = 15;
+        boolean allCaps = false;
         int shadowcolor = 0;
+        float dx = 0, dy = 0, r = 0;
+        boolean elegant = false;
+        float letterSpacing = 0;
+        
+        Drawable drawableLeft = null, drawableTop = null, drawableRight = null,
+                drawableBottom = null, drawableStart = null, drawableEnd = null;
+        int drawablePadding = 0;
+        int ellipsize = -1;
+        boolean singleLine = false;
+        int maxlength = -1;
+        CharSequence text = "";
 		
         final Resources.Theme theme = context.getTheme();
         
@@ -84,21 +274,21 @@ public class TextView extends View {
 			} else if (attr == com.glview.R.styleable.TextView_linksClickable) {
 				// mLinksClickable = a.getBoolean(attr, true);
 			} else if (attr == com.glview.R.styleable.TextView_maxLines) {
-				// setMaxLines(a.getInt(attr, -1));
+				 setMaxLines(a.getInt(attr, -1));
 			} else if (attr == com.glview.R.styleable.TextView_maxHeight) {
-				// setMaxHeight(a.getDimensionPixelSize(attr, -1));
+				 setMaxHeight(a.getDimensionPixelSize(attr, -1));
 			} else if (attr == com.glview.R.styleable.TextView_lines) {
-				// setLines(a.getInt(attr, -1));
+				 setLines(a.getInt(attr, -1));
 			} else if (attr == com.glview.R.styleable.TextView_height) {
-				// setHeight(a.getDimensionPixelSize(attr, -1));
+				 setHeight(a.getDimensionPixelSize(attr, -1));
 			} else if (attr == com.glview.R.styleable.TextView_minLines) {
-				// setMinLines(a.getInt(attr, -1));
+				 setMinLines(a.getInt(attr, -1));
 			} else if (attr == com.glview.R.styleable.TextView_minHeight) {
-				// setMinHeight(a.getDimensionPixelSize(attr, -1));
+				 setMinHeight(a.getDimensionPixelSize(attr, -1));
 			} else if (attr == com.glview.R.styleable.TextView_maxWidth) {
 				setMaxWidth(a.getDimensionPixelSize(attr, -1));
 			} else if (attr == com.glview.R.styleable.TextView_width) {
-				// setWidth(a.getDimensionPixelSize(attr, -1));
+				 setWidth(a.getDimensionPixelSize(attr, -1));
 			} else if (attr == com.glview.R.styleable.TextView_minWidth) {
 				setMinWidth(a.getDimensionPixelSize(attr, -1));
 			} else if (attr == com.glview.R.styleable.TextView_gravity) {
@@ -106,15 +296,14 @@ public class TextView extends View {
 			} else if (attr == com.glview.R.styleable.TextView_hint) {
 				// hint = a.getText(attr);
 			} else if (attr == com.glview.R.styleable.TextView_text) {
-				mText = (String) a.getText(attr);
+				mText = a.getText(attr);
 			} else if (attr == com.glview.R.styleable.TextView_scrollHorizontally) {
 				// if (a.getBoolean(attr, false)) {
 				// setHorizontallyScrolling(true);
 				// }
 			} else if (attr == com.glview.R.styleable.TextView_singleLine) {
-				// singleLine = a.getBoolean(attr, singleLine);
+				singleLine = a.getBoolean(attr, singleLine);
 			} else if (attr == com.glview.R.styleable.TextView_ellipsize) {
-				// ellipsize = a.getInt(attr, ellipsize);
 				ellipsize = a.getInt(attr, ellipsize);
 			} else if (attr == com.glview.R.styleable.TextView_marqueeRepeatLimit) {
 				// setMarqueeRepeatLimit(a.getInt(attr, mMarqueeRepeatLimit));
@@ -123,7 +312,7 @@ public class TextView extends View {
 				// setIncludeFontPadding(false);
 				// }
 			} else if (attr == com.glview.R.styleable.TextView_maxLength) {
-				// maxlength = a.getInt(attr, -1);
+				 maxlength = a.getInt(attr, -1);
 			} else if (attr == com.glview.R.styleable.TextView_textScaleX) {
 				// setTextScaleX(a.getFloat(attr, 1.0f));
 			} else if (attr == com.glview.R.styleable.TextView_shadowColor) {
@@ -139,14 +328,13 @@ public class TextView extends View {
 			} else if (attr == com.glview.R.styleable.TextView_textColorHighlight) {
 				// textColorHighlight = a.getColor(attr, textColorHighlight);
 			} else if (attr == com.glview.R.styleable.TextView_textColor) {
-				// textColor = a.getColorStateList(attr);
-				mTextColor = a.getColor(attr, DEFAULT_TEXT_COLOR);
+				textColor = a.getColor(attr, textColor);
 			} else if (attr == com.glview.R.styleable.TextView_textColorHint) {
 				// textColorHint = a.getColorStateList(attr);
 			} else if (attr == com.glview.R.styleable.TextView_textColorLink) {
 				// textColorLink = a.getColorStateList(attr);
 			} else if (attr == com.glview.R.styleable.TextView_textSize) {
-				mTextSize = a.getDimensionPixelSize(attr, DEFAULT_TEXT_SIZE);
+				textSize = a.getDimensionPixelSize(attr, textSize);
 			} else if (attr == com.glview.R.styleable.TextView_typeface) {
 				// typefaceIndex = a.getInt(attr, typefaceIndex);
 			} else if (attr == com.glview.R.styleable.TextView_textStyle) {
@@ -157,33 +345,204 @@ public class TextView extends View {
 		}
         a.recycle();
         
-		if (ellipsize < 0) {
+		if (singleLine && ellipsize < 0) {
 		    ellipsize = 3; // END
 		}
 
 	    switch (ellipsize) {
 	        case 1:
-	            setEllipsize(TruncateAt.START);
+	            setEllipsize(TextUtils.TruncateAt.START);
 	            break;
 	        case 2:
-	        	 setEllipsize(TruncateAt.MIDDLE);
+	        	 setEllipsize(TextUtils.TruncateAt.MIDDLE);
 	            break;
 	        case 3:
-	        	 setEllipsize(TruncateAt.END);
+	        	 setEllipsize(TextUtils.TruncateAt.END);
 	            break;
 	        case 4:
-	        	 setEllipsize(TruncateAt.MARQUEE);
+	        	 setEllipsize(TextUtils.TruncateAt.MARQUEE);
 	            break;
 	    }
         
-		mTextPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
-		mTextPaint.setTextSize(mTextSize);
-		mTextPaint.setColor(mTextColor);
+		mTextPaint.setTextSize(textSize);
+		mTextPaint.setColor(textColor);
 		if(shadowcolor != 0){
 			setShadowLayer(r, dx, dy, shadowcolor);
 		}
     }
     
+    /**
+     * Makes the TextView at least this many lines tall.
+     *
+     * Setting this value overrides any other (minimum) height setting. A single line TextView will
+     * set this value to 1.
+     *
+     * @see #getMinLines()
+     *
+     * @attr ref android.R.styleable#TextView_minLines
+     */
+    public void setMinLines(int minlines) {
+        mMinimum = minlines;
+        mMinMode = LINES;
+
+        requestLayout();
+        invalidate();
+    }
+
+    /**
+     * @return the minimum number of lines displayed in this TextView, or -1 if the minimum
+     * height was set in pixels instead using {@link #setMinHeight(int) or #setHeight(int)}.
+     *
+     * @see #setMinLines(int)
+     *
+     * @attr ref android.R.styleable#TextView_minLines
+     */
+    public int getMinLines() {
+        return mMinMode == LINES ? mMinimum : -1;
+    }
+
+    /**
+     * Makes the TextView at least this many pixels tall.
+     *
+     * Setting this value overrides any other (minimum) number of lines setting.
+     *
+     * @attr ref android.R.styleable#TextView_minHeight
+     */
+    public void setMinHeight(int minHeight) {
+        mMinimum = minHeight;
+        mMinMode = PIXELS;
+
+        requestLayout();
+        invalidate();
+    }
+
+    /**
+     * @return the minimum height of this TextView expressed in pixels, or -1 if the minimum
+     * height was set in number of lines instead using {@link #setMinLines(int) or #setLines(int)}.
+     *
+     * @see #setMinHeight(int)
+     *
+     * @attr ref android.R.styleable#TextView_minHeight
+     */
+    public int getMinHeight() {
+        return mMinMode == PIXELS ? mMinimum : -1;
+    }
+
+    /**
+     * Makes the TextView at most this many lines tall.
+     *
+     * Setting this value overrides any other (maximum) height setting.
+     *
+     * @attr ref android.R.styleable#TextView_maxLines
+     */
+    public void setMaxLines(int maxlines) {
+        mMaximum = maxlines;
+        mMaxMode = LINES;
+
+        requestLayout();
+        invalidate();
+    }
+
+    /**
+     * @return the maximum number of lines displayed in this TextView, or -1 if the maximum
+     * height was set in pixels instead using {@link #setMaxHeight(int) or #setHeight(int)}.
+     *
+     * @see #setMaxLines(int)
+     *
+     * @attr ref android.R.styleable#TextView_maxLines
+     */
+    public int getMaxLines() {
+        return mMaxMode == LINES ? mMaximum : -1;
+    }
+
+    /**
+     * Makes the TextView at most this many pixels tall.  This option is mutually exclusive with the
+     * {@link #setMaxLines(int)} method.
+     *
+     * Setting this value overrides any other (maximum) number of lines setting.
+     *
+     * @attr ref android.R.styleable#TextView_maxHeight
+     */
+    public void setMaxHeight(int maxHeight) {
+        mMaximum = maxHeight;
+        mMaxMode = PIXELS;
+
+        requestLayout();
+        invalidate();
+    }
+
+    /**
+     * @return the maximum height of this TextView expressed in pixels, or -1 if the maximum
+     * height was set in number of lines instead using {@link #setMaxLines(int) or #setLines(int)}.
+     *
+     * @see #setMaxHeight(int)
+     *
+     * @attr ref android.R.styleable#TextView_maxHeight
+     */
+    public int getMaxHeight() {
+        return mMaxMode == PIXELS ? mMaximum : -1;
+    }
+
+    /**
+     * Makes the TextView exactly this many lines tall.
+     *
+     * Note that setting this value overrides any other (minimum / maximum) number of lines or
+     * height setting. A single line TextView will set this value to 1.
+     *
+     * @attr ref android.R.styleable#TextView_lines
+     */
+    public void setLines(int lines) {
+        mMaximum = mMinimum = lines;
+        mMaxMode = mMinMode = LINES;
+
+        requestLayout();
+        invalidate();
+    }
+
+    /**
+     * Makes the TextView exactly this many pixels tall.
+     * You could do the same thing by specifying this number in the
+     * LayoutParams.
+     *
+     * Note that setting this value overrides any other (minimum / maximum) number of lines or
+     * height setting.
+     *
+     * @attr ref android.R.styleable#TextView_height
+     */
+    public void setHeight(int pixels) {
+        mMaximum = mMinimum = pixels;
+        mMaxMode = mMinMode = PIXELS;
+
+        requestLayout();
+        invalidate();
+    }
+
+    /**
+     * Makes the TextView at least this many ems wide
+     *
+     * @attr ref android.R.styleable#TextView_minEms
+     */
+    public void setMinEms(int minems) {
+        mMinWidth = minems;
+        mMinWidthMode = EMS;
+
+        requestLayout();
+        invalidate();
+    }
+
+    /**
+     * @return the minimum width of the TextView, expressed in ems or -1 if the minimum width
+     * was set in pixels instead (using {@link #setMinWidth(int)} or {@link #setWidth(int)}).
+     *
+     * @see #setMinEms(int)
+     * @see #setEms(int)
+     *
+     * @attr ref android.R.styleable#TextView_minEms
+     */
+    public int getMinEms() {
+        return mMinWidthMode == EMS ? mMinWidth : -1;
+    }
+
     /**
      * Makes the TextView at least this many pixels wide
      *
@@ -191,6 +550,7 @@ public class TextView extends View {
      */
     public void setMinWidth(int minpixels) {
         mMinWidth = minpixels;
+        mMinWidthMode = PIXELS;
 
         requestLayout();
         invalidate();
@@ -206,7 +566,33 @@ public class TextView extends View {
      * @attr ref android.R.styleable#TextView_minWidth
      */
     public int getMinWidth() {
-        return mMinWidth;
+        return mMinWidthMode == PIXELS ? mMinWidth : -1;
+    }
+
+    /**
+     * Makes the TextView at most this many ems wide
+     *
+     * @attr ref android.R.styleable#TextView_maxEms
+     */
+    public void setMaxEms(int maxems) {
+        mMaxWidth = maxems;
+        mMaxWidthMode = EMS;
+
+        requestLayout();
+        invalidate();
+    }
+
+    /**
+     * @return the maximum width of the TextView, expressed in ems or -1 if the maximum width
+     * was set in pixels instead (using {@link #setMaxWidth(int)} or {@link #setWidth(int)}).
+     *
+     * @see #setMaxEms(int)
+     * @see #setEms(int)
+     *
+     * @attr ref android.R.styleable#TextView_maxEms
+     */
+    public int getMaxEms() {
+        return mMaxWidthMode == EMS ? mMaxWidth : -1;
     }
 
     /**
@@ -216,6 +602,7 @@ public class TextView extends View {
      */
     public void setMaxWidth(int maxpixels) {
         mMaxWidth = maxpixels;
+        mMaxWidthMode = PIXELS;
 
         requestLayout();
         invalidate();
@@ -231,7 +618,93 @@ public class TextView extends View {
      * @attr ref android.R.styleable#TextView_maxWidth
      */
     public int getMaxWidth() {
-        return mMaxWidth;
+        return mMaxWidthMode == PIXELS ? mMaxWidth : -1;
+    }
+
+    /**
+     * Makes the TextView exactly this many ems wide
+     *
+     * @see #setMaxEms(int)
+     * @see #setMinEms(int)
+     * @see #getMinEms()
+     * @see #getMaxEms()
+     *
+     * @attr ref android.R.styleable#TextView_ems
+     */
+    public void setEms(int ems) {
+        mMaxWidth = mMinWidth = ems;
+        mMaxWidthMode = mMinWidthMode = EMS;
+
+        requestLayout();
+        invalidate();
+    }
+
+    /**
+     * Makes the TextView exactly this many pixels wide.
+     * You could do the same thing by specifying this number in the
+     * LayoutParams.
+     *
+     * @see #setMaxWidth(int)
+     * @see #setMinWidth(int)
+     * @see #getMinWidth()
+     * @see #getMaxWidth()
+     *
+     * @attr ref android.R.styleable#TextView_width
+     */
+    public void setWidth(int pixels) {
+        mMaxWidth = mMinWidth = pixels;
+        mMaxWidthMode = mMinWidthMode = PIXELS;
+
+        requestLayout();
+        invalidate();
+    }
+
+    /**
+     * Sets line spacing for this TextView.  Each line will have its height
+     * multiplied by <code>mult</code> and have <code>add</code> added to it.
+     *
+     * @attr ref android.R.styleable#TextView_lineSpacingExtra
+     * @attr ref android.R.styleable#TextView_lineSpacingMultiplier
+     */
+    public void setLineSpacing(float add, float mult) {
+        if (mSpacingAdd != add || mSpacingMult != mult) {
+            mSpacingAdd = add;
+            mSpacingMult = mult;
+
+            if (mLayout != null) {
+                nullLayouts();
+                requestLayout();
+                invalidate();
+            }
+        }
+    }
+
+    /**
+     * Gets the line spacing multiplier
+     *
+     * @return the value by which each line's height is multiplied to get its actual height.
+     *
+     * @see #setLineSpacing(float, float)
+     * @see #getLineSpacingExtra()
+     *
+     * @attr ref android.R.styleable#TextView_lineSpacingMultiplier
+     */
+    public float getLineSpacingMultiplier() {
+        return mSpacingMult;
+    }
+
+    /**
+     * Gets the line spacing extra space
+     *
+     * @return the extra space that is added to the height of each lines of this TextView.
+     *
+     * @see #setLineSpacing(float, float)
+     * @see #getLineSpacingMultiplier()
+     *
+     * @attr ref android.R.styleable#TextView_lineSpacingExtra
+     */
+    public float getLineSpacingExtra() {
+        return mSpacingAdd;
     }
 	
 	//interface 
@@ -242,18 +715,7 @@ public class TextView extends View {
 		super.onFocusChanged(gainFocus, direction, previouslyFocusedRect);
 	}
 	
-    public enum TruncateAt {
-        START,
-        MIDDLE,
-        END,
-        MARQUEE,
-        /**
-         * @hide
-         */
-        END_SMALL
-    }  
-    
-    public void setEllipsize(TruncateAt where) {
+    public void setEllipsize(TextUtils.TruncateAt where) {
         // TruncateAt is an enum. != comparison is ok between these singleton objects.
     	mEllipsize = where;
     }
