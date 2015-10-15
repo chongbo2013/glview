@@ -7,6 +7,43 @@ import com.glview.hwui.GLPaint;
 public abstract class Layout {
 	
 	/**
+     * Return how wide a layout must be in order to display the
+     * specified text with one line per paragraph.
+     */
+    public static float getDesiredWidth(CharSequence source,
+                                        GLPaint paint) {
+        return getDesiredWidth(source, 0, source.length(), paint);
+    }
+
+    /**
+     * Return how wide a layout must be in order to display the
+     * specified text slice with one line per paragraph.
+     */
+    public static float getDesiredWidth(CharSequence source,
+                                        int start, int end,
+                                        GLPaint paint) {
+        float need = 0;
+
+        int next;
+        for (int i = start; i <= end; i = next) {
+            next = TextUtils.indexOf(source, '\n', i, end);
+
+            if (next < 0)
+                next = end;
+
+            // note, omits trailing paragraph char
+            float w = measurePara(paint, source, i, next);
+
+            if (w > need)
+                need = w;
+
+            next++;
+        }
+
+        return need;
+    }
+	
+	/**
      * Subclasses of Layout use this constructor to set the display text,
      * width, and other standard properties.
      * @param text the text to render
@@ -21,6 +58,26 @@ public abstract class Layout {
      */
     protected Layout(CharSequence text, GLPaint paint,
                      int width, Alignment align,
+                     float spacingMult, float spacingAdd, boolean drawDeffer) {
+        this(text, paint, width, align, TextDirectionHeuristics.FIRSTSTRONG_LTR,
+                spacingMult, spacingAdd, drawDeffer);
+    }
+    
+	/**
+     * Subclasses of Layout use this constructor to set the display text,
+     * width, and other standard properties.
+     * @param text the text to render
+     * @param paint the default paint for the layout.  Styles can override
+     * various attributes of the paint.
+     * @param width the wrapping width for the text.
+     * @param align whether to left, right, or center the text.  Styles can
+     * override the alignment.
+     * @param spacingMult factor by which to scale the font size to get the
+     * default line spacing
+     * @param spacingAdd amount to add to the default line spacing
+     */
+    protected Layout(CharSequence text, GLPaint paint,
+                     int width, Alignment align, TextDirectionHeuristic textDir,
                      float spacingMult, float spacingAdd, boolean drawDeffer) {
     	if (width < 0)
             throw new IllegalArgumentException("Layout: " + width + " < 0");
@@ -181,6 +238,14 @@ public abstract class Layout {
     public final float getSpacingAdd() {
         return mSpacingAdd;
     }
+    
+    /**
+     * Return the heuristic used to determine paragraph text direction.
+     * @hide
+     */
+    public final TextDirectionHeuristic getTextDirectionHeuristic() {
+        return mTextDir;
+    }
 	
     /**
      * Return the number of lines of text in this layout.
@@ -203,6 +268,68 @@ public abstract class Layout {
             bounds.bottom = getLineTop(line + 1);
         }
         return getLineBaseline(line);
+    }
+    
+    /**
+     * Get the leftmost position that should be exposed for horizontal
+     * scrolling on the specified line.
+     */
+    public float getLineLeft(int line) {
+        int dir = getParagraphDirection(line);
+        Alignment align = getParagraphAlignment(line);
+
+        if (align == Alignment.ALIGN_LEFT) {
+            return 0;
+        } else if (align == Alignment.ALIGN_NORMAL) {
+            if (dir == DIR_RIGHT_TO_LEFT)
+                return getParagraphRight(line) - getLineMax(line);
+            else
+                return 0;
+        } else if (align == Alignment.ALIGN_RIGHT) {
+            return mWidth - getLineMax(line);
+        } else if (align == Alignment.ALIGN_OPPOSITE) {
+            if (dir == DIR_RIGHT_TO_LEFT)
+                return 0;
+            else
+                return mWidth - getLineMax(line);
+        } else { /* align == Alignment.ALIGN_CENTER */
+            int left = getParagraphLeft(line);
+            int right = getParagraphRight(line);
+            int max = ((int) getLineMax(line)) & ~1;
+
+            return left + ((right - left) - max) / 2;
+        }
+    }
+
+    /**
+     * Get the rightmost position that should be exposed for horizontal
+     * scrolling on the specified line.
+     */
+    public float getLineRight(int line) {
+        int dir = getParagraphDirection(line);
+        Alignment align = getParagraphAlignment(line);
+
+        if (align == Alignment.ALIGN_LEFT) {
+            return getParagraphLeft(line) + getLineMax(line);
+        } else if (align == Alignment.ALIGN_NORMAL) {
+            if (dir == DIR_RIGHT_TO_LEFT)
+                return mWidth;
+            else
+                return getParagraphLeft(line) + getLineMax(line);
+        } else if (align == Alignment.ALIGN_RIGHT) {
+            return mWidth;
+        } else if (align == Alignment.ALIGN_OPPOSITE) {
+            if (dir == DIR_RIGHT_TO_LEFT)
+                return getLineMax(line);
+            else
+                return mWidth;
+        } else { /* align == Alignment.ALIGN_CENTER */
+            int left = getParagraphLeft(line);
+            int right = getParagraphRight(line);
+            int max = ((int) getLineMax(line)) & ~1;
+
+            return right - ((right - left) - max) / 2;
+        }
     }
     
     /**
@@ -257,11 +384,27 @@ public abstract class Layout {
     public abstract int getLineDescent(int line);
     
     /**
+     * Returns the primary directionality of the paragraph containing the
+     * specified line, either 1 for left-to-right lines, or -1 for right-to-left
+     * lines (see {@link #DIR_LEFT_TO_RIGHT}, {@link #DIR_RIGHT_TO_LEFT}).
+     */
+    public abstract int getParagraphDirection(int line);
+
+    /**
      * Returns whether the specified line contains one or more
      * characters that need to be handled specially, like tabs
      * or emoji.
      */
     public abstract boolean getLineContainsTab(int line);
+
+    /**
+     * Returns the directional run information for the specified line.
+     * The array alternates counts of characters in left-to-right
+     * and right-to-left segments of the line.
+     *
+     * <p>NOTE: this is inadequate to support bidirectional text, and will change.
+     */
+    public abstract Directions getLineDirections(int line);
 
     /**
      * Return the text offset of the beginning of the specified line (
@@ -392,6 +535,76 @@ public abstract class Layout {
     }
     
     /**
+     * Get the alignment of the specified paragraph, taking into account
+     * markup attached to it.
+     */
+    public final Alignment getParagraphAlignment(int line) {
+        Alignment align = mAlignment;
+        return align;
+    }
+    
+    /**
+     * Get the left edge of the specified paragraph, inset by left margins.
+     */
+    public final int getParagraphLeft(int line) {
+        int left = 0;
+        int dir = getParagraphDirection(line);
+        if (dir == DIR_RIGHT_TO_LEFT) {
+            return left; // leading margin has no impact, or no styles
+        }
+        return getParagraphLeadingMargin(line);
+    }
+
+    /**
+     * Get the right edge of the specified paragraph, inset by right margins.
+     */
+    public final int getParagraphRight(int line) {
+        int right = mWidth;
+        int dir = getParagraphDirection(line);
+        if (dir == DIR_LEFT_TO_RIGHT) {
+            return right; // leading margin has no impact, or no styles
+        }
+        return right - getParagraphLeadingMargin(line);
+    }
+
+    /**
+     * Returns the effective leading margin (unsigned) for this line,
+     * taking into account LeadingMarginSpan and LeadingMarginSpan2.
+     * @param line the line index
+     * @return the leading margin of this line
+     */
+    private int getParagraphLeadingMargin(int line) {
+    	return 0;
+    }
+    
+    /* package */
+    static float measurePara(GLPaint paint, CharSequence text, int start, int end) {
+        return paint.measureText(text, start, end);
+    }
+    
+    /**
+     * Stores information about bidirectional (left-to-right or right-to-left)
+     * text within the layout of a line.
+     */
+    public static class Directions {
+        // Directions represents directional runs within a line of text.
+        // Runs are pairs of ints listed in visual order, starting from the
+        // leading margin.  The first int of each pair is the offset from
+        // the first character of the line to the start of the run.  The
+        // second int represents both the length and level of the run.
+        // The length is in the lower bits, accessed by masking with
+        // DIR_LENGTH_MASK.  The level is in the higher bits, accessed
+        // by shifting by DIR_LEVEL_SHIFT and masking by DIR_LEVEL_MASK.
+        // To simply test for an RTL direction, test the bit using
+        // DIR_RTL_FLAG, if set then the direction is rtl.
+
+        /* package */ int[] mDirections;
+        /* package */ Directions(int[] dirs) {
+            mDirections = dirs;
+        }
+    }
+    
+    /**
      * Return the offset of the first character to be ellipsized away,
      * relative to the start of the line.  (So 0 if the beginning of the
      * line is ellipsized, not getLineStart().)
@@ -497,7 +710,21 @@ public abstract class Layout {
     private Alignment mAlignment = Alignment.ALIGN_NORMAL;
     private float mSpacingMult;
     private float mSpacingAdd;
+    private TextDirectionHeuristic mTextDir;
     protected boolean mDrawDeffer;
+    
+    public static final int DIR_LEFT_TO_RIGHT = 1;
+    public static final int DIR_RIGHT_TO_LEFT = -1;
+
+    /* package */ static final int DIR_REQUEST_LTR = 1;
+    /* package */ static final int DIR_REQUEST_RTL = -1;
+    /* package */ static final int DIR_REQUEST_DEFAULT_LTR = 2;
+    /* package */ static final int DIR_REQUEST_DEFAULT_RTL = -2;
+
+    /* package */ static final int RUN_LENGTH_MASK = 0x03ffffff;
+    /* package */ static final int RUN_LEVEL_SHIFT = 26;
+    /* package */ static final int RUN_LEVEL_MASK = 0x3f;
+    /* package */ static final int RUN_RTL_FLAG = 1 << RUN_LEVEL_SHIFT;
     
     public enum Alignment {
         ALIGN_NORMAL,
@@ -511,4 +738,9 @@ public abstract class Layout {
 
     /* package */ static final char[] ELLIPSIS_NORMAL = { '\u2026' }; // this is "..."
     /* package */ static final char[] ELLIPSIS_TWO_DOTS = { '\u2025' }; // this is ".."
+    
+    /* package */ static final Directions DIRS_ALL_LEFT_TO_RIGHT =
+            new Directions(new int[] { 0, RUN_LENGTH_MASK });
+        /* package */ static final Directions DIRS_ALL_RIGHT_TO_LEFT =
+            new Directions(new int[] { 0, RUN_LENGTH_MASK | RUN_RTL_FLAG });
 }

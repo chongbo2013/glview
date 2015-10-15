@@ -276,11 +276,11 @@ public class GLPaint {
     	return mTextSize;
     }
     
-    public void setTextSize(int textSize) {
+    public void setTextSize(float textSize) {
     	if (textSize > 500 || textSize < 5) {
     		throw new IllegalArgumentException("textSize should be in range[5-500], set=" + textSize);
     	}
-    	mTextSize = textSize;
+    	mTextSize = (int) (textSize + 0.5f);
     }
     
     public Typeface getTypeface() {
@@ -290,6 +290,8 @@ public class GLPaint {
     public void setTypeface(Typeface typeface) {
     	mTypeface = typeface;
     }
+    
+    public void setShadowLayer(float radius, float dx, float dy, int shadowColor) {}
     
     public void setShader(BaseShader shader) {
     	mShader = shader;

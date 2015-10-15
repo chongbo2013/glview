@@ -1,7 +1,5 @@
 package com.glview.text;
 
-import android.text.GetChars;
-
 import com.glview.R;
 import com.glview.content.GLContext;
 import com.glview.hwui.GLPaint;
@@ -24,6 +22,18 @@ public class TextUtils {
             for (int i = start; i < end; i++)
                 dest[destoff++] = s.charAt(i);
         }
+    }
+    
+    /**
+     * Returns true if the string is null or 0-length.
+     * @param str the string to be examined
+     * @return true if str is null or zero length
+     */
+    public static boolean isEmpty(CharSequence str) {
+        if (str == null || str.length() == 0)
+            return true;
+        else
+            return false;
     }
     
     public static int indexOf(CharSequence s, char ch) {
@@ -248,7 +258,7 @@ public class TextUtils {
                 	GLContext.get().getApplicationContext().getString(R.string.ellipsis);
 
         return ellipsize(text, paint, avail, where, preserveLength, callback,
-                ellipsis);
+        		TextDirectionHeuristics.FIRSTSTRONG_LTR, ellipsis);
     }
 
     /**
@@ -268,13 +278,14 @@ public class TextUtils {
             GLPaint paint,
             float avail, TruncateAt where,
             boolean preserveLength,
-            EllipsizeCallback callback, String ellipsis) {
+            EllipsizeCallback callback,
+            TextDirectionHeuristic textDir, String ellipsis) {
 
         int len = text.length();
 
         MeasuredText mt = MeasuredText.obtain();
         try {
-            mt.setPara(text, 0, len);
+            mt.setPara(text, 0, len, textDir);
             float width = mt.addStyleRun(paint, len, null);
             if (width <= avail) {
                 if (callback != null) {

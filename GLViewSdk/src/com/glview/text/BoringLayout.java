@@ -221,7 +221,26 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
      */
     public static Metrics isBoring(CharSequence text,
                                    GLPaint paint) {
-        return isBoring(text, paint, null);
+        return isBoring(text, paint, TextDirectionHeuristics.FIRSTSTRONG_LTR, null);
+    }
+
+    /**
+     * Returns null if not boring; the width, ascent, and descent if boring.
+     * @hide
+     */
+    public static Metrics isBoring(CharSequence text,
+                                   GLPaint paint,
+                                   TextDirectionHeuristic textDir) {
+        return isBoring(text, paint, textDir, null);
+    }
+    
+    /**
+     * Returns null if not boring; the width, ascent, and descent in the
+     * provided Metrics object (or a new one if the provided one was null)
+     * if boring.
+     */
+    public static Metrics isBoring(CharSequence text, GLPaint paint, Metrics metrics) {
+        return isBoring(text, paint, TextDirectionHeuristics.FIRSTSTRONG_LTR, metrics);
     }
 
     /**
@@ -230,7 +249,8 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
      * if boring.
      * @hide
      */
-    public static Metrics isBoring(CharSequence text, GLPaint paint, Metrics metrics) {
+    public static Metrics isBoring(CharSequence text, GLPaint paint,
+            TextDirectionHeuristic textDir, Metrics metrics) {
         char[] temp = TextUtils.obtain(500);
         int length = text.length();
         boolean boring = true;
@@ -311,6 +331,11 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
     }
 
     @Override
+    public int getParagraphDirection(int line) {
+        return DIR_LEFT_TO_RIGHT;
+    }
+
+    @Override
     public boolean getLineContainsTab(int line) {
         return false;
     }
@@ -318,6 +343,11 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
     @Override
     public float getLineMax(int line) {
         return mMax;
+    }
+
+    @Override
+    public final Directions getLineDirections(int line) {
+        return Layout.DIRS_ALL_LEFT_TO_RIGHT;
     }
 
     @Override

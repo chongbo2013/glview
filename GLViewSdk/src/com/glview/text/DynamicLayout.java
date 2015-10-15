@@ -58,6 +58,25 @@ public class DynamicLayout extends Layout
         this(base, display, paint, width, align, spacingmult, spacingadd,
              includepad, null, 0, drawDeffer);
     }
+    
+    /**
+     * Make a layout for the transformed text (password transformation
+     * being the primary example of a transformation)
+     * that will be updated as the base text is changed.
+     * If ellipsize is non-null, the Layout will ellipsize the text
+     * down to ellipsizedWidth.
+     * *
+     * *@hide
+     */
+    public DynamicLayout(CharSequence base, CharSequence display,
+                         GLPaint paint,
+                         int width, Alignment align,
+                         float spacingmult, float spacingadd,
+                         boolean includepad,
+                         TextUtils.TruncateAt ellipsize, int ellipsizedWidth, boolean drawDeffer) {
+        this(base, display, paint, width, align, TextDirectionHeuristics.FIRSTSTRONG_LTR,
+                spacingmult, spacingadd, includepad, ellipsize, ellipsizedWidth, drawDeffer);
+    }
 
     /**
      * Make a layout for the transformed text (password transformation
@@ -68,14 +87,14 @@ public class DynamicLayout extends Layout
      */
     public DynamicLayout(CharSequence base, CharSequence display,
                          GLPaint paint,
-                         int width, Alignment align, 
+                         int width, Alignment align, TextDirectionHeuristic textDir,
                          float spacingmult, float spacingadd,
                          boolean includepad,
                          TextUtils.TruncateAt ellipsize, int ellipsizedWidth, boolean drawDeffer) {
         super((ellipsize == null)
                 ? display
                 : new Ellipsizer(display),
-              paint, width, align, spacingmult, spacingadd, drawDeffer);
+              paint, width, align, textDir, spacingmult, spacingadd, drawDeffer);
 
         mBase = base;
         mDisplay = display;
@@ -201,7 +220,7 @@ public class DynamicLayout extends Layout
         }
 
         reflowed.generate(text, where, where + after,
-                getPaint(), getWidth(), getSpacingMultiplier(),
+                getPaint(), getWidth(), getTextDirectionHeuristic(), getSpacingMultiplier(),
                 getSpacingAdd(), false,
                 true, mEllipsizedWidth, mEllipsizeAt);
         int n = reflowed.getLineCount();
@@ -497,7 +516,7 @@ public class DynamicLayout extends Layout
     public int getLineTop(int line) {
         return mInts.getValue(line, TOP);
     }
-
+    
     @Override
     public int getLineDescent(int line) {
         return mInts.getValue(line, DESCENT);
@@ -512,7 +531,17 @@ public class DynamicLayout extends Layout
     public boolean getLineContainsTab(int line) {
         return (mInts.getValue(line, TAB) & TAB_MASK) != 0;
     }
+    
+    @Override
+    public int getParagraphDirection(int line) {
+        return mInts.getValue(line, DIR) >> DIR_SHIFT;
+    }
 
+    @Override
+    public final Directions getLineDirections(int line) {
+        return mObjects.getValue(line, 0);
+    }
+    
     @Override
     public int getTopPadding() {
         return mTopPadding;
@@ -554,6 +583,7 @@ public class DynamicLayout extends Layout
     private TextUtils.TruncateAt mEllipsizeAt;
 
     private PackedIntVector mInts;
+    private PackedObjectVector<Directions> mObjects;
 
     /**
      * Value used in mBlockIndices when a block has been created or recycled and indicating that its
@@ -578,6 +608,7 @@ public class DynamicLayout extends Layout
     private static final Object[] sLock = new Object[0];
 
     private static final int START = 0;
+    private static final int DIR = START;
     private static final int TAB = START;
     private static final int TOP = 1;
     private static final int DESCENT = 2;
@@ -588,6 +619,7 @@ public class DynamicLayout extends Layout
     private static final int COLUMNS_ELLIPSIZE = 5;
 
     private static final int START_MASK = 0x1FFFFFFF;
+    private static final int DIR_SHIFT  = 30;
     private static final int TAB_MASK   = 0x20000000;
 
     private static final int ELLIPSIS_UNDEFINED = 0x80000000;

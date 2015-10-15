@@ -21,8 +21,6 @@ import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.os.Build;
 import android.os.SystemClock;
-import android.text.TextUtils;
-import android.view.Gravity;
 import android.view.MotionEvent;
 
 import com.glview.animation.Animator;
@@ -36,7 +34,9 @@ import com.glview.content.GLContext;
 import com.glview.graphics.Rect;
 import com.glview.graphics.drawable.Drawable;
 import com.glview.libgdx.graphics.math.MathUtils;
+import com.glview.text.TextUtils;
 import com.glview.util.Property;
+import com.glview.view.Gravity;
 import com.glview.view.View;
 import com.glview.view.View.MeasureSpec;
 import com.glview.view.ViewConfiguration;
@@ -44,7 +44,6 @@ import com.glview.view.ViewGroup.LayoutParams;
 import com.glview.view.ViewGroupOverlay;
 import com.glview.widget.AbsListView.OnScrollListener;
 import com.glview.widget.ImageView.ScaleType;
-import com.glview.widget.TextView.TruncateAt;
 
 /**
  * Helper class for AbsListView to draw and control the Fast Scroll thumb
@@ -513,7 +512,7 @@ class FastScroller {
         final TextView textView = new TextView(context);
         textView.setLayoutParams(params);
 //        textView.setSingleLine(true);
-        textView.setEllipsize(TruncateAt.MIDDLE);
+        textView.setEllipsize(TextUtils.TruncateAt.MIDDLE);
         textView.setGravity(Gravity.CENTER);
         textView.setAlpha(0f);
 

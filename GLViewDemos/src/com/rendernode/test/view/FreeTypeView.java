@@ -19,7 +19,7 @@ public class FreeTypeView extends FrameLayout {
 	GLPaint mPaint = new GLPaint();
 	Paint mAndroidPaint = new Paint();
 	
-	Layout mLayout;
+	Layout mLayout, mLayout1;
 	
 	public FreeTypeView(Context context) {
 		super(context);
@@ -33,9 +33,11 @@ public class FreeTypeView extends FrameLayout {
 		
 //		BoringLayout.Metrics metrics = BoringLayout.isBoring(s, mPaint);
 //		if (metrics != null) {
-//			mLayout = BoringLayout.make(s, mPaint, 1000, Layout.Alignment.ALIGN_NORMAL, 1, 0, metrics, false, TextUtils.TruncateAt.END, 1000);
+//			mLayout = BoringLayout.make(s, mPaint, 1000, Layout.Alignment.ALIGN_NORMAL, 1, 0, metrics, false, TextUtils.TruncateAt.END, 1000, true);
 //		}
-		mLayout = new StaticLayout(s, mPaint, 1000, Layout.Alignment.ALIGN_OPPOSITE, 1f, 0, false);
+		mLayout = new StaticLayout(s, mPaint, 1000, Layout.Alignment.ALIGN_OPPOSITE, 1f, 0, false, true);
+		
+		mLayout1 = new StaticLayout("啊哦heihei", mPaint, 1000, Layout.Alignment.ALIGN_OPPOSITE, 1f, 0, false, true);
 	}
 	
 	@Override
@@ -51,6 +53,7 @@ public class FreeTypeView extends FrameLayout {
 //		canvas.drawText(s, 0, 0, mPaint);
 		if (mLayout != null) {
 			mLayout.draw(canvas);
+			mLayout1.draw(canvas);
 		}
 //		mPaint.setTextSize(50);
 //		canvas.drawText(s, 0, 200, mPaint);

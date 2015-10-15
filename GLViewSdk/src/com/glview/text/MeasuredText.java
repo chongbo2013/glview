@@ -27,6 +27,7 @@ class MeasuredText {
     int mTextStart;
     float[] mWidths;
     char[] mChars;
+    int mDir;
     int mLen;
 
     private int mPos;
@@ -75,7 +76,7 @@ class MeasuredText {
     /**
      * Analyzes text for bidirectional runs.  Allocates working buffers.
      */
-    void setPara(CharSequence text, int start, int end) {
+    void setPara(CharSequence text, int start, int end, TextDirectionHeuristic textDir) {
         mText = text;
         mTextStart = start;
 
@@ -91,6 +92,7 @@ class MeasuredText {
         }
         TextUtils.getChars(text, start, end, mChars, 0);
 
+        mDir = Layout.DIR_LEFT_TO_RIGHT;
     }
 
     float addStyleRun(GLPaint paint, int len, GLPaint.FontMetricsInt fm) {

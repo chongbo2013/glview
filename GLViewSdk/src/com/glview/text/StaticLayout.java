@@ -44,6 +44,17 @@ public class StaticLayout extends Layout {
         this(source, 0, source.length(), paint, width, align,
              spacingmult, spacingadd, includepad, drawDeffer);
     }
+    
+    /**
+     * @hide
+     */
+    public StaticLayout(CharSequence source, GLPaint paint,
+            int width, Alignment align, TextDirectionHeuristic textDir,
+            float spacingmult, float spacingadd,
+            boolean includepad, boolean drawDeffer) {
+        this(source, 0, source.length(), paint, width, align, textDir,
+                spacingmult, spacingadd, includepad, drawDeffer);
+    }
 
     public StaticLayout(CharSequence source, int bufstart, int bufend,
     					GLPaint paint, int outerwidth,
@@ -53,6 +64,18 @@ public class StaticLayout extends Layout {
         this(source, bufstart, bufend, paint, outerwidth, align,
              spacingmult, spacingadd, includepad, null, 0, drawDeffer);
     }
+    
+    /**
+     * @hide
+     */
+    public StaticLayout(CharSequence source, int bufstart, int bufend,
+            GLPaint paint, int outerwidth,
+            Alignment align, TextDirectionHeuristic textDir,
+            float spacingmult, float spacingadd,
+            boolean includepad, boolean drawDeffer) {
+        this(source, bufstart, bufend, paint, outerwidth, align, textDir,
+                spacingmult, spacingadd, includepad, null, 0, Integer.MAX_VALUE, drawDeffer);
+}
 
     public StaticLayout(CharSequence source, int bufstart, int bufend,
     		GLPaint paint, int outerwidth,
@@ -61,6 +84,7 @@ public class StaticLayout extends Layout {
             boolean includepad,
             TextUtils.TruncateAt ellipsize, int ellipsizedWidth, boolean drawDeffer) {
         this(source, bufstart, bufend, paint, outerwidth, align,
+        		TextDirectionHeuristics.FIRSTSTRONG_LTR,
                 spacingmult, spacingadd, includepad, ellipsize, ellipsizedWidth, Integer.MAX_VALUE, drawDeffer);
     }
 
@@ -69,14 +93,14 @@ public class StaticLayout extends Layout {
      */
     public StaticLayout(CharSequence source, int bufstart, int bufend,
     					GLPaint paint, int outerwidth,
-                        Alignment align,
+                        Alignment align, TextDirectionHeuristic textDir,
                         float spacingmult, float spacingadd,
                         boolean includepad,
                         TextUtils.TruncateAt ellipsize, int ellipsizedWidth, int maxLines, boolean drawDeffer) {
         super((ellipsize == null)
                 ? source
                 : new Ellipsizer(source),
-              paint, outerwidth, align, spacingmult, spacingadd, drawDeffer);
+              paint, outerwidth, align, textDir, spacingmult, spacingadd, drawDeffer);
 
         /*
          * This is annoying, but we can't refer to the layout until
@@ -100,12 +124,13 @@ public class StaticLayout extends Layout {
             mEllipsizedWidth = outerwidth;
         }
 
-        mLines = new int[2 * mColumns];
+        mLineDirections = new Directions[2 * mColumns];;
+        mLines = new int[mLineDirections.length];
         mMaximumVisibleLineCount = maxLines;
 
         mMeasured = MeasuredText.obtain();
 
-        generate(source, bufstart, bufend, paint, outerwidth, spacingmult,
+        generate(source, bufstart, bufend, paint, outerwidth, textDir, spacingmult,
                  spacingadd, includepad, includepad, ellipsizedWidth,
                  ellipsize);
 
@@ -117,14 +142,15 @@ public class StaticLayout extends Layout {
         super(text, null, 0, null, 0, 0, false);
 
         mColumns = COLUMNS_ELLIPSIZE;
-        mLines = new int[2 * mColumns];
+        mLineDirections = new Directions[2 * mColumns];;
+        mLines = new int[mLineDirections.length];
         // FIXME This is never recycled
         mMeasured = MeasuredText.obtain();
     }
 
     /* package */ void generate(CharSequence source, int bufStart, int bufEnd,
                         GLPaint paint, int outerWidth,
-                        float spacingmult,
+                        TextDirectionHeuristic textDir, float spacingmult,
                         float spacingadd, boolean includepad,
                         boolean trackpad, float ellipsizedWidth,
                         TextUtils.TruncateAt ellipsize) {
@@ -151,9 +177,10 @@ public class StaticLayout extends Layout {
             int firstWidth = outerWidth;
             int restWidth = outerWidth;
 
-            measured.setPara(source, paraStart, paraEnd);
+            measured.setPara(source, paraStart, paraEnd, textDir);
             char[] chs = measured.mChars;
             float[] widths = measured.mWidths;
+            int dir = measured.mDir;
 
 //            breakOpp = nLineBreakOpportunities(localeLanguageTag, chs, paraEnd - paraStart, breakOpp);
             breakOpp = new int[paraEnd - paraStart + 1];
@@ -301,7 +328,7 @@ public class StaticLayout extends Layout {
                         v = out(source, here, endPos,
                                 above, below, top, bottom,
                                 v, spacingmult, spacingadd, fm, hasTabOrEmoji,
-                                needMultiply, bufEnd, includepad, trackpad,
+                                needMultiply, dir, bufEnd, includepad, trackpad,
                                 chs, widths, paraStart, ellipsize, ellipsizedWidth,
                                 currentTextWidth, paint, moreChars);
 
@@ -348,7 +375,7 @@ public class StaticLayout extends Layout {
                         here, paraEnd, fitAscent, fitDescent,
                         fitTop, fitBottom, v,
                         spacingmult, spacingadd, fm, hasTabOrEmoji,
-                        needMultiply, bufEnd,
+                        needMultiply, dir, bufEnd,
                         includepad, trackpad, chs,
                         widths, paraStart, ellipsize,
                         ellipsizedWidth, w, paint, paraEnd != bufEnd);
@@ -364,7 +391,7 @@ public class StaticLayout extends Layout {
                 mLineCount < mMaximumVisibleLineCount) {
             // Log.e("text", "output last " + bufEnd);
 
-            measured.setPara(source, bufStart, bufEnd);
+            measured.setPara(source, bufStart, bufEnd, textDir);
 
             paint.getFontMetricsInt(fm);
 
@@ -373,7 +400,7 @@ public class StaticLayout extends Layout {
                     fm.top, fm.bottom,
                     v,
                     spacingmult, spacingadd, fm, false,
-                    needMultiply, bufEnd,
+                    needMultiply, measured.mDir, bufEnd,
                     includepad, trackpad, null,
                     null, bufStart, ellipsize,
                     ellipsizedWidth, 0, paint, false);
@@ -384,7 +411,7 @@ public class StaticLayout extends Layout {
                       int above, int below, int top, int bottom, int v,
                       float spacingmult, float spacingadd,
                       GLPaint.FontMetricsInt fm, boolean hasTabOrEmoji,
-                      boolean needMultiply,
+                      boolean needMultiply, int dir,
                       int bufEnd, boolean includePad,
                       boolean trackPad, char[] chs,
                       float[] widths, int widthStart, TextUtils.TruncateAt ellipsize,
@@ -396,7 +423,11 @@ public class StaticLayout extends Layout {
         int[] lines = mLines;
 
         if (want >= lines.length) {
-
+        	Directions[] grow2 = new Directions[GrowingArrayUtils.growSize(want)];
+            System.arraycopy(mLineDirections, 0, grow2, 0,
+                             mLineDirections.length);
+            mLineDirections = grow2;
+            
             int[] grow = new int[GrowingArrayUtils.growSize(lines.length)];
             System.arraycopy(lines, 0, grow, 0, lines.length);
             mLines = grow;
@@ -473,6 +504,10 @@ public class StaticLayout extends Layout {
 
         if (hasTabOrEmoji)
             lines[off + TAB] |= TAB_MASK;
+
+        lines[off + DIR] |= dir << DIR_SHIFT;
+        Directions linedirs = DIRS_ALL_LEFT_TO_RIGHT;
+        mLineDirections[j] = linedirs;
 
         if (ellipsize != null) {
             // If there is only one line, then do any type of ellipsis except when it is MARQUEE
@@ -655,8 +690,18 @@ public class StaticLayout extends Layout {
     }
 
     @Override
+    public int getParagraphDirection(int line) {
+        return mLines[mColumns * line + DIR] >> DIR_SHIFT;
+    }
+
+    @Override
     public boolean getLineContainsTab(int line) {
         return (mLines[mColumns * line + TAB] & TAB_MASK) != 0;
+    }
+
+    @Override
+    public final Directions getLineDirections(int line) {
+        return mLineDirections[line];
     }
 
     @Override
@@ -713,6 +758,7 @@ public class StaticLayout extends Layout {
     private static final int COLUMNS_NORMAL = 3;
     private static final int COLUMNS_ELLIPSIZE = 5;
     private static final int START = 0;
+    private static final int DIR = START;
     private static final int TAB = START;
     private static final int TOP = 1;
     private static final int DESCENT = 2;
@@ -720,9 +766,11 @@ public class StaticLayout extends Layout {
     private static final int ELLIPSIS_COUNT = 4;
 
     private int[] mLines;
+    private Directions[] mLineDirections;
     private int mMaximumVisibleLineCount = Integer.MAX_VALUE;
 
     private static final int START_MASK = 0x1FFFFFFF;
+    private static final int DIR_SHIFT  = 30;
     private static final int TAB_MASK   = 0x20000000;
 
     private static final int TAB_INCREMENT = 20; // same as Layout, but that's private

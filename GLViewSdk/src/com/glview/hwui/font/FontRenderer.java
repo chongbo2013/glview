@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.Vector;
 
 import android.support.v4.util.LongSparseArray;
+import android.util.Log;
 
 import com.badlogic.gdx.graphics.g2d.freetype.FreeType;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeType.Face;
@@ -129,7 +130,7 @@ public class FontRenderer {
 		int textSize = paint.getTextSize();
 		if (textSize < 5) return;
 		face.setPixelSizes(0, textSize);
-		long k = typeface.index() << 10 | textSize;
+		long k = typeface.index() * 10000L | textSize;
 		FontData fontData = mFontDatas.get(k);
 		if (fontData == null) {
 			fontData = new FontData();
@@ -158,7 +159,7 @@ public class FontRenderer {
 				charIndex = face.getCharIndex(c);
 			}
 			if (charIndex == 0) continue;
-			long key = charIndex << 20 | typeface.index() << 10 | textSize;
+			long key = charIndex * 10000000L | typeface.index() * 10000L | textSize;
 			FontRect r = mCacheRects.get(key);
 			if (r == null) {
 				if (!face.loadChar(c, FreeType.FT_LOAD_DEFAULT)) {
