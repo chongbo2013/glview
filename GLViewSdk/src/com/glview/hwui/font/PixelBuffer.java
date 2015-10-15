@@ -32,13 +32,22 @@ public class PixelBuffer {
 		return new PixelBuffer(format, width, height);
 	}
 	
+	public void upload(int x, int y, int width, int height) {
+		upload(x, y, width, height, getOffset(x, y));
+	}
+	
 	public void upload(int x, int y, int width, int height, int offset) {
 		mByteBuffer.position(offset);
-//		mGL.glTexSubImage2D(GL20.GL_TEXTURE_2D, 0, x, y, width, height,
-//				mFormat, GL20.GL_UNSIGNED_BYTE, mByteBuffer);
-		mGL.glTexSubImage2D(GL20.GL_TEXTURE_2D, 0, x, 0, width, y + height,
+		mGL.glTexSubImage2D(GL20.GL_TEXTURE_2D, 0, x, y, width, height,
 				mFormat, GL20.GL_UNSIGNED_BYTE, mByteBuffer);
 	}
+	
+	/**
+     * Returns the offset of a pixel in this pixel buffer, in bytes.
+     */
+    int getOffset(int x, int y) {
+        return (y * mWidth + x) * formatSize(mFormat);
+    }
 	
 	public ByteBuffer map() {
 		return mByteBuffer;

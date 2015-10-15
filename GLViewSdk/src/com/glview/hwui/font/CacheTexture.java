@@ -95,7 +95,7 @@ class CacheTexture {
 //	        glPixelStorei(GL_UNPACK_ROW_LENGTH, mWidth);
 //	    }
 	    mCaches.bindTexture(mTexture);
-	    mPixelBuffer.upload(x, y, width, height, 0);
+	    mPixelBuffer.upload(x, y, width, height);
 	    setDirty(false);
 
 	    return mHasUnpackRowLength;
