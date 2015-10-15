@@ -19,12 +19,12 @@ public class FreeTypeView extends FrameLayout {
 	GLPaint mPaint = new GLPaint();
 	Paint mAndroidPaint = new Paint();
 	
-	Layout mLayout, mLayout1;
+	Layout mLayout;
 	
 	public FreeTypeView(Context context) {
 		super(context);
 		mPaint.setColor(Color.RED);
-		mPaint.setTextSize(100);
+		mPaint.setTextSize(30);
 		TextView tv = new TextView(context);
 		tv.setTextSize(100);
 		tv.setText(s);
@@ -37,13 +37,11 @@ public class FreeTypeView extends FrameLayout {
 //		}
 		mLayout = new StaticLayout(s, mPaint, 1000, Layout.Alignment.ALIGN_OPPOSITE, 1f, 0, false, true);
 		
-		mLayout1 = new StaticLayout("啊哦heihei", mPaint, 1000, Layout.Alignment.ALIGN_OPPOSITE, 1f, 0, false, true);
 	}
 	
 	@Override
 	protected void dispatchDraw(GLCanvas canvas) {
 		super.dispatchDraw(canvas);
-		mPaint.setTextSize(100);
 		Log.d("lijing", "glview=" + mPaint.measureText(s));
 		Log.d("lijing", "glview=" + mPaint.getFontMetricsInt());
 		
@@ -51,9 +49,9 @@ public class FreeTypeView extends FrameLayout {
 		Log.d("lijing", "android=" + mAndroidPaint.getFontMetricsInt());
 		
 //		canvas.drawText(s, 0, 0, mPaint);
+		canvas.scale(1.5f, 1.5f, 1);
 		if (mLayout != null) {
 			mLayout.draw(canvas);
-			mLayout1.draw(canvas);
 		}
 //		mPaint.setTextSize(50);
 //		canvas.drawText(s, 0, 200, mPaint);

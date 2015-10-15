@@ -27,6 +27,13 @@ public final class Caches {
 		}
 	};
 	
+	// Must define as many texture units as specified by REQUIRED_TEXTURE_UNITS_COUNT
+	static final int gTextureUnits[] = {
+	    GL20.GL_TEXTURE0,
+	    GL20.GL_TEXTURE1,
+	    GL20.GL_TEXTURE2
+	};
+	
 	final GL20 mGL;
 	
 	int maxTextureSize;

@@ -34,7 +34,9 @@ public class PixelBuffer {
 	
 	public void upload(int x, int y, int width, int height, int offset) {
 		mByteBuffer.position(offset);
-		mGL.glTexSubImage2D(GL20.GL_TEXTURE_2D, 0, x, y, width, height,
+//		mGL.glTexSubImage2D(GL20.GL_TEXTURE_2D, 0, x, y, width, height,
+//				mFormat, GL20.GL_UNSIGNED_BYTE, mByteBuffer);
+		mGL.glTexSubImage2D(GL20.GL_TEXTURE_2D, 0, x, 0, width, y + height,
 				mFormat, GL20.GL_UNSIGNED_BYTE, mByteBuffer);
 	}
 	

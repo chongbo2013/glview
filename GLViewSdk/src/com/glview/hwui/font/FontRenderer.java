@@ -4,7 +4,6 @@ import java.nio.ByteBuffer;
 import java.util.Vector;
 
 import android.support.v4.util.LongSparseArray;
-import android.util.Log;
 
 import com.badlogic.gdx.graphics.g2d.freetype.FreeType;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeType.Face;
@@ -26,6 +25,8 @@ public class FontRenderer {
 			return new FontRenderer();
 		}
 	};
+	
+	final static int FONT_BORDER_SIZE = 1;
 	
 	private FontRenderer() {}
 	
@@ -177,6 +178,9 @@ public class FontRenderer {
 				FreeType.GlyphMetrics metrics = slot.getMetrics();
 				int w = mainBitmap.getWidth();
 				int h = mainBitmap.getRows();
+				if (w <= 0 || h <= 0) {
+					continue;
+				}
 				for (CacheTexture cacheTexture : mACacheTextures) {
 					PackerRect rect = cacheTexture.mPacker.insert(w, h);
 					if (rect != null) {
@@ -198,10 +202,13 @@ public class FontRenderer {
 //							}
 //						}
 //						tmp = new JavaBlurProcess().blur(tmp, rect.width(), rect.height(), 15);
-						for (int i = rect.rect().top; i < rect.rect().bottom; i ++) {
-							for (int j = rect.rect().left; j < rect.rect().right; j ++) {
-								byteBuffer.put(i * cacheTexture.mWidth + j, buffer.get((i - rect.rect().top) * pitch + j - rect.rect().left));
-//								byteBuffer.put(i * cacheTexture.mWidth + j, tmp[(i - rect.rect().top) * rect.width() + j - rect.rect().left]);
+						for (int i = 0; i < rect.height(); i ++) {
+							for (int j = 0; j < rect.width(); j ++) {
+								if (i < FONT_BORDER_SIZE || i >= rect.height() - FONT_BORDER_SIZE || j < FONT_BORDER_SIZE || j >= rect.width() - FONT_BORDER_SIZE) {
+									byteBuffer.put((i + rect.rect().top) * cacheTexture.mWidth + j + rect.rect().left, (byte) 0);
+								} else {
+									byteBuffer.put((i + rect.rect().top) * cacheTexture.mWidth + j + rect.rect().left, buffer.get(i * pitch + j));
+								}
 							}
 						}
 						cacheTexture.mDirtyRect.union(rect.rect());
