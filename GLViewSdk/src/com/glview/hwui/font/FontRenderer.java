@@ -19,19 +19,12 @@ import com.glview.libgdx.graphics.opengl.GL20;
 
 public class FontRenderer {
 	
-	static ThreadLocal<FontRenderer> sThreadLocal = new ThreadLocal<FontRenderer>() {
-		@Override
-		protected FontRenderer initialValue() {
-			return new FontRenderer();
-		}
-	};
-	
 	final static int FONT_BORDER_SIZE = 1;
 	
-	private FontRenderer() {}
+	FontRenderer() {}
 	
 	public static FontRenderer instance() {
-		return sThreadLocal.get();
+		return GammaFontRenderer.instance().getFontRenderer();
 	}
 	
 	private boolean mInitialized;
@@ -40,6 +33,7 @@ public class FontRenderer {
 	int mSmallCacheHeight = 512;
 	int mLargeCacheWidth = 1024;
 	int mLargeCacheHeight = 1024;
+	byte[] mGammaTable;
 
     Vector<CacheTexture> mACacheTextures = new Vector<CacheTexture>();
     Vector<CacheTexture> mRGBACacheTextures = new Vector<CacheTexture>();
@@ -49,6 +43,10 @@ public class FontRenderer {
     LongSparseArray<FontData> mFontDatas = new LongSparseArray<FontData>();
     
     GLCanvas mCanvas = null;
+    
+    void setGammaTable(byte[] gammaTable) {
+        mGammaTable = gammaTable;
+    }
     
     public void release() {
     	clearCacheTextures(mACacheTextures);
@@ -202,12 +200,25 @@ public class FontRenderer {
 //							}
 //						}
 //						tmp = new JavaBlurProcess().blur(tmp, rect.width(), rect.height(), 15);
-						for (int i = 0; i < rect.height(); i ++) {
-							for (int j = 0; j < rect.width(); j ++) {
-								if (i < FONT_BORDER_SIZE || i >= rect.height() - FONT_BORDER_SIZE || j < FONT_BORDER_SIZE || j >= rect.width() - FONT_BORDER_SIZE) {
-									byteBuffer.put((i + rect.rect().top) * cacheTexture.mWidth + j + rect.rect().left, (byte) 0);
-								} else {
-									byteBuffer.put((i + rect.rect().top) * cacheTexture.mWidth + j + rect.rect().left, buffer.get(i * pitch + j));
+						if (mGammaTable != null) {
+							for (int i = 0; i < rect.height(); i ++) {
+								for (int j = 0; j < rect.width(); j ++) {
+									if (i < FONT_BORDER_SIZE || i >= rect.height() - FONT_BORDER_SIZE || j < FONT_BORDER_SIZE || j >= rect.width() - FONT_BORDER_SIZE) {
+										byteBuffer.put((i + rect.rect().top) * cacheTexture.mWidth + j + rect.rect().left, (byte) 0);
+									} else {
+										int t = buffer.get(i * pitch + j) & 0xFF;
+										byteBuffer.put((i + rect.rect().top) * cacheTexture.mWidth + j + rect.rect().left, mGammaTable[t]);
+									}
+								}
+							}
+						} else {
+							for (int i = 0; i < rect.height(); i ++) {
+								for (int j = 0; j < rect.width(); j ++) {
+									if (i < FONT_BORDER_SIZE || i >= rect.height() - FONT_BORDER_SIZE || j < FONT_BORDER_SIZE || j >= rect.width() - FONT_BORDER_SIZE) {
+										byteBuffer.put((i + rect.rect().top) * cacheTexture.mWidth + j + rect.rect().left, (byte) 0);
+									} else {
+										byteBuffer.put((i + rect.rect().top) * cacheTexture.mWidth + j + rect.rect().left, buffer.get(i * pitch + j));
+									}
 								}
 							}
 						}

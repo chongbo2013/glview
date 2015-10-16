@@ -10,6 +10,7 @@ import android.widget.Button;
 public class MyButton extends Button {
 	
 	TextPaint mPaint;
+	TextPaint mPaint1;
 
 	public MyButton(Context context) {
 		super(context);
@@ -36,12 +37,17 @@ public class MyButton extends Button {
 		mPaint = new TextPaint();
 		mPaint.setTextSize(100);
 		mPaint.setColor(Color.RED);
+		mPaint1 = new TextPaint();
+		mPaint1.setTextSize(100);
+		mPaint1.setColor(Color.RED);
+		mPaint1.setAntiAlias(true);
 	}
 	
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
-		canvas.drawText("Test111", 100, 100, mPaint);
+		canvas.drawText("Test111", 0, 100, mPaint);
+		canvas.drawText("Test111", 0, 300, mPaint1);
 	}
 
 }

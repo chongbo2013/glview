@@ -14,7 +14,7 @@ import com.glview.widget.TextView;
 
 public class FreeTypeView extends FrameLayout {
 	
-	String s = "Helloeverybody,thisislijingspeaking,whoareyoune";
+	String s = "哎呦我去，这是怎么个情况Helloeverybody 1234567890, thisislijingspeaking,whoareyoune";
 	
 	GLPaint mPaint = new GLPaint();
 	Paint mAndroidPaint = new Paint();
@@ -24,7 +24,7 @@ public class FreeTypeView extends FrameLayout {
 	public FreeTypeView(Context context) {
 		super(context);
 		mPaint.setColor(Color.RED);
-		mPaint.setTextSize(30);
+		mPaint.setTextSize(50);
 		TextView tv = new TextView(context);
 		tv.setTextSize(100);
 		tv.setText(s);
@@ -49,7 +49,6 @@ public class FreeTypeView extends FrameLayout {
 		Log.d("lijing", "android=" + mAndroidPaint.getFontMetricsInt());
 		
 //		canvas.drawText(s, 0, 0, mPaint);
-		canvas.scale(1.5f, 1.5f, 1);
 		if (mLayout != null) {
 			mLayout.draw(canvas);
 		}
