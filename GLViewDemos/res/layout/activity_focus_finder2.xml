@@ -11,17 +11,17 @@
         android:orientation="vertical" >
         <com.rendernode.test.android.view.MyButton 
 	        android:layout_width="wrap_content"
-	        android:layout_height="300dp"
-	        android:maxWidth="200dp"
-	        android:textSize="67sp"
+	        android:layout_height="wrap_content"
+	        android:maxWidth="700dp"
+	        android:textSize="100sp"
 	        android:shadowColor="@color/red"
 	        android:ellipsize="end"
 	        android:shadowDx="5"
 	        android:shadowDy="5"
-	        android:shadowRadius="5"
+	        android:shadowRadius="0"
 	        android:padding="10dp"
 	        android:focusable="true"
-	        android:text="TextTex tTextTextText" />
+	        android:text="哎呦我去，这是怎么个情况Helloeverybody1234567890,thisislijingspeaking,whoareyoune" />
     </LinearLayout>
     <LinearLayout 
         android:layout_width="wrap_content"

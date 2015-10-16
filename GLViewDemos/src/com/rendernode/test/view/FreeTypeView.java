@@ -24,9 +24,9 @@ public class FreeTypeView extends FrameLayout {
 	public FreeTypeView(Context context) {
 		super(context);
 		mPaint.setColor(Color.RED);
-		mPaint.setTextSize(50);
+		mPaint.setTextSize(100);
 		TextView tv = new TextView(context);
-		tv.setTextSize(100);
+		tv.setTextSize(50);
 		tv.setText(s);
 //		addView(tv);
 		mAndroidPaint.setTextSize(100);
@@ -35,7 +35,7 @@ public class FreeTypeView extends FrameLayout {
 //		if (metrics != null) {
 //			mLayout = BoringLayout.make(s, mPaint, 1000, Layout.Alignment.ALIGN_NORMAL, 1, 0, metrics, false, TextUtils.TruncateAt.END, 1000, true);
 //		}
-		mLayout = new StaticLayout(s, mPaint, 1000, Layout.Alignment.ALIGN_OPPOSITE, 1f, 0, false, true);
+		mLayout = new StaticLayout(s, mPaint, 1000, Layout.Alignment.ALIGN_NORMAL, 1f, 0, false, true);
 		
 	}
 	
@@ -49,6 +49,7 @@ public class FreeTypeView extends FrameLayout {
 		Log.d("lijing", "android=" + mAndroidPaint.getFontMetricsInt());
 		
 //		canvas.drawText(s, 0, 0, mPaint);
+		canvas.scale(1.4f, 1.4f, 1);
 		if (mLayout != null) {
 			mLayout.draw(canvas);
 		}

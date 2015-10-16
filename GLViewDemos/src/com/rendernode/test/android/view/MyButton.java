@@ -3,6 +3,7 @@ package com.rendernode.test.android.view;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.widget.Button;
@@ -33,7 +34,13 @@ public class MyButton extends Button {
 		init();
 	}
 	
+	static Typeface sTypeface;
+	
 	void init() {
+		if (sTypeface == null) {
+			sTypeface = Typeface.createFromAsset(getContext().getAssets(), "fonts/DroidSansFallback.ttf");
+		}
+		setTypeface(sTypeface);
 		mPaint = new TextPaint();
 		mPaint.setTextSize(100);
 		mPaint.setColor(Color.RED);
@@ -46,8 +53,8 @@ public class MyButton extends Button {
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
-		canvas.drawText("Test111", 0, 100, mPaint);
-		canvas.drawText("Test111", 0, 300, mPaint1);
+//		canvas.drawText("Test111", 0, 100, mPaint);
+//		canvas.drawText("Test111", 0, 300, mPaint1);
 	}
 
 }
