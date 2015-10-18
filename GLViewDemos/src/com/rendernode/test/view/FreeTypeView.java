@@ -42,7 +42,9 @@ public class FreeTypeView extends FrameLayout {
 	@Override
 	protected void dispatchDraw(GLCanvas canvas) {
 		super.dispatchDraw(canvas);
-		Log.d("lijing", "glview=" + mPaint.measureText(s));
+		for (int i = 0; i < 1000; i ++) {
+			Log.d("lijing", "glview=" + mPaint.measureText(s));
+		}
 		Log.d("lijing", "glview=" + mPaint.getFontMetricsInt());
 		
 		Log.d("lijing", "android=" + mAndroidPaint.measureText(s));

@@ -415,17 +415,19 @@ class CanvasContext {
 			public void doTask() {
 				ensureEglManager();
 				Log.v(TAG, "trimMemory level=" + level);
-				sEglManager.initializeEgl();
 				if (level >= TRIM_MEMORY_COMPLETE) {
 					FontRenderer.instance().release();
 					Caches.getInstance().clear();
-					sEglManager.destroy();
-					sEglManager.initializeEgl();
+				} if (level >= TRIM_MEMORY_MODERATE) {
+					FontRenderer.instance().release();
+					Caches.getInstance().textureCache.clear();
 				} else if (level >= TRIM_MEMORY_UI_HIDDEN) {
 					FontRenderer.instance().release();
 					Caches.getInstance().textureCache.flush();
 				} else {
-					if (level >= TRIM_MEMORY_UI_HIDDEN) {
+					if (level == TRIM_MEMORY_RUNNING_MODERATE) {
+						Caches.getInstance().textureCache.flush();
+					} else {
 						Caches.getInstance().clear();
 					}
 				}

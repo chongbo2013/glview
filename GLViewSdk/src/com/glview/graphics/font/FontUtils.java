@@ -19,14 +19,16 @@ public class FontUtils {
             return 0f;
         }
         FreeType.Face face = paint.getTypeface().face();
-        face.setPixelSizes(0, paint.getTextSize());
-        float r = 0f;
-        for (int i = start; i < end; i ++) {
-        	char c = text.charAt(i);
-        	
-        	r += measureChar(c, face);
+        synchronized (face) {
+	        face.setPixelSizes(0, paint.getTextSize());
+	        float r = 0f;
+	        for (int i = start; i < end; i ++) {
+	        	char c = text.charAt(i);
+	        	
+	        	r += measureChar(c, face);
+	        }
+			return r;
         }
-		return r;
 	}
 	
 	public static float measureText(GLPaint paint, char[] text, int index, int count) {
@@ -41,14 +43,16 @@ public class FontUtils {
             return 0f;
         }
         FreeType.Face face = paint.getTypeface().face();
-        face.setPixelSizes(0, paint.getTextSize());
-        float r = 0f;
-        for (int i = index; i < index + count; i ++) {
-        	char c = text[i];
-        	
-			r += measureChar(c, face);
+        synchronized (face) {
+        	face.setPixelSizes(0, paint.getTextSize());
+        	float r = 0f;
+        	for (int i = index; i < index + count; i ++) {
+        		char c = text[i];
+        		
+        		r += measureChar(c, face);
+        	}
+        	return r;
         }
-		return r;
 	}
 	
 	private static float measureChar(char c, FreeType.Face face) {
@@ -67,31 +71,34 @@ public class FontUtils {
 	
 	public static int getFontMetricsInt(GLPaint paint, FontMetricsInt fmi) {
 		FreeType.Face face = paint.getTypeface().face();
-        face.setPixelSizes(0, paint.getTextSize());
-        FreeType.SizeMetrics fontMetrics = face.getSize().getMetrics();
-        int lineHeight = FreeType.toInt(fontMetrics.getHeight());
-        if (fmi != null) {
-        	fmi.ascent = - FreeType.toInt(fontMetrics.getAscender()); // To Android Coordinate
-        	fmi.top = fmi.ascent;
-        	fmi.descent = - FreeType.toInt(fontMetrics.getDescender());
-        	fmi.bottom = fmi.descent;
-        	fmi.leading = 0;
-//        	Log.d("lijing", "h=" + FreeType.toInt(fontMetrics.getHeight()));
-        }
-		return lineHeight;
+		synchronized (face) {
+			face.setPixelSizes(0, paint.getTextSize());
+			FreeType.SizeMetrics fontMetrics = face.getSize().getMetrics();
+			int lineHeight = FreeType.toInt(fontMetrics.getHeight());
+			if (fmi != null) {
+				fmi.ascent = - FreeType.toInt(fontMetrics.getAscender()); // To Android Coordinate
+				fmi.top = fmi.ascent;
+				fmi.descent = - FreeType.toInt(fontMetrics.getDescender());
+				fmi.bottom = fmi.descent;
+				fmi.leading = 0;
+			}
+			return lineHeight;
+		}
 	}
 	
 	public static float getTextRunAdvances(GLPaint paint, char[] chars, int index, int count, float[] advances, int advanceIndex) {
 		FreeType.Face face = paint.getTypeface().face();
-        face.setPixelSizes(0, paint.getTextSize());
-        float totalAdvance = 0f;
-        for (int i = 0; i < count; i ++) {
-        	float advance = measureChar(chars[i + index], face);
-        	advances[i + advanceIndex] = advance;
-        	totalAdvance += advance;
-        	
-        }
-        return totalAdvance;
+		synchronized (face) {
+	        face.setPixelSizes(0, paint.getTextSize());
+	        float totalAdvance = 0f;
+	        for (int i = 0; i < count; i ++) {
+	        	float advance = measureChar(chars[i + index], face);
+	        	advances[i + advanceIndex] = advance;
+	        	totalAdvance += advance;
+	        	
+	        }
+	        return totalAdvance;
+		}
 	}
 	
 }

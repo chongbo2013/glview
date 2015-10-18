@@ -1,10 +1,10 @@
 package com.glview.graphics.bitmap;
 
-import com.glview.graphics.Bitmap;
-
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
+
+import com.glview.graphics.Bitmap;
 
 public class ResourceBitmap extends Bitmap {
 	

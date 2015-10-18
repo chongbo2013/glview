@@ -128,118 +128,121 @@ public class FontRenderer {
 		Face face = typeface.face();
 		int textSize = paint.getTextSize();
 		if (textSize < 5) return;
-		face.setPixelSizes(0, textSize);
-		long k = typeface.index() * 10000L | textSize;
-		FontData fontData = mFontDatas.get(k);
-		if (fontData == null) {
-			fontData = new FontData();
-			SizeMetrics fontMetrics = face.getSize().getMetrics();
-			fontData.ascent = FreeType.toInt(fontMetrics.getAscender());
-			fontData.descent = FreeType.toInt(fontMetrics.getDescender());
-			fontData.lineHeight = FreeType.toInt(fontMetrics.getHeight());
-			if (face.loadChar(' ', FreeType.FT_LOAD_DEFAULT)) {
-				fontData.spaceWidth = FreeType.toInt(face.getGlyph().getMetrics().getHoriAdvance());
-			} else {
-				fontData.spaceWidth = FreeType.toInt(face.getMaxAdvanceWidth());
+		synchronized (face) {
+			face.setPixelSizes(0, textSize);
+			long k = typeface.index() * 10000L | textSize;
+			FontData fontData = mFontDatas.get(k);
+			if (fontData == null) {
+				fontData = new FontData();
+				SizeMetrics fontMetrics = face.getSize().getMetrics();
+				fontData.ascent = FreeType.toInt(fontMetrics.getAscender());
+				fontData.descent = FreeType.toInt(fontMetrics.getDescender());
+				fontData.lineHeight = FreeType.toInt(fontMetrics.getHeight());
+				if (face.loadChar(' ', FreeType.FT_LOAD_DEFAULT)) {
+					fontData.spaceWidth = FreeType.toInt(face.getGlyph().getMetrics().getHoriAdvance());
+				} else {
+					fontData.spaceWidth = FreeType.toInt(face.getMaxAdvanceWidth());
+				}
 			}
-		}
-		
-		float baseline = y;
-		
-		for (int index = 0; index < end - start; index ++) {
-			char c = text.charAt(index + start);
-			if (c == ' ') {
-				x += fontData.spaceWidth;
-				continue;
-			}
-			int charIndex = face.getCharIndex(c);
-			if (charIndex == 0) {
-				c = 0;
-				charIndex = face.getCharIndex(c);
-			}
-			if (charIndex == 0) continue;
-			long key = charIndex * 10000000L | typeface.index() * 10000L | textSize;
-			FontRect r = mCacheRects.get(key);
-			if (r == null) {
-				if (!face.loadChar(c, FreeType.FT_LOAD_DEFAULT)) {
+			
+			float baseline = y;
+			
+			for (int index = 0; index < end - start; index ++) {
+				char c = text.charAt(index + start);
+				if (c == ' ') {
+					x += fontData.spaceWidth;
 					continue;
 				}
-				FreeType.GlyphSlot slot = face.getGlyph();
-				FreeType.Glyph mainGlyph = slot.getGlyph();
-				try {
-					mainGlyph.toBitmap(FreeType.FT_RENDER_MODE_NORMAL);
-				} catch (RuntimeException e) {
-					mainGlyph.dispose();
-					continue;
+				int charIndex = face.getCharIndex(c);
+				if (charIndex == 0) {
+					c = 0;
+					charIndex = face.getCharIndex(c);
 				}
-				FreeType.Bitmap mainBitmap = mainGlyph.getBitmap();
-				FreeType.GlyphMetrics metrics = slot.getMetrics();
-				int w = mainBitmap.getWidth();
-				int h = mainBitmap.getRows();
-				if (w <= 0 || h <= 0) {
-					continue;
-				}
-				for (CacheTexture cacheTexture : mACacheTextures) {
-					PackerRect rect = cacheTexture.mPacker.insert(w + FONT_BORDER_SIZE * 2, h + FONT_BORDER_SIZE * 2);
-					if (rect != null) {
-						r = new FontRect(cacheTexture, rect, new GlyphSlot(FreeType.toInt(slot.getAdvanceX()), FreeType.toInt(slot.getAdvanceY()), new GlyphMetrics(metrics.getWidth(), metrics.getHeight())), mainGlyph.getLeft(), mainGlyph.getTop());
-						if (cacheTexture.getPixelBuffer() == null) {
-							cacheTexture.allocateTexture();
-						}
-						ByteBuffer byteBuffer = cacheTexture.getPixelBuffer().map();
-						ByteBuffer buffer = mainBitmap.getBuffer();
-						int pitch = mainBitmap.getPitch();
-//						byte[] tmp = new byte[rect.width() * rect.height()];
-//						for (int i = 0; i < rect.height(); i ++) {
-//							for (int j = 0; j < rect.width(); j ++) {
-//								if (i < FONT_BORDER_SIZE || i >= rect.height() - FONT_BORDER_SIZE || j < FONT_BORDER_SIZE || j >= rect.width() - FONT_BORDER_SIZE) {
-//									tmp[i * rect.width() + j] = 0;
-//								} else {
-//									tmp[i * rect.width() + j] = buffer.get((i - FONT_BORDER_SIZE) * pitch + j - FONT_BORDER_SIZE);
+				if (charIndex == 0) continue;
+				long key = charIndex * 10000000L | typeface.index() * 10000L | textSize;
+				FontRect r = mCacheRects.get(key);
+				if (r == null) {
+					if (!face.loadChar(c, FreeType.FT_LOAD_DEFAULT)) {
+						continue;
+					}
+					FreeType.GlyphSlot slot = face.getGlyph();
+					FreeType.Glyph mainGlyph = slot.getGlyph();
+					try {
+						mainGlyph.toBitmap(FreeType.FT_RENDER_MODE_NORMAL);
+					} catch (RuntimeException e) {
+						mainGlyph.dispose();
+						continue;
+					}
+					FreeType.Bitmap mainBitmap = mainGlyph.getBitmap();
+					FreeType.GlyphMetrics metrics = slot.getMetrics();
+					int w = mainBitmap.getWidth();
+					int h = mainBitmap.getRows();
+					if (w <= 0 || h <= 0) {
+						continue;
+					}
+					for (CacheTexture cacheTexture : mACacheTextures) {
+						PackerRect rect = cacheTexture.mPacker.insert(w + FONT_BORDER_SIZE * 2, h + FONT_BORDER_SIZE * 2);
+						if (rect != null) {
+							r = new FontRect(cacheTexture, rect, new GlyphSlot(FreeType.toInt(slot.getAdvanceX()), FreeType.toInt(slot.getAdvanceY()), new GlyphMetrics(metrics.getWidth(), metrics.getHeight())), mainGlyph.getLeft(), mainGlyph.getTop());
+							if (cacheTexture.getPixelBuffer() == null) {
+								cacheTexture.allocateTexture();
+							}
+							ByteBuffer byteBuffer = cacheTexture.getPixelBuffer().map();
+							ByteBuffer buffer = mainBitmap.getBuffer();
+							int pitch = mainBitmap.getPitch();
+//							byte[] tmp = new byte[rect.width() * rect.height()];
+//							for (int i = 0; i < rect.height(); i ++) {
+//								for (int j = 0; j < rect.width(); j ++) {
+//									if (i < FONT_BORDER_SIZE || i >= rect.height() - FONT_BORDER_SIZE || j < FONT_BORDER_SIZE || j >= rect.width() - FONT_BORDER_SIZE) {
+//										tmp[i * rect.width() + j] = 0;
+//									} else {
+//										tmp[i * rect.width() + j] = buffer.get((i - FONT_BORDER_SIZE) * pitch + j - FONT_BORDER_SIZE);
+//									}
 //								}
 //							}
-//						}
-//						tmp = new JavaBlurProcess().blur(tmp, rect.width(), rect.height(), 15);
-						if (mGammaTable != null) {
-							for (int i = 0; i < rect.height(); i ++) {
-								for (int j = 0; j < rect.width(); j ++) {
-									if (i < FONT_BORDER_SIZE || i >= rect.height() - FONT_BORDER_SIZE || j < FONT_BORDER_SIZE || j >= rect.width() - FONT_BORDER_SIZE) {
-										byteBuffer.put((i + rect.rect().top) * cacheTexture.mWidth + j + rect.rect().left, (byte) 0);
-									} else {
-										int t = buffer.get((i - FONT_BORDER_SIZE) * pitch + j - FONT_BORDER_SIZE) & 0xFF;
-										byteBuffer.put((i + rect.rect().top) * cacheTexture.mWidth + j + rect.rect().left, mGammaTable[t]);
+//							tmp = new JavaBlurProcess().blur(tmp, rect.width(), rect.height(), 15);
+							if (mGammaTable != null) {
+								for (int i = 0; i < rect.height(); i ++) {
+									for (int j = 0; j < rect.width(); j ++) {
+										if (i < FONT_BORDER_SIZE || i >= rect.height() - FONT_BORDER_SIZE || j < FONT_BORDER_SIZE || j >= rect.width() - FONT_BORDER_SIZE) {
+											byteBuffer.put((i + rect.rect().top) * cacheTexture.mWidth + j + rect.rect().left, (byte) 0);
+										} else {
+											int t = buffer.get((i - FONT_BORDER_SIZE) * pitch + j - FONT_BORDER_SIZE) & 0xFF;
+											byteBuffer.put((i + rect.rect().top) * cacheTexture.mWidth + j + rect.rect().left, mGammaTable[t]);
+										}
+									}
+								}
+							} else {
+								for (int i = 0; i < rect.height(); i ++) {
+									for (int j = 0; j < rect.width(); j ++) {
+										if (i < FONT_BORDER_SIZE || i >= rect.height() - FONT_BORDER_SIZE || j < FONT_BORDER_SIZE || j >= rect.width() - FONT_BORDER_SIZE) {
+											byteBuffer.put((i + rect.rect().top) * cacheTexture.mWidth + j + rect.rect().left, (byte) 0);
+										} else {
+											byteBuffer.put((i + rect.rect().top) * cacheTexture.mWidth + j + rect.rect().left, buffer.get((i - FONT_BORDER_SIZE) * pitch + j - FONT_BORDER_SIZE));
+										}
 									}
 								}
 							}
-						} else {
-							for (int i = 0; i < rect.height(); i ++) {
-								for (int j = 0; j < rect.width(); j ++) {
-									if (i < FONT_BORDER_SIZE || i >= rect.height() - FONT_BORDER_SIZE || j < FONT_BORDER_SIZE || j >= rect.width() - FONT_BORDER_SIZE) {
-										byteBuffer.put((i + rect.rect().top) * cacheTexture.mWidth + j + rect.rect().left, (byte) 0);
-									} else {
-										byteBuffer.put((i + rect.rect().top) * cacheTexture.mWidth + j + rect.rect().left, buffer.get((i - FONT_BORDER_SIZE) * pitch + j - FONT_BORDER_SIZE));
-									}
-								}
-							}
+							cacheTexture.mDirtyRect.union(rect.rect());
+							cacheTexture.setDirty(true);
+							mCacheRects.put(key, r);
+							break;
 						}
-						cacheTexture.mDirtyRect.union(rect.rect());
-						cacheTexture.setDirty(true);
-						mCacheRects.put(key, r);
-						break;
 					}
+					mainGlyph.dispose();
 				}
-				mainGlyph.dispose();
+				if (r != null) {
+					r.mTexture.allocateMesh();
+					r.mTexture.mFontBatch.draw(x + r.mLeft, baseline/* - r.mRect.height()*/ - r.mTop, r.mRect.width(), r.mRect.height(), r.mRect.rect().left, r.mRect.rect().top, r.mRect.width(), r.mRect.height(), alpha, paint);
+					x += r.mGlyphSlot.getAdvanceX();
+				} else {
+				}
 			}
-			if (r != null) {
-				r.mTexture.allocateMesh();
-				r.mTexture.mFontBatch.draw(x + r.mLeft, baseline/* - r.mRect.height()*/ - r.mTop, r.mRect.width(), r.mRect.height(), r.mRect.rect().left, r.mRect.rect().top, r.mRect.width(), r.mRect.height(), alpha, paint);
-				x += r.mGlyphSlot.getAdvanceX();
-			} else {
+			if (forceFinish) {
+				flushBatch();
 			}
 		}
-		if (forceFinish) {
-			flushBatch();
-		}
+		
 	}
 	
 	private static class FontData {
