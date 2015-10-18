@@ -1,14 +1,5 @@
 package com.glview.widget;
 
-import android.content.Context;
-import android.content.res.Resources;
-import android.content.res.TypedArray;
-import android.graphics.Color;
-import android.text.GetChars;
-import android.util.AttributeSet;
-import android.util.FloatMath;
-import android.util.TypedValue;
-
 import com.glview.content.GLContext;
 import com.glview.graphics.Rect;
 import com.glview.graphics.Typeface;
@@ -27,6 +18,14 @@ import com.glview.view.Gravity;
 import com.glview.view.View;
 import com.glview.view.ViewGroup.LayoutParams;
 import com.glview.view.ViewTreeObserver;
+
+import android.content.Context;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
+import android.graphics.Color;
+import android.text.GetChars;
+import android.util.AttributeSet;
+import android.util.TypedValue;
 
 public class TextView extends View implements ViewTreeObserver.OnPreDrawListener {
 	
@@ -1808,8 +1807,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
              * keep leading edge in view.
              */
 
-            int left = (int) FloatMath.floor(layout.getLineLeft(line));
-            int right = (int) FloatMath.ceil(layout.getLineRight(line));
+            int left = (int) Math.floor(layout.getLineLeft(line));
+            int right = (int) Math.ceil(layout.getLineRight(line));
 
             if (right - left < hspace) {
                 scrollx = (right + left) / 2 - hspace / 2;
@@ -1821,10 +1820,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
             }
         } else if (a == Layout.Alignment.ALIGN_RIGHT) {
-            int right = (int) FloatMath.ceil(layout.getLineRight(line));
+            int right = (int) Math.ceil(layout.getLineRight(line));
             scrollx = right - hspace;
         } else { // a == Layout.Alignment.ALIGN_LEFT (will also be the default)
-            scrollx = (int) FloatMath.floor(layout.getLineLeft(line));
+            scrollx = (int) Math.floor(layout.getLineLeft(line));
         }
 
         if (ht < vspace) {
@@ -2188,7 +2187,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             max = Math.max(max, layout.getLineWidth(i));
         }
 
-        return (int) FloatMath.ceil(max);
+        return (int) Math.ceil(max);
     }
 	
 	private static final BoringLayout.Metrics UNKNOWN_BORING = new BoringLayout.Metrics();
@@ -2232,7 +2231,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             if (boring == null || boring == UNKNOWN_BORING) {
                 if (des < 0) {
-                    des = (int) FloatMath.ceil(Layout.getDesiredWidth(mText, mTextPaint));
+                    des = (int) Math.ceil(Layout.getDesiredWidth(mText, mTextPaint));
                 }
                 width = des;
             } else {

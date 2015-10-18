@@ -16,14 +16,13 @@
 
 package com.glview.widget;
 
-import android.content.Context;
-import android.hardware.SensorManager;
-import android.util.FloatMath;
-import android.util.Log;
-
 import com.glview.view.ViewConfiguration;
 import com.glview.view.animation.AnimationUtils;
 import com.glview.view.animation.Interpolator;
+
+import android.content.Context;
+import android.hardware.SensorManager;
+import android.util.Log;
 
 /**
  * This class encapsulates scrolling with the ability to overshoot the bounds
@@ -184,7 +183,7 @@ public class OverScroller {
     public float getCurrVelocity() {
         float squaredNorm = mScrollerX.mCurrVelocity * mScrollerX.mCurrVelocity;
         squaredNorm += mScrollerY.mCurrVelocity * mScrollerY.mCurrVelocity;
-        return FloatMath.sqrt(squaredNorm);
+        return (float) Math.sqrt(squaredNorm);
     }
 
     /**
