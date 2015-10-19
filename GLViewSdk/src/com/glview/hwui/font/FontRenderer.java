@@ -3,11 +3,9 @@ package com.glview.hwui.font;
 import java.nio.ByteBuffer;
 import java.util.Vector;
 
-import android.support.v4.util.LongSparseArray;
-
-import com.badlogic.gdx.graphics.g2d.freetype.FreeType;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeType.Face;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeType.SizeMetrics;
+import com.glview.freetype.FreeType;
+import com.glview.freetype.FreeType.Face;
+import com.glview.freetype.FreeType.SizeMetrics;
 import com.glview.graphics.Rect;
 import com.glview.graphics.Typeface;
 import com.glview.graphics.font.GlyphMetrics;
@@ -16,6 +14,8 @@ import com.glview.hwui.GLCanvas;
 import com.glview.hwui.GLPaint;
 import com.glview.hwui.packer.PackerRect;
 import com.glview.libgdx.graphics.opengl.GL20;
+
+import android.support.v4.util.LongSparseArray;
 
 public class FontRenderer {
 	

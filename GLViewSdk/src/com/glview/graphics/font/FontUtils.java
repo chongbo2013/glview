@@ -1,6 +1,6 @@
 package com.glview.graphics.font;
 
-import com.badlogic.gdx.graphics.g2d.freetype.FreeType;
+import com.glview.freetype.FreeType;
 import com.glview.hwui.GLPaint;
 import com.glview.hwui.GLPaint.FontMetricsInt;
 

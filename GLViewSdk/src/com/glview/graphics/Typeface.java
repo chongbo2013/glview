@@ -7,16 +7,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.WeakHashMap;
 
+import com.glview.content.GLContext;
+import com.glview.freetype.FreeType;
+import com.glview.freetype.FreeType.Face;
+import com.glview.freetype.FreeType.Library;
+
 import android.content.res.AssetManager;
 import android.util.Log;
 
-import com.badlogic.gdx.graphics.g2d.freetype.FreeType;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeType.Face;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeType.Library;
-import com.glview.content.GLContext;
-
 /**
- * TODO 这边NDK环境没有搭上，先采用libgdx的freetype扩展
  * @author lijing.lj
  */
 public class Typeface {
