@@ -14,7 +14,6 @@
 	        android:layout_height="300dp"
 	        android:textSize="@dimen/text_size_1"
 	        android:padding="10dp"
-	        android:elevation="10dp"
 	        android:focusable="true"
 	        android:text="Text1" />
     </LinearLayout>
@@ -27,7 +26,6 @@
 	        android:layout_height="100dp"
 	        android:textSize="@dimen/text_size_1"
 	        android:padding="10dp"
-	        android:elevation="10dp"
 	        android:focusable="true"
 	        android:text="Text2" />
         <Button 
@@ -35,7 +33,6 @@
 	        android:layout_height="100dp"
 	        android:textSize="@dimen/text_size_1"
 	        android:padding="10dp"
-	        android:elevation="10dp"
 	        android:focusable="true"
 	        android:text="Text3" />
         <Button 
@@ -43,7 +40,6 @@
 	        android:layout_height="100dp"
 	        android:textSize="@dimen/text_size_1"
 	        android:padding="10dp"
-	        android:elevation="10dp"
 	        android:focusable="true"
 	        android:text="Text4" />
     </LinearLayout>

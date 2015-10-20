@@ -421,13 +421,13 @@ class CanvasContext {
 				sEglManager.initializeEgl();
 				if (level >= TRIM_MEMORY_COMPLETE) {
 					Caches.getInstance().clear();
-					sEglManager.destroy();
-					sEglManager.initializeEgl();
 				} else if (level >= TRIM_MEMORY_UI_HIDDEN) {
 					Caches.getInstance().textureCache.flush();
 				} else {
-					if (level >= TRIM_MEMORY_UI_HIDDEN) {
-						Caches.getInstance().clear();
+					if (level == TRIM_MEMORY_RUNNING_LOW) {
+						Caches.getInstance().textureCache.flush();
+					} else if (level == TRIM_MEMORY_RUNNING_CRITICAL) {
+						Caches.getInstance().textureCache.clear();
 					}
 				}
 			}
