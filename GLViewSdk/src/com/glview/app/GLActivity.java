@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.SurfaceView;
 
 import com.glview.content.GLContext;
+import com.glview.hwui.RenderPolicy;
 import com.glview.thread.Handler;
 import com.glview.thread.Looper;
 import com.glview.view.GLRootView;
@@ -92,11 +93,6 @@ public abstract class GLActivity extends Activity implements GLRootView.Callback
 	}
 	
 	@Override
-	public void onTrimMemory(int level) {
-		super.onTrimMemory(level);
-	}
-	
-	@Override
 	public void onAttached(View content) {
 	}
 	
@@ -106,5 +102,17 @@ public abstract class GLActivity extends Activity implements GLRootView.Callback
 		} else {
 			mHandler.post(r);
 		}
+	}
+	
+	@Override
+	public void onLowMemory() {
+		super.onLowMemory();
+		RenderPolicy.trimMemory(TRIM_MEMORY_COMPLETE);
+	}
+	
+	@Override
+	public void onTrimMemory(int level) {
+		super.onTrimMemory(level);
+		RenderPolicy.trimMemory(level);
 	}
 }

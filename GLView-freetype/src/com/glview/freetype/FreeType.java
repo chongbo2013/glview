@@ -65,7 +65,7 @@ public class FreeType {
 				throw new RuntimeException("Couldn't load font");
 			}
 			else {
-				return new Face(face, this);
+				return new Face(face, this, buffer);
 			}
 		}
 
@@ -92,10 +92,12 @@ public class FreeType {
 	
 	public static class Face extends Pointer {
 		Library library;
+		ByteBuffer buffer;
 		
-		public Face (long address, Library library) {
+		public Face (long address, Library library, ByteBuffer buffer) {
 			super(address);
 			this.library = library;
+			this.buffer = buffer;
 		}
 		
 		public void dispose() {

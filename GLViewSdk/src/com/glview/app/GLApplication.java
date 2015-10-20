@@ -22,6 +22,6 @@ public class GLApplication extends Application {
 	@Override
 	public void onLowMemory() {
 		super.onLowMemory();
-		RenderPolicy.trimMemory(TRIM_MEMORY_RUNNING_CRITICAL);
+		RenderPolicy.trimMemory(TRIM_MEMORY_COMPLETE);
 	}
 }
