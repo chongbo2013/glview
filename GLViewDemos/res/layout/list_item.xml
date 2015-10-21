@@ -2,7 +2,7 @@
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:glview="http://schemas.android.com/apk/res-auto"
     glview:layout_width="fill_parent"
-    glview:layout_height="fill_parent" glview:id="@+id/list_item_textview" glview:textSize="16sp" glview:textColor="#000" glview:padding="5dp">
+    glview:layout_height="fill_parent" glview:id="@+id/list_item_textview" glview:textSize="16sp" glview:padding="5dp">
     
 
 </TextView>

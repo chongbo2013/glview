@@ -1,5 +1,7 @@
 package com.glview.hwui.font;
 
+import android.opengl.Matrix;
+
 import com.glview.graphics.shader.BaseShader;
 import com.glview.graphics.shader.DefaultTextureShader;
 import com.glview.hwui.Caches;
@@ -11,6 +13,7 @@ import com.glview.libgdx.graphics.glutils.ShaderProgram;
 import com.glview.libgdx.graphics.math.NumberUtils;
 import com.glview.libgdx.graphics.opengl.GL20;
 import com.glview.libgdx.graphics.utils.Disposable;
+import com.glview.util.MatrixUtil;
 
 class FontBatch implements Disposable {
 	
@@ -28,6 +31,8 @@ class FontBatch implements Disposable {
 	
 	Caches mCaches;
 	
+	float[] temp = new float[16];
+	
 	public FontBatch(FontRenderer fontRenderer, CacheTexture texture) {
 		this(fontRenderer, texture, 1000);
 	}
@@ -39,6 +44,8 @@ class FontBatch implements Disposable {
 		mTexture = texture;
 		mInvTexWidth = 1.0f / texture.getWidth();
 		mInvTexHeight = 1.0f / texture.getHeight();
+		
+		Matrix.setIdentityM(temp, 0);
 		
 		mCaches = Caches.getInstance();
 		
@@ -75,7 +82,7 @@ class FontBatch implements Disposable {
 		mMesh.dispose();
 	}
 	
-	public void draw(float x, float y, float width, float height, float srcX, float srcY, float srcWidth, float srcHeight, float alpha, GLPaint paint) {
+	public void draw(float x, float y, float width, float height, float srcX, float srcY, float srcWidth, float srcHeight, float[] transformation, float alpha, int color, GLPaint paint) {
 		float[] vertices = this.mVertices;
 
 		if (this.mIndex == vertices.length) //
@@ -85,32 +92,84 @@ class FontBatch implements Disposable {
 		final float v = srcY * mInvTexHeight;
 		final float u2 = (srcX + srcWidth) * mInvTexWidth;
 		final float v2 = (srcY + srcHeight) * mInvTexHeight;
+		
 		final float fx2 = x + width;
 		final float fy2 = y + height;
+		
+		float[] pt = MatrixUtil.mapPoint(transformation, x, y);
+		float x1 = pt[0], y1 = pt[1];
+		pt = MatrixUtil.mapPoint(transformation, x, fy2);
+		float x2 = pt[0], y2 = pt[1];
+		pt = MatrixUtil.mapPoint(transformation, fx2, fy2);
+		float x3 = pt[0], y3 = pt[1];
+		pt = MatrixUtil.mapPoint(transformation,fx2, y);
+		float x4 = pt[0], y4 = pt[1];
 
-		float color = NumberUtils.intToFloatColor(packColor(alpha * paint.getAlpha(), paint.getColor()));
+		float c = NumberUtils.intToFloatColor(packColor(alpha, color));
+		int idx = this.mIndex;
+		vertices[idx++] = x1;
+		vertices[idx++] = y1;
+		vertices[idx++] = c;
+		vertices[idx++] = u;
+		vertices[idx++] = v;
+
+		vertices[idx++] = x2;
+		vertices[idx++] = y2;
+		vertices[idx++] = c;
+		vertices[idx++] = u;
+		vertices[idx++] = v2;
+
+		vertices[idx++] = x3;
+		vertices[idx++] = y3;
+		vertices[idx++] = c;
+		vertices[idx++] = u2;
+		vertices[idx++] = v2;
+
+		vertices[idx++] = x4;
+		vertices[idx++] = y4;
+		vertices[idx++] = c;
+		vertices[idx++] = u2;
+		vertices[idx++] = v;
+		this.mIndex = idx;
+	}
+	
+	public void draw(float x, float y, float width, float height, float srcX, float srcY, float srcWidth, float srcHeight, float alpha, int color, GLPaint paint) {
+		float[] vertices = this.mVertices;
+
+		if (this.mIndex == vertices.length) //
+			flush();
+
+		final float u = srcX * mInvTexWidth;
+		final float v = srcY * mInvTexHeight;
+		final float u2 = (srcX + srcWidth) * mInvTexWidth;
+		final float v2 = (srcY + srcHeight) * mInvTexHeight;
+		
+		final float fx2 = x + width;
+		final float fy2 = y + height;
+		
+		float c = NumberUtils.intToFloatColor(packColor(alpha, color));
 		int idx = this.mIndex;
 		vertices[idx++] = x;
 		vertices[idx++] = y;
-		vertices[idx++] = color;
+		vertices[idx++] = c;
 		vertices[idx++] = u;
 		vertices[idx++] = v;
 
 		vertices[idx++] = x;
 		vertices[idx++] = fy2;
-		vertices[idx++] = color;
+		vertices[idx++] = c;
 		vertices[idx++] = u;
 		vertices[idx++] = v2;
 
 		vertices[idx++] = fx2;
 		vertices[idx++] = fy2;
-		vertices[idx++] = color;
+		vertices[idx++] = c;
 		vertices[idx++] = u2;
 		vertices[idx++] = v2;
 
 		vertices[idx++] = fx2;
 		vertices[idx++] = y;
-		vertices[idx++] = color;
+		vertices[idx++] = c;
 		vertices[idx++] = u2;
 		vertices[idx++] = v;
 		this.mIndex = idx;
@@ -131,7 +190,7 @@ class FontBatch implements Disposable {
 		mCaches.useProgram(program);
 		mDefaultShader.setupColor(1, 1, 1, 1);
 		if (mFontRenderer.getGLCanvas() != null) {
-			mFontRenderer.getGLCanvas().applyMatrix(mDefaultShader);
+			mFontRenderer.getGLCanvas().applyMatrix(mDefaultShader, temp);
 		}
 		mDefaultShader.setupCustomValues();
 		
@@ -141,9 +200,9 @@ class FontBatch implements Disposable {
 	
 	int packColor(float alpha, int color) {
 		float prealpha = ((color >>> 24) & 0xFF) * alpha / 255;
-		float colorR = Math.round(((color >> 16) & 0xFF)) * 1.0f / 255;
-		float colorG = Math.round(((color >> 8) & 0xFF)) * 1.0f / 255;
-		float colorB = Math.round((color & 0xFF)) * 1.0f / 255;
+		float colorR = Math.round(((color >> 16) & 0xFF)) * prealpha / 255;
+		float colorG = Math.round(((color >> 8) & 0xFF)) * prealpha / 255;
+		float colorB = Math.round((color & 0xFF)) * prealpha / 255;
 		float colorA = Math.round(255 * prealpha) * 1.0f / 255;
 		int intBits = (int)(255 * colorA) << 24 | (int)(255 * colorB) << 16 | (int)(255 * colorG) << 8 | (int)(255 * colorR);
 		return intBits;

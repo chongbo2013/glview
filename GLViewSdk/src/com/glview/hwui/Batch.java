@@ -1,5 +1,7 @@
 package com.glview.hwui;
 
+import android.opengl.Matrix;
+
 import com.glview.graphics.Bitmap;
 import com.glview.graphics.shader.BaseShader;
 import com.glview.graphics.shader.DefaultTextureShader;
@@ -25,6 +27,8 @@ class Batch {
 	
 	Caches mCaches;
 	
+	float[] temp = new float[16];
+	
 	public Batch(GLCanvas canvas) {
 		this(canvas, 1000);
 	}
@@ -33,7 +37,7 @@ class Batch {
 		// 32767 is max index, so 32767 / 6 - (32767 / 6 % 3) = 5460.
 		if (size > 5460) throw new IllegalArgumentException("Can't have more than 5460 sprites per batch: " + size);
 		mCanvas = canvas;
-		
+		Matrix.setIdentityM(temp, 0);
 		mCaches = Caches.getInstance();
 		
 		mMesh = new Mesh(false, size * 4, size * 6, new VertexAttribute(
@@ -130,7 +134,7 @@ class Batch {
 		ShaderProgram program = mDefaultShader.getShaderProgram();
 		mCaches.useProgram(program);
 		mDefaultShader.setupColor(1, 1, 1, 1);
-		mCanvas.applyMatrix(mDefaultShader);
+		mCanvas.applyMatrix(mDefaultShader, temp);
 		mDefaultShader.setupCustomValues();
 		
 		mesh.render(program, GL20.GL_TRIANGLES, 0, count);
@@ -138,10 +142,10 @@ class Batch {
 	}
 	
 	int packColor(float alpha, int color) {
-		float prealpha = ((color >>> 24) & 0xFF) * alpha / 255;
-		float colorR = Math.round(((color >> 16) & 0xFF)) * 1.0f / 255;
-		float colorG = Math.round(((color >> 8) & 0xFF)) * 1.0f / 255;
-		float colorB = Math.round((color & 0xFF)) * 1.0f / 255;
+		float prealpha = ((color >>> 24) & 0xFF) * (alpha / 255) / 255;
+		float colorR = Math.round(((color >> 16) & 0xFF)) * prealpha / 255;
+		float colorG = Math.round(((color >> 8) & 0xFF)) * prealpha / 255;
+		float colorB = Math.round((color & 0xFF)) * prealpha / 255;
 		float colorA = Math.round(255 * prealpha) * 1.0f / 255;
 		int intBits = (int)(255 * colorA) << 24 | (int)(255 * colorB) << 16 | (int)(255 * colorG) << 8 | (int)(255 * colorR);
 		return intBits;

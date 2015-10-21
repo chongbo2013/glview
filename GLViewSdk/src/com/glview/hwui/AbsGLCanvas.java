@@ -157,7 +157,7 @@ public abstract class AbsGLCanvas implements GLCanvas {
 	
 	@Override
 	public void drawText(CharSequence text, int start, int end, float x,
-			float y, GLPaint paint, boolean drawDeffer) {
+			float y, GLPaint paint, boolean drawDefer) {
 	}
 	
 	@Override
@@ -194,6 +194,6 @@ public abstract class AbsGLCanvas implements GLCanvas {
 	}
 	
 	@Override
-	public void applyMatrix(BaseShader shader) {
+	public void applyMatrix(BaseShader shader, float[] transform) {
 	}
 }

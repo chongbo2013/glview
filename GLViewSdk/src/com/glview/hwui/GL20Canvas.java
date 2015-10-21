@@ -247,6 +247,7 @@ class GL20Canvas extends StatefullBaseCanvas {
 	@Override
 	public void endFrame() {
 		flushBatch();
+		flushFont();
 		mFontRenderer.setGLCanvas(null);
 	}
 
@@ -426,9 +427,9 @@ class GL20Canvas extends StatefullBaseCanvas {
 	}
 	
 	@Override
-	public void applyMatrix(BaseShader shader) {
+	public void applyMatrix(BaseShader shader, float[] transform) {
 		// 将最终变换矩阵传入shader程序
-		float[] m = getFinalMatrix(mFinalMatrix, currentSnapshot().transform);
+		float[] m = getFinalMatrix(mFinalMatrix, transform == null ? currentSnapshot().transform : transform);
 		shader.setupViewModelMatrices(m);
 	}
 
@@ -536,9 +537,9 @@ class GL20Canvas extends StatefullBaseCanvas {
 	
 	@Override
 	public void drawText(CharSequence text, int start, int end, float x, float y,
-			GLPaint paint, boolean drawDeffer) {
+			GLPaint paint, boolean drawDefer) {
 		setupDraw();
-		mFontRenderer.renderText(this, text, start, end, x, y, currentSnapshot().alpha, getGLPaint(paint), currentSnapshot().clipRect, currentSnapshot().transform, !drawDeffer);
+		mFontRenderer.renderText(this, text, start, end, x, y, currentSnapshot().alpha, getGLPaint(paint), currentSnapshot().clipRect, currentSnapshot().transform, !drawDefer);
 	}
 
 	class ShaderManager {
@@ -667,6 +668,7 @@ class GL20Canvas extends StatefullBaseCanvas {
 	///////////////////////////////////////////////////////////////////////////////
 	Rect mTmpClipRect = new Rect();
 	void setScissorFromClip() {
+		flushFont();
 	    Rect clip = currentClipRect();
 	    if (mCaches.setScissor(clip.left, clip.top, clip.width(), clip.height())) {
 	    }
@@ -684,6 +686,9 @@ class GL20Canvas extends StatefullBaseCanvas {
 	
 	private void flushBatch() {
 		mBatch.flush();
+	}
+	
+	private void flushFont() {
 		mFontRenderer.flushBatch();
 	}
 }

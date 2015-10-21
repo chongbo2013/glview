@@ -21,6 +21,11 @@ public class GLPaint {
     int mTextSize;
     Typeface mTypeface;
     
+    float mShadowRadius;
+    float mShadowDx, mShadowDy;
+    int mShadowColor;
+    boolean mHasShadow = false;
+    
     /**
      * Paint flag that enables antialiasing when drawing.
      *
@@ -155,6 +160,8 @@ public class GLPaint {
     		mTextSize = paint.mTextSize;
     		mTypeface = paint.mTypeface;
     		mShader = paint.mShader;
+    		
+    		setShadowLayer(paint.mShadowRadius, paint.mShadowDx, paint.mShadowDy, paint.mShadowColor);
     	} else {
     		reset();
     	}
@@ -168,6 +175,7 @@ public class GLPaint {
     	mTextSize = 25;
     	mTypeface = null;
     	mShader = null;
+    	clearShadowLayer();
     }
     
     /**
@@ -291,7 +299,43 @@ public class GLPaint {
     	mTypeface = typeface;
     }
     
-    public void setShadowLayer(float radius, float dx, float dy, int shadowColor) {}
+    public void setShadowLayer(float radius, float dx, float dy, int shadowColor) {
+    	if (mShadowRadius > 25) {
+    		throw new IllegalArgumentException("Shadow radius must not big than 25!");
+    	}
+    	mShadowRadius = radius;
+    	mShadowDx = dx;
+    	mShadowDy = dy;
+    	mShadowColor = shadowColor;
+    	mHasShadow = mShadowRadius >= 1 && mShadowColor != 0;
+    }
+    
+    public float getShadowRadius() {
+    	return mShadowRadius;
+    }
+    
+    public float getShadowDx() {
+    	return mShadowDx;
+    }
+    
+    public float getShadowDy() {
+    	return mShadowDy;
+    }
+    
+    public int getShadowColor() {
+    	return mShadowColor;
+    }
+    
+    public boolean hasShadow() {
+    	return mHasShadow;
+    }
+    
+    /**
+     * Clear the shadow layer.
+     */
+    public void clearShadowLayer() {
+        setShadowLayer(0, 0, 0, 0);
+    }
     
     public void setShader(BaseShader shader) {
     	mShader = shader;

@@ -58,9 +58,9 @@ public abstract class Layout {
      */
     protected Layout(CharSequence text, GLPaint paint,
                      int width, Alignment align,
-                     float spacingMult, float spacingAdd, boolean drawDeffer) {
+                     float spacingMult, float spacingAdd, boolean drawDefer) {
         this(text, paint, width, align, TextDirectionHeuristics.FIRSTSTRONG_LTR,
-                spacingMult, spacingAdd, drawDeffer);
+                spacingMult, spacingAdd, drawDefer);
     }
     
 	/**
@@ -78,7 +78,7 @@ public abstract class Layout {
      */
     protected Layout(CharSequence text, GLPaint paint,
                      int width, Alignment align, TextDirectionHeuristic textDir,
-                     float spacingMult, float spacingAdd, boolean drawDeffer) {
+                     float spacingMult, float spacingAdd, boolean drawDefer) {
     	if (width < 0)
             throw new IllegalArgumentException("Layout: " + width + " < 0");
 
@@ -88,7 +88,7 @@ public abstract class Layout {
         mAlignment = align;
         mSpacingMult = spacingMult;
         mSpacingAdd = spacingAdd;
-        mDrawDeffer = drawDeffer;
+        mDrawDefer = drawDefer;
     }
     
     /**
@@ -162,10 +162,17 @@ public abstract class Layout {
                     x = (right + left - max) >> 1;
                 }
             }
-            boolean drawDeffer = i == lastLine ? mDrawDeffer : true;
-            canvas.drawText(buf, start, end, x, lbaseline, paint, drawDeffer);
+            boolean drawDefer = i == lastLine ? mDrawDefer : true;
+            
+            // FIXME what to do
+            if (i != firstLine && TextUtils.isSpace(buf.charAt(start)) && buf.charAt(start - 1) != CHAR_NEW_LINE) {
+            	start ++;
+            }
+            canvas.drawText(buf, start, end, x, lbaseline, paint, drawDefer);
         }
     }
+    
+    private static final char CHAR_NEW_LINE = '\n';
     
     /**
      * Return the text that is displayed by this Layout.
@@ -700,8 +707,8 @@ public abstract class Layout {
 
     }
     
-    public void setDrawDeffer(boolean drawDeffer) {
-    	mDrawDeffer = drawDeffer;
+    public void setDrawDefer(boolean drawDefer) {
+    	mDrawDefer = drawDefer;
     }
     
     private CharSequence mText;
@@ -711,7 +718,7 @@ public abstract class Layout {
     private float mSpacingMult;
     private float mSpacingAdd;
     private TextDirectionHeuristic mTextDir;
-    protected boolean mDrawDeffer;
+    protected boolean mDrawDefer;
     
     public static final int DIR_LEFT_TO_RIGHT = 1;
     public static final int DIR_RIGHT_TO_LEFT = -1;

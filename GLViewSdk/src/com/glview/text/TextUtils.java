@@ -382,7 +382,7 @@ public class TextUtils {
 	 * heuristic, but should be accurate most of the time.
 	 */
 	public static boolean isWordBreak(char c) {
-	    if (c == ' ' || (c >= 0x2000 && c <= 0x200a) || c == 0x3000) {
+	    if (isSpace(c)) {
 	        // spaces
 	        return true;
 	    }
@@ -392,6 +392,14 @@ public class TextUtils {
 	    }
 	    // Note: kana is not included, as sophisticated fonts may kern kana
 	    return false;
+	}
+	
+	public static boolean isSpace(char c) {
+		if (c == ' ' || (c >= 0x2000 && c <= 0x200a) || c == 0x3000) {
+	        // spaces
+	        return true;
+	    }
+		return false;
 	}
 	
 }

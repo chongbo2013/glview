@@ -87,7 +87,7 @@ public interface GLCanvas {
             GLPaint paint);
     
     public void drawText(CharSequence text, int start, int end, float x, float y,
-            GLPaint paint, boolean drawDeffer);
+            GLPaint paint, boolean drawDefer);
 	
 	public void drawCircle(float cx, float cy, float radius, GLPaint paint);
 	
@@ -101,6 +101,6 @@ public interface GLCanvas {
 	
 	public void clipRect(float left, float top, float right, float bottom);
 	
-	public void applyMatrix(BaseShader shader);
+	public void applyMatrix(BaseShader shader, float[] transform);
 	
 }

@@ -242,7 +242,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private Layout mSavedMarqueeModeLayout;
     
     private CharSequence mText;
-    private boolean mDrawDeffer = true;;
+    private boolean mDrawDefer = true;;
     
     private final GLPaint mTextPaint;
     private boolean mUserSetTextScaleX;
@@ -2127,7 +2127,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 } else {
                     result = BoringLayout.make(getText(), mTextPaint,
                             wantWidth, alignment, mSpacingMult, mSpacingAdd,
-                            boring, mIncludePad, mDrawDeffer);
+                            boring, mIncludePad, mDrawDefer);
                 }
 
                 if (useSaved) {
@@ -2143,29 +2143,29 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     result = BoringLayout.make(getText(), mTextPaint,
                             wantWidth, alignment, mSpacingMult, mSpacingAdd,
                             boring, mIncludePad, effectiveEllipsize,
-                            ellipsisWidth, mDrawDeffer);
+                            ellipsisWidth, mDrawDefer);
                 }
             } else if (shouldEllipsize) {
                 result = new StaticLayout(getText(),
                         0, getText().length(),
                         mTextPaint, wantWidth, alignment, mTextDir, mSpacingMult,
                         mSpacingAdd, mIncludePad, effectiveEllipsize,
-                        ellipsisWidth, mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE, mDrawDeffer);
+                        ellipsisWidth, mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE, mDrawDefer);
             } else {
                 result = new StaticLayout(getText(), mTextPaint,
                         wantWidth, alignment, mTextDir, mSpacingMult, mSpacingAdd,
-                        mIncludePad, mDrawDeffer);
+                        mIncludePad, mDrawDefer);
             }
         } else if (shouldEllipsize) {
             result = new StaticLayout(getText(),
                     0, getText().length(),
                     mTextPaint, wantWidth, alignment, mTextDir, mSpacingMult,
                     mSpacingAdd, mIncludePad, effectiveEllipsize,
-                    ellipsisWidth, mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE, mDrawDeffer);
+                    ellipsisWidth, mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE, mDrawDefer);
         } else {
             result = new StaticLayout(getText(), mTextPaint,
                     wantWidth, alignment, mTextDir, mSpacingMult, mSpacingAdd,
-                    mIncludePad, mDrawDeffer);
+                    mIncludePad, mDrawDefer);
         }
         return result;
     }

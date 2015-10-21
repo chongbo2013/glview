@@ -38,10 +38,10 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
                         GLPaint paint, int outerwidth,
                         Alignment align,
                         float spacingmult, float spacingadd,
-                        BoringLayout.Metrics metrics, boolean includepad, boolean drawDeffer) {
+                        BoringLayout.Metrics metrics, boolean includepad, boolean drawDefer) {
         return new BoringLayout(source, paint, outerwidth, align,
                                 spacingmult, spacingadd, metrics,
-                                includepad, drawDeffer);
+                                includepad, drawDefer);
     }
 
     public static BoringLayout make(CharSequence source,
@@ -49,10 +49,10 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
                         Alignment align,
                         float spacingmult, float spacingadd,
                         BoringLayout.Metrics metrics, boolean includepad,
-                        TextUtils.TruncateAt ellipsize, int ellipsizedWidth, boolean drawDeffer) {
+                        TextUtils.TruncateAt ellipsize, int ellipsizedWidth, boolean drawDefer) {
         return new BoringLayout(source, paint, outerwidth, align,
                                 spacingmult, spacingadd, metrics,
-                                includepad, ellipsize, ellipsizedWidth, drawDeffer);
+                                includepad, ellipsize, ellipsizedWidth, drawDefer);
     }
 
     /**
@@ -379,7 +379,7 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
     @Override
     public void draw(GLCanvas c) {
         if (mDirect != null) {
-            c.drawText(mDirect, 0, mDirect.length(), 0, mBottom - mDesc, mPaint, mDrawDeffer);
+            c.drawText(mDirect, 0, mDirect.length(), 0, mBottom - mDesc, mPaint, mDrawDefer);
         } else {
             super.draw(c);
         }

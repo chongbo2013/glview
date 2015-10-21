@@ -6,15 +6,12 @@ public class GlyphSlot {
 	
 	int advanceY;
 	
-	GlyphMetrics metrics;
-	
 	public GlyphSlot() {
 	}
 	
-	public GlyphSlot(int advanceX, int advanceY, GlyphMetrics metrics) {
+	public GlyphSlot(int advanceX, int advanceY) {
 		this.advanceX = advanceX;
 		this.advanceY = advanceY;
-		this.metrics = metrics;
 	}
 
 	public int getAdvanceX() {
@@ -31,14 +28,6 @@ public class GlyphSlot {
 
 	public void setAdvanceY(int advanceY) {
 		this.advanceY = advanceY;
-	}
-
-	public GlyphMetrics getMetrics() {
-		return metrics;
-	}
-
-	public void setMetrics(GlyphMetrics metrics) {
-		this.metrics = metrics;
 	}
 	
 }

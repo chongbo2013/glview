@@ -30,7 +30,6 @@ public class XListViewActivity extends BaseActivity implements IXListViewListene
 	@Override
 	public void onAttached(View content) {
 		super.onAttached(content);
-		content.setBackgroundColor(Color.BLUE);
 		mListView = (XListView) content.findViewById(R.id.xListView);
 		mListView.setPullLoadEnable(true);
 		mAdapter = new ArrayAdapter<String>(this, R.layout.list_item, items);

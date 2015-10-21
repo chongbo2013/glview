@@ -68,6 +68,10 @@ public class Snapshot implements Poolable {
 	    }
 	}
 	
+	public float[] getTransformation() {
+		return transform;
+	}
+	
 	float mTransformRoot[] = new float[48];
 	Rect mClipRectRoot = new Rect();
 	

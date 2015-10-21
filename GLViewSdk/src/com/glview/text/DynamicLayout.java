@@ -40,9 +40,9 @@ public class DynamicLayout extends Layout
                          GLPaint paint,
                          int width, Alignment align,
                          float spacingmult, float spacingadd,
-                         boolean includepad, boolean drawDeffer) {
+                         boolean includepad, boolean drawDefer) {
         this(base, base, paint, width, align, spacingmult, spacingadd,
-             includepad, drawDeffer);
+             includepad, drawDefer);
     }
 
     /**
@@ -54,9 +54,9 @@ public class DynamicLayout extends Layout
                          GLPaint paint,
                          int width, Alignment align,
                          float spacingmult, float spacingadd,
-                         boolean includepad, boolean drawDeffer) {
+                         boolean includepad, boolean drawDefer) {
         this(base, display, paint, width, align, spacingmult, spacingadd,
-             includepad, null, 0, drawDeffer);
+             includepad, null, 0, drawDefer);
     }
     
     /**
@@ -73,9 +73,9 @@ public class DynamicLayout extends Layout
                          int width, Alignment align,
                          float spacingmult, float spacingadd,
                          boolean includepad,
-                         TextUtils.TruncateAt ellipsize, int ellipsizedWidth, boolean drawDeffer) {
+                         TextUtils.TruncateAt ellipsize, int ellipsizedWidth, boolean drawDefer) {
         this(base, display, paint, width, align, TextDirectionHeuristics.FIRSTSTRONG_LTR,
-                spacingmult, spacingadd, includepad, ellipsize, ellipsizedWidth, drawDeffer);
+                spacingmult, spacingadd, includepad, ellipsize, ellipsizedWidth, drawDefer);
     }
 
     /**
@@ -90,11 +90,11 @@ public class DynamicLayout extends Layout
                          int width, Alignment align, TextDirectionHeuristic textDir,
                          float spacingmult, float spacingadd,
                          boolean includepad,
-                         TextUtils.TruncateAt ellipsize, int ellipsizedWidth, boolean drawDeffer) {
+                         TextUtils.TruncateAt ellipsize, int ellipsizedWidth, boolean drawDefer) {
         super((ellipsize == null)
                 ? display
                 : new Ellipsizer(display),
-              paint, width, align, textDir, spacingmult, spacingadd, drawDeffer);
+              paint, width, align, textDir, spacingmult, spacingadd, drawDefer);
 
         mBase = base;
         mDisplay = display;

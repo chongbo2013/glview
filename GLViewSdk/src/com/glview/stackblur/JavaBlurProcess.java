@@ -77,8 +77,8 @@ public class JavaBlurProcess implements BlurProcess {
 
 	@Override
 	public byte[] blur(byte[] original, int w, int h, float radius) {
-		byte[] currentPixels = new byte[w * h];
-		System.arraycopy(original, 0, currentPixels, 0, currentPixels.length);
+		byte[] currentPixels = original;//new byte[w * h];
+//		System.arraycopy(original, 0, currentPixels, 0, currentPixels.length);
 		int cores = EXECUTOR_THREADS;
 
 		ArrayList<A8BlurTask> horizontal = new ArrayList<A8BlurTask>(cores);

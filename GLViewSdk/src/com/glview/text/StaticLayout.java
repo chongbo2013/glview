@@ -40,9 +40,9 @@ public class StaticLayout extends Layout {
     public StaticLayout(CharSequence source, GLPaint paint,
                         int width,
                         Alignment align, float spacingmult, float spacingadd,
-                        boolean includepad, boolean drawDeffer) {
+                        boolean includepad, boolean drawDefer) {
         this(source, 0, source.length(), paint, width, align,
-             spacingmult, spacingadd, includepad, drawDeffer);
+             spacingmult, spacingadd, includepad, drawDefer);
     }
     
     /**
@@ -51,18 +51,18 @@ public class StaticLayout extends Layout {
     public StaticLayout(CharSequence source, GLPaint paint,
             int width, Alignment align, TextDirectionHeuristic textDir,
             float spacingmult, float spacingadd,
-            boolean includepad, boolean drawDeffer) {
+            boolean includepad, boolean drawDefer) {
         this(source, 0, source.length(), paint, width, align, textDir,
-                spacingmult, spacingadd, includepad, drawDeffer);
+                spacingmult, spacingadd, includepad, drawDefer);
     }
 
     public StaticLayout(CharSequence source, int bufstart, int bufend,
     					GLPaint paint, int outerwidth,
                         Alignment align,
                         float spacingmult, float spacingadd,
-                        boolean includepad, boolean drawDeffer) {
+                        boolean includepad, boolean drawDefer) {
         this(source, bufstart, bufend, paint, outerwidth, align,
-             spacingmult, spacingadd, includepad, null, 0, drawDeffer);
+             spacingmult, spacingadd, includepad, null, 0, drawDefer);
     }
     
     /**
@@ -72,9 +72,9 @@ public class StaticLayout extends Layout {
             GLPaint paint, int outerwidth,
             Alignment align, TextDirectionHeuristic textDir,
             float spacingmult, float spacingadd,
-            boolean includepad, boolean drawDeffer) {
+            boolean includepad, boolean drawDefer) {
         this(source, bufstart, bufend, paint, outerwidth, align, textDir,
-                spacingmult, spacingadd, includepad, null, 0, Integer.MAX_VALUE, drawDeffer);
+                spacingmult, spacingadd, includepad, null, 0, Integer.MAX_VALUE, drawDefer);
 }
 
     public StaticLayout(CharSequence source, int bufstart, int bufend,
@@ -82,10 +82,10 @@ public class StaticLayout extends Layout {
             Alignment align,
             float spacingmult, float spacingadd,
             boolean includepad,
-            TextUtils.TruncateAt ellipsize, int ellipsizedWidth, boolean drawDeffer) {
+            TextUtils.TruncateAt ellipsize, int ellipsizedWidth, boolean drawDefer) {
         this(source, bufstart, bufend, paint, outerwidth, align,
         		TextDirectionHeuristics.FIRSTSTRONG_LTR,
-                spacingmult, spacingadd, includepad, ellipsize, ellipsizedWidth, Integer.MAX_VALUE, drawDeffer);
+                spacingmult, spacingadd, includepad, ellipsize, ellipsizedWidth, Integer.MAX_VALUE, drawDefer);
     }
 
     /**
@@ -96,11 +96,11 @@ public class StaticLayout extends Layout {
                         Alignment align, TextDirectionHeuristic textDir,
                         float spacingmult, float spacingadd,
                         boolean includepad,
-                        TextUtils.TruncateAt ellipsize, int ellipsizedWidth, int maxLines, boolean drawDeffer) {
+                        TextUtils.TruncateAt ellipsize, int ellipsizedWidth, int maxLines, boolean drawDefer) {
         super((ellipsize == null)
                 ? source
                 : new Ellipsizer(source),
-              paint, outerwidth, align, textDir, spacingmult, spacingadd, drawDeffer);
+              paint, outerwidth, align, textDir, spacingmult, spacingadd, drawDefer);
 
         /*
          * This is annoying, but we can't refer to the layout until
@@ -183,7 +183,6 @@ public class StaticLayout extends Layout {
             int dir = measured.mDir;
 
 //            breakOpp = nLineBreakOpportunities(localeLanguageTag, chs, paraEnd - paraStart, breakOpp);
-            breakOpp = new int[paraEnd - paraStart + 1];
             Vector<Integer> vec = new Vector<Integer>();
             for (int i = 0; i < paraEnd - paraStart; i ++) {
             	char c = chs[i];
