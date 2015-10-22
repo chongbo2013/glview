@@ -140,6 +140,7 @@ public class FontRenderer {
 	}
 	
 	private final static boolean DEBUG_FONT_CACHE = false;
+	private final static boolean DEBUG_FONT_SHADOW_CACHE = false;
 	GLPaint mTestPaint = null, mTestPaint2 = null;
 	public void end(InnerGLCanvas canvas) {
 		if (DEBUG_FONT_CACHE) {
@@ -151,6 +152,21 @@ public class FontRenderer {
 				mTestPaint2.setColor(Color.WHITE);
 			}
 			for (CacheTexture texture : mCacheTextures.mACacheTextures) {
+				if (texture.mTexture.mId > 0) {
+					((GLCanvas) canvas).drawRect(0, 0, texture.mWidth, texture.mHeight, mTestPaint2);
+					canvas.drawTexture(texture.mTexture, 0, 0, texture.mWidth, texture.mHeight, mTestPaint);
+				}
+			}
+		}
+		if (DEBUG_FONT_SHADOW_CACHE) {
+			if (mTestPaint == null) {
+				mTestPaint = new GLPaint();
+				mTestPaint.setColor(Color.RED);
+				mTestPaint.setShader(new A8TextureShader());
+				mTestPaint2 = new GLPaint();
+				mTestPaint2.setColor(Color.WHITE);
+			}
+			for (CacheTexture texture : mShadowCacheTextures.mACacheTextures) {
 				if (texture.mTexture.mId > 0) {
 					((GLCanvas) canvas).drawRect(0, 0, texture.mWidth, texture.mHeight, mTestPaint2);
 					canvas.drawTexture(texture.mTexture, 0, 0, texture.mWidth, texture.mHeight, mTestPaint);
