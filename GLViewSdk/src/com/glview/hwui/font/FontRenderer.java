@@ -3,28 +3,29 @@ package com.glview.hwui.font;
 import java.nio.ByteBuffer;
 import java.util.Vector;
 
-import android.support.v4.util.LongSparseArray;
-
 import com.glview.freetype.FreeType;
 import com.glview.freetype.FreeType.Face;
 import com.glview.freetype.FreeType.SizeMetrics;
 import com.glview.graphics.Rect;
-import com.glview.graphics.RectF;
 import com.glview.graphics.Typeface;
 import com.glview.graphics.font.GlyphSlot;
+import com.glview.graphics.shader.A8TextureShader;
 import com.glview.hwui.GLCanvas;
 import com.glview.hwui.GLPaint;
+import com.glview.hwui.InnerGLCanvas;
 import com.glview.hwui.packer.PackerRect;
 import com.glview.internal.util.GrowingArrayUtils;
 import com.glview.libgdx.graphics.opengl.GL20;
 import com.glview.stackblur.BlurProcess;
 import com.glview.stackblur.JavaBlurProcess;
 import com.glview.text.TextUtils;
-import com.glview.util.MatrixUtil;
+
+import android.graphics.Color;
+import android.support.v4.util.LongSparseArray;
 
 public class FontRenderer {
 	
-	final static int FONT_BORDER_SIZE = 1;
+	public final static int TEXTURE_BORDER_SIZE = 1;
 	
 	FontRenderer() {}
 	
@@ -35,9 +36,9 @@ public class FontRenderer {
 	private boolean mInitialized;
 	
 	int mSmallCacheWidth = 1024;
-	int mSmallCacheHeight = 1024;
+	int mSmallCacheHeight = 512;
 	int mLargeCacheWidth = 2048;
-	int mLargeCacheHeight = 2048;
+	int mLargeCacheHeight = 1024;
 	byte[] mGammaTable;
 	byte[] mBuffer = new byte[2048];
 	
@@ -93,6 +94,8 @@ public class FontRenderer {
 	    		GL20.GL_ALPHA, false));
 	    mShadowCacheTextures.mACacheTextures.add(createCacheTexture(mLargeCacheWidth, mLargeCacheHeight >> 1,
 	    		GL20.GL_ALPHA, false));
+	    mShadowCacheTextures.mACacheTextures.add(createCacheTexture(mLargeCacheWidth, mLargeCacheHeight,
+	    		GL20.GL_ALPHA, false));
 	}
 	
 	void clearCacheTextures(FontCaches caches) {
@@ -134,6 +137,26 @@ public class FontRenderer {
 	
 	public GLCanvas getGLCanvas() {
 		return mCanvas;
+	}
+	
+	private final static boolean DEBUG_FONT_CACHE = false;
+	GLPaint mTestPaint = null, mTestPaint2 = null;
+	public void end(InnerGLCanvas canvas) {
+		if (DEBUG_FONT_CACHE) {
+			if (mTestPaint == null) {
+				mTestPaint = new GLPaint();
+				mTestPaint.setColor(Color.RED);
+				mTestPaint.setShader(new A8TextureShader());
+				mTestPaint2 = new GLPaint();
+				mTestPaint2.setColor(Color.WHITE);
+			}
+			for (CacheTexture texture : mCacheTextures.mACacheTextures) {
+				if (texture.mTexture.mId > 0) {
+					((GLCanvas) canvas).drawRect(0, 0, texture.mWidth, texture.mHeight, mTestPaint2);
+					canvas.drawTexture(texture.mTexture, 0, 0, texture.mWidth, texture.mHeight, mTestPaint);
+				}
+			}
+		}
 	}
  	
 	public void renderText(GLCanvas canvas, CharSequence text, int start, int end, float x, float y,
@@ -202,7 +225,7 @@ public class FontRenderer {
 						continue;
 					}
 					if (r == null) {
-						r = cacheBitmap(mCacheTextures, w, h, FONT_BORDER_SIZE, slot, glyph, bitmap, true);
+						r = cacheBitmap(mCacheTextures, w, h, TEXTURE_BORDER_SIZE, slot, glyph, bitmap, true);
 						if (r != null) {
 							mCacheTextures.mCacheRects.put(key, r);
 						}
@@ -277,7 +300,7 @@ public class FontRenderer {
 							if (i < border || i >= rect.height() - border || j < border || j >= rect.width() - border) {
 								byteBuffer.put((i + rect.rect().top) * cacheTexture.mWidth + j + rect.rect().left, (byte) 0);
 							} else {
-								byteBuffer.put((i + rect.rect().top) * cacheTexture.mWidth + j + rect.rect().left, buffer.get((i - FONT_BORDER_SIZE) * pitch + j - FONT_BORDER_SIZE));
+								byteBuffer.put((i + rect.rect().top) * cacheTexture.mWidth + j + rect.rect().left, buffer.get((i - border) * pitch + j - border));
 							}
 						}
 					}

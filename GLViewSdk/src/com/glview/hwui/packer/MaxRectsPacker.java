@@ -28,6 +28,10 @@ public class MaxRectsPacker implements Packer {
 		int bestShortSideFit;
 		int bestLongSideFit;
 	}
+	
+	public MaxRectsPacker(int width, int height) {
+		this(width, height, false);
+	}
 
 	public MaxRectsPacker(int width, int height, boolean rotation) {
 		this(width, height, rotation, FreeRectangleChoiceHeuristic.BestShortSideFit);

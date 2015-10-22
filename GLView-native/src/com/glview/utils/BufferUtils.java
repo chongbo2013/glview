@@ -3,10 +3,12 @@ package com.glview.utils;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
+import com.glview.Lib;
+
 public class BufferUtils {
 	
 	static {
-		System.loadLibrary("GLView-freetype");
+		Lib.init();
 	}
 	
 	public static void copy(ByteBuffer src, int srcOffset, ByteBuffer dst, int dstOffset, int numBytes) {

@@ -18,6 +18,8 @@ package com.glview.freetype;
 
 import java.nio.ByteBuffer;
 
+import com.glview.Lib;
+
 public class FreeType {
 	// @off
 	/*JNI
@@ -779,7 +781,7 @@ public class FreeType {
 	public static int FT_STROKER_LINEJOIN_MITER_FIXED    = 3;
 
    public static Library initFreeType() {
-   	System.loadLibrary("GLView-freetype");
+   	Lib.init();
    	long address = initFreeTypeJni();
    	if(address == 0) throw new RuntimeException("Couldn't initialize FreeType library");
    	else return new Library(address);

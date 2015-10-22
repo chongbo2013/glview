@@ -1,7 +1,5 @@
 package com.glview.hwui;
 
-import android.opengl.Matrix;
-
 import com.glview.App;
 import com.glview.graphics.Bitmap;
 import com.glview.graphics.Rect;
@@ -21,12 +19,14 @@ import com.glview.libgdx.graphics.opengl.GL20;
 import com.glview.util.MatrixUtil;
 import com.glview.util.Utils;
 
+import android.opengl.Matrix;
+
 /**
  * This canvas use OpenGL ES 2.0
  * 
  * @author lijing.lj
  */
-class GL20Canvas extends StatefullBaseCanvas {
+class GL20Canvas extends StatefullBaseCanvas implements InnerGLCanvas {
 
 	private static final String TAG = "GL20Canvas";
 
@@ -248,6 +248,7 @@ class GL20Canvas extends StatefullBaseCanvas {
 	public void endFrame() {
 		flushBatch();
 		flushFont();
+		mFontRenderer.end(this);
 		mFontRenderer.setGLCanvas(null);
 	}
 
@@ -339,6 +340,7 @@ class GL20Canvas extends StatefullBaseCanvas {
 		mRenderState.setDepthMask(true);
 	}
 	
+	@Override
 	public void drawTexture(Texture texture, float x, float y, float width, float height, GLPaint paint) {
 		drawTexture(texture, x, y, width, height, true, paint);
 	}

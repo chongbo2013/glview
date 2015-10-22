@@ -1,7 +1,7 @@
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
  
-LOCAL_MODULE    := GLView-freetype
+LOCAL_MODULE    := GLView-native
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/freetype-2.6.1/include 
  
 LOCAL_CFLAGS := $(LOCAL_C_INCLUDES:%=-I%) -O2 -Wall -D__ANDROID__ -std=c99 -DFT2_BUILD_LIBRARY

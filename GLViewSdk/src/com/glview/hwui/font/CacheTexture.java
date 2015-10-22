@@ -3,7 +3,6 @@ package com.glview.hwui.font;
 import com.glview.graphics.Rect;
 import com.glview.hwui.Caches;
 import com.glview.hwui.Texture;
-import com.glview.hwui.packer.MaxRectsPacker;
 import com.glview.hwui.packer.Packer;
 import com.glview.libgdx.graphics.opengl.GL20;
 
@@ -34,7 +33,7 @@ class CacheTexture {
 		mFormat = format;
 		mCaches = Caches.getInstance();
 		
-		mPacker = new MaxRectsPacker(mWidth, mHeight, false);
+		mPacker = new ColumnBasePacker(mWidth, mHeight);
 		
 		mTexture = new Texture();
 		mTexture.setWidth(width);
