@@ -1,4 +1,4 @@
-#include <com.glview.freetype.FreeType.h>
+#include <com_glview_freetype_FreeType.h>
 
 //@line:35
 

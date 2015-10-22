@@ -60,6 +60,8 @@ public class MaxRectsPacker implements Packer {
 	
 	public String dump() {
 		StringBuilder sb = new StringBuilder();
+		sb.append("us=" + mUsedRects.size());
+		sb.append("fs=" + mFreeRects.size());
 		sb.append("usedRect=");
 		sb.append(mUsedRects);
 		sb.append(", freeRect=");

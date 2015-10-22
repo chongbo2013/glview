@@ -203,11 +203,15 @@ public class FontRenderer {
 					}
 					if (r == null) {
 						r = cacheBitmap(mCacheTextures, w, h, FONT_BORDER_SIZE, slot, glyph, bitmap, true);
-						mCacheTextures.mCacheRects.put(key, r);
+						if (r != null) {
+							mCacheTextures.mCacheRects.put(key, r);
+						}
 					}
 					if (shadowR == null && hasShadow) {
 						shadowR = cacheBitmapShadow(mShadowCacheTextures, w, h, shadowRadius, slot, glyph, bitmap, true);
-						mShadowCacheTextures.mCacheRects.put(key + shadowRadius, shadowR);
+						if (shadowR != null) {
+							mShadowCacheTextures.mCacheRects.put(key + shadowRadius, shadowR);
+						}
 					}
 					glyph.dispose();
 				}

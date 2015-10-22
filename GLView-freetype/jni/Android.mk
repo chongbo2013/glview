@@ -6,10 +6,11 @@ LOCAL_C_INCLUDES := $(LOCAL_PATH)/freetype-2.6.1/include
  
 LOCAL_CFLAGS := $(LOCAL_C_INCLUDES:%=-I%) -O2 -Wall -D__ANDROID__ -std=c99 -DFT2_BUILD_LIBRARY
 LOCAL_CPPFLAGS := $(LOCAL_C_INCLUDES:%=-I%) -O2 -Wall -D__ANDROID__ -std=c99 -DFT2_BUILD_LIBRARY
-LOCAL_LDLIBS := -lm
+LOCAL_LDLIBS := -lm -llog
 LOCAL_ARM_MODE  := arm
  
-LOCAL_SRC_FILES := com.glview.freetype.FreeType.cpp\
+LOCAL_SRC_FILES := com_glview_freetype_FreeType.cpp\
+	com_glview_utils_BufferUtils.cpp\
 	freetype-2.6.1/src/autofit/autofit.c\
 	freetype-2.6.1/src/base/ftbase.c\
 	freetype-2.6.1/src/base/ftbbox.c\
