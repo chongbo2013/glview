@@ -5,6 +5,7 @@
 bin/
 gen/
 .project
+.cproject
 .settings
 .classpath
 project.properties
