@@ -14,6 +14,7 @@
       __typeof__ (max) _max__ = (max); \
       _a__ < _min__ ? _min__ : _a__ > _max__ ? _max__ : _a__; })
 
+
 // Based heavily on http://vitiy.info/Code/stackblur.cpp
 // See http://vitiy.info/stackblur-algorithm-multi-threaded-blur-for-cpp/
 // Stack Blur Algorithm by Mario Klingemann <mario@quasimondo.com>
@@ -59,7 +60,7 @@ static unsigned char const stackblur_shr[255] =
 };
 
 /// Stackblur algorithm body
-void stackblurJob(char* src,                ///< input image data
+void stackblurJob(unsigned char* src,                ///< input image data
                   unsigned int w,                    ///< image width
                   unsigned int h,                    ///< image height
                   unsigned int stride,           ///< image data stride
@@ -72,10 +73,10 @@ void stackblurJob(char* src,                ///< input image data
     unsigned int x, y, xp, yp, i;
     unsigned int sp;
     unsigned int stack_start;
-    char* stack_ptr;
+    unsigned char* stack_ptr;
 
-    char* src_ptr;
-    char* dst_ptr;
+    unsigned char* src_ptr;
+    unsigned char* dst_ptr;
 
     unsigned long sum_a;
     unsigned long sum_in_a;
@@ -86,13 +87,12 @@ void stackblurJob(char* src,                ///< input image data
     unsigned int div = (radius * 2) + 1;
     unsigned int mul_sum = stackblur_mul[radius];
     unsigned char shr_sum = stackblur_shr[radius];
-    char stack[div * 3];
+    unsigned char stack[div];
 
     if (step == 1)
     {
-        int minY = core * h / cores;
-        int maxY = (core + 1) * h / cores;
-
+    	unsigned int minY = core * h / cores;
+    	unsigned int maxY = (core + 1) * h / cores;
         for(y = minY; y < maxY; y++)
         {
             sum_a =
@@ -127,7 +127,7 @@ void stackblurJob(char* src,                ///< input image data
             dst_ptr = src + y * stride;//src + y * w; // img.pix_ptr(0, y);
             for(x = 0; x < w; x++)
             {
-                dst_ptr[0] = clamp((sum_a * mul_sum) >> shr_sum, 0, 0xff);
+                dst_ptr[0] = clamp((unsigned char) ((sum_a * mul_sum) >> shr_sum), 0, 0xff);
                 dst_ptr += 1;
 
                 sum_a -= sum_out_a;
@@ -163,8 +163,8 @@ void stackblurJob(char* src,                ///< input image data
     // step 2
     if (step == 2)
     {
-        int minX = core * w / cores;
-        int maxX = (core + 1) * w / cores;
+    	unsigned int minX = core * w / cores;
+    	unsigned int maxX = (core + 1) * w / cores;
 
         for(x = minX; x < maxX; x++)
         {
@@ -197,7 +197,7 @@ void stackblurJob(char* src,                ///< input image data
             dst_ptr = src + x;               // img.pix_ptr(x, 0);
             for(y = 0; y < h; y++)
             {
-                dst_ptr[0] = clamp((sum_a * mul_sum) >> shr_sum, 0, 0xff);
+                dst_ptr[0] = clamp((unsigned char) ((sum_a * mul_sum) >> shr_sum), 0, 0xff);
                 dst_ptr += stride;//w;
 
                 sum_a -= sum_out_a;
@@ -231,7 +231,7 @@ void stackblurJob(char* src,                ///< input image data
 }
 
 JNIEXPORT void JNICALL Java_com_glview_blur_Blur_blur(JNIEnv* env, jclass clzz, jbyteArray src, jint w, jint h, jint stride, jint radius, jint threadCount, jint threadIndex, jint step) {
-	char* data = (char*)env->GetPrimitiveArrayCritical(src, 0);
+	unsigned char* data = (unsigned char*)env->GetPrimitiveArrayCritical(src, 0);
 
     stackblurJob(data, w, h, stride, radius, threadCount, threadIndex, step);
     env->ReleasePrimitiveArrayCritical(src, data, 0);

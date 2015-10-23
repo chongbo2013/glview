@@ -7,6 +7,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 /*
  * Class:     com_glview_blur_Blur
  * Method:    blur

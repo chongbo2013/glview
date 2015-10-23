@@ -6,6 +6,7 @@ import java.util.Vector;
 import android.graphics.Color;
 import android.support.v4.util.LongSparseArray;
 
+import com.glview.font.FontUtils;
 import com.glview.freetype.FreeType;
 import com.glview.freetype.FreeType.Face;
 import com.glview.freetype.FreeType.SizeMetrics;
@@ -25,7 +26,7 @@ import com.glview.text.TextUtils;
 
 public class FontRenderer {
 	
-	public final static int TEXTURE_BORDER_SIZE = 1;
+	private final static int FONT_BORDER_SIZE = 1;
 	
 	FontRenderer() {}
 	
@@ -238,7 +239,7 @@ public class FontRenderer {
 						continue;
 					}
 					if (r == null) {
-						r = cacheBitmap(mCacheTextures, w, h, TEXTURE_BORDER_SIZE, slot, glyph, bitmap, true);
+						r = cacheBitmap(mCacheTextures, w, h, FONT_BORDER_SIZE, slot, glyph, bitmap, true);
 						if (r != null) {
 							mCacheTextures.mCacheRects.put(key, r);
 						}
@@ -284,10 +285,8 @@ public class FontRenderer {
 	}
 	
 	private FontRect cacheBitmap(FontCaches caches, int w, int h, int border, FreeType.GlyphSlot slot, FreeType.Glyph glyph, FreeType.Bitmap bitmap, boolean c) {
-		w = w + border * 2;
-		h = h + border * 2;
 		for (CacheTexture cacheTexture : caches.mACacheTextures) {
-			PackerRect rect = cacheTexture.mPacker.insert(w, h);
+			PackerRect rect = cacheTexture.mPacker.insert(w + border * 2, h + border * 2);
 			if (rect != null) {
 				FontRect r = new FontRect(cacheTexture, rect, new GlyphSlot(FreeType.toInt(slot.getAdvanceX()), FreeType.toInt(slot.getAdvanceY())), glyph.getLeft(), glyph.getTop());
 				if (cacheTexture.getPixelBuffer() == null) {
@@ -296,15 +295,16 @@ public class FontRenderer {
 				ByteBuffer byteBuffer = cacheTexture.getPixelBuffer().map();
 				ByteBuffer buffer = bitmap.getBuffer();
 				int pitch = bitmap.getPitch();
-				for (int i = 0; i < rect.height(); i ++) {
-					for (int j = 0; j < rect.width(); j ++) {
-						if (i < border || i >= rect.height() - border || j < border || j >= rect.width() - border) {
-							byteBuffer.put((i + rect.rect().top) * cacheTexture.mWidth + j + rect.rect().left, (byte) 0);
-						} else {
-							byteBuffer.put((i + rect.rect().top) * cacheTexture.mWidth + j + rect.rect().left, buffer.get((i - border) * pitch + j - border));
-						}
-					}
-				}
+//				for (int i = 0; i < rect.height(); i ++) {
+//					for (int j = 0; j < rect.width(); j ++) {
+//						if (i < border || i >= rect.height() - border || j < border || j >= rect.width() - border) {
+//							byteBuffer.put((i + rect.rect().top) * cacheTexture.mWidth + j + rect.rect().left, (byte) 0);
+//						} else {
+//							byteBuffer.put((i + rect.rect().top) * cacheTexture.mWidth + j + rect.rect().left, buffer.get((i - border) * pitch + j - border));
+//						}
+//					}
+//				}
+				FontUtils.loadGlyphBitmap(buffer, w, h, pitch, border, byteBuffer, cacheTexture.mWidth, cacheTexture.mHeight, rect.rect().left, rect.rect().top);
 				cacheTexture.mDirtyRect.union(rect.rect());
 				cacheTexture.setDirty(true);
 				return r;
@@ -321,10 +321,8 @@ public class FontRenderer {
 	 * TODO 较耗时，需要优化。可以考虑将模糊操作通过其他工作线程处理
 	 */
 	private FontRect cacheBitmapShadow(FontCaches caches, int w, int h, int shadowRadius, FreeType.GlyphSlot slot, FreeType.Glyph glyph, FreeType.Bitmap bitmap, boolean c) {
-		w = w + shadowRadius * 2;
-		h = h + shadowRadius * 2;
 		for (CacheTexture cacheTexture : caches.mACacheTextures) {
-			PackerRect rect = cacheTexture.mPacker.insert(w, h);
+			PackerRect rect = cacheTexture.mPacker.insert(w + shadowRadius * 2, h + shadowRadius * 2);
 			if (rect != null) {
 				FontRect r = new FontRect(cacheTexture, rect, new GlyphSlot(FreeType.toInt(slot.getAdvanceX()), FreeType.toInt(slot.getAdvanceY())), glyph.getLeft(), glyph.getTop());
 				if (cacheTexture.getPixelBuffer() == null) {
@@ -333,25 +331,27 @@ public class FontRenderer {
 				ByteBuffer byteBuffer = cacheTexture.getPixelBuffer().map();
 				ByteBuffer buffer = bitmap.getBuffer();
 				int pitch = bitmap.getPitch();
-				int size = w * h;
+				int size = rect.width() * rect.height();
 				if (mBuffer.length < size) {
 					mBuffer = new byte[GrowingArrayUtils.growSize(size)];
 				}
-				for (int i = 0; i < h; i ++) {
-					for (int j = 0; j < w; j ++) {
-						if (i < shadowRadius || i >= rect.height() - shadowRadius || j < shadowRadius || j >= rect.width() - shadowRadius) {
-							mBuffer[i* w + j] = (byte) 0;
-						} else {
-							mBuffer[i * w + j] = buffer.get((i - shadowRadius) * pitch + j - shadowRadius);
-						}
-					}
-				}
-				mBlurProcess.blur(mBuffer, w, h, w, shadowRadius);
-				for (int i = 0; i < h; i ++) {
-					for (int j = 0; j < w; j ++) {
-						byteBuffer.put((i + rect.rect().top) * cacheTexture.mWidth + j + rect.rect().left, mBuffer[i * w + j]);
-					}
-				}
+//				for (int i = 0; i < rect.height(); i ++) {
+//					for (int j = 0; j < rect.width(); j ++) {
+//						if (i < shadowRadius || i >= rect.height() - shadowRadius || j < shadowRadius || j >= rect.width() - shadowRadius) {
+//							mBuffer[i* rect.width() + j] = (byte) 0;
+//						} else {
+//							mBuffer[i * rect.width() + j] = buffer.get((i - shadowRadius) * pitch + j - shadowRadius);
+//						}
+//					}
+//				}
+				FontUtils.loadGlyphBlurBitmap(buffer, w, h, pitch, mBuffer, shadowRadius);
+				mBlurProcess.blur(mBuffer, rect.width(), rect.height(), rect.width(), shadowRadius);
+//				for (int i = 0; i < rect.height(); i ++) {
+//					for (int j = 0; j < rect.width(); j ++) {
+//						byteBuffer.put((i + rect.rect().top) * cacheTexture.mWidth + j + rect.rect().left, mBuffer[i * rect.width() + j]);
+//					}
+//				}
+				FontUtils.loadGlyphBitmap(mBuffer, rect.width(), rect.height(), rect.width(), 0, byteBuffer, cacheTexture.mWidth, cacheTexture.mHeight, rect.rect().left, rect.rect().top);
 				cacheTexture.mDirtyRect.union(rect.rect());
 				cacheTexture.setDirty(true);
 				return r;
@@ -359,7 +359,7 @@ public class FontRenderer {
 		}
 		if (c) {
 			flushAndInvalidate(caches);
-			return cacheBitmap(caches, w, h, shadowRadius, slot, glyph, bitmap, false);
+			return cacheBitmapShadow(caches, w, h, shadowRadius, slot, glyph, bitmap, false);
 		}
 		return null;
 	}
