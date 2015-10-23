@@ -2,8 +2,6 @@ package com.glview.stackblur;
 
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Blur using Java code.
@@ -33,9 +31,6 @@ import java.util.concurrent.Executors;
  * @license: Apache License 2.0
  */
 public class JavaBlurProcess implements BlurProcess {
-	
-	static final int EXECUTOR_THREADS = Runtime.getRuntime().availableProcessors();
-	static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(EXECUTOR_THREADS);
 
 	private static final short[] stackblur_mul = {
 			512, 512, 456, 512, 328, 456, 335, 512, 405, 328, 271, 456, 388, 335, 292, 512,
@@ -76,7 +71,8 @@ public class JavaBlurProcess implements BlurProcess {
 	};
 
 	@Override
-	public byte[] blur(byte[] original, int w, int h, float radius) {
+	public byte[] blur(byte[] original, int w, int h, int stride, float radius) {
+		if (stride < w) stride = w;
 		byte[] currentPixels = original;//new byte[w * h];
 //		System.arraycopy(original, 0, currentPixels, 0, currentPixels.length);
 		int cores = EXECUTOR_THREADS;
@@ -84,8 +80,8 @@ public class JavaBlurProcess implements BlurProcess {
 		ArrayList<A8BlurTask> horizontal = new ArrayList<A8BlurTask>(cores);
 		ArrayList<A8BlurTask> vertical = new ArrayList<A8BlurTask>(cores);
 		for (int i = 0; i < cores; i++) {
-			horizontal.add(new A8BlurTask(currentPixels, w, h, (int) radius, cores, i, 1));
-			vertical.add(new A8BlurTask(currentPixels, w, h, (int) radius, cores, i, 2));
+			horizontal.add(new A8BlurTask(currentPixels, w, h, stride, (int) radius, cores, i, 1));
+			vertical.add(new A8BlurTask(currentPixels, w, h, stride, (int) radius, cores, i, 2));
 		}
 
 		try {
@@ -104,7 +100,7 @@ public class JavaBlurProcess implements BlurProcess {
 	}
 	
 	@Override
-	public int[] blur(int[] original, int w, int h, float radius) {
+	public int[] blur(int[] original, int w, int h, int stride, float radius) {
 		int[] currentPixels = new int[w * h];
 		System.arraycopy(original, 0, currentPixels, 0, currentPixels.length);
 		int cores = EXECUTOR_THREADS;
@@ -131,7 +127,7 @@ public class JavaBlurProcess implements BlurProcess {
 		return currentPixels;
 	}
 	
-	private static void blurIteration(byte[] src, int w, int h, int radius, int cores, int core, int step) {
+	private static void blurIteration(byte[] src, int w, int h, int stride, int radius, int cores, int core, int step) {
 		int x, y, xp, yp, i;
 		int sp;
 		int stack_start;
@@ -162,7 +158,7 @@ public class JavaBlurProcess implements BlurProcess {
 				sum_in_a = 
 				sum_out_a = 0;
 
-				src_i = w * y; // start of line (0,y)
+				src_i = stride * y;//w * y; // start of line (0,y)
 
 				for(i = 0; i <= radius; i++)
 				{
@@ -186,8 +182,8 @@ public class JavaBlurProcess implements BlurProcess {
 				sp = radius;
 				xp = radius;
 				if (xp > wm) xp = wm;
-				src_i = xp + y * w; //   img.pix_ptr(xp, y);
-				dst_i = y * w; // img.pix_ptr(0, y);
+				src_i = xp + y * stride;;//xp + y * w; //   img.pix_ptr(xp, y);
+				dst_i = y * stride;//y * w; // img.pix_ptr(0, y);
 				for(x = 0; x < w; x++)
 				{
 					src[dst_i] = (byte) (((sum_a * mul_sum) >>> shr_sum) & 0xff);
@@ -245,7 +241,7 @@ public class JavaBlurProcess implements BlurProcess {
 				}
 				for(i = 1; i <= radius; i++)
 				{
-					if(i <= hm) src_i += w; // +stride
+					if(i <= hm) src_i += stride;//w; // +stride
 
 					stack_i = i + radius;
 					stack[stack_i] = src[src_i];
@@ -256,7 +252,7 @@ public class JavaBlurProcess implements BlurProcess {
 				sp = radius;
 				yp = radius;
 				if (yp > hm) yp = hm;
-				src_i = x + yp * w; // img.pix_ptr(x, yp);
+				src_i = x + yp * stride;//x + yp * w; // img.pix_ptr(x, yp);
 				dst_i = x;               // img.pix_ptr(x, 0);
 				for(y = 0; y < h; y++)
 				{
@@ -273,7 +269,7 @@ public class JavaBlurProcess implements BlurProcess {
 
 					if(yp < hm)
 					{
-						src_i += w; // stride
+						src_i += stride;//w; // stride
 						++yp;
 					}
 
@@ -535,15 +531,17 @@ public class JavaBlurProcess implements BlurProcess {
 		private final byte[] _src;
 		private final int _w;
 		private final int _h;
+		private final int _stride;
 		private final int _radius;
 		private final int _totalCores;
 		private final int _coreIndex;
 		private final int _round;
 
-		public A8BlurTask(byte[] src, int w, int h, int radius, int totalCores, int coreIndex, int round) {
+		public A8BlurTask(byte[] src, int w, int h, int stride, int radius, int totalCores, int coreIndex, int round) {
 			_src = src;
 			_w = w;
 			_h = h;
+			_stride = stride;
 			_radius = radius;
 			_totalCores = totalCores;
 			_coreIndex = coreIndex;
@@ -551,7 +549,7 @@ public class JavaBlurProcess implements BlurProcess {
 		}
 
 		@Override public Void call() throws Exception {
-			blurIteration(_src, _w, _h, _radius, _totalCores, _coreIndex, _round);
+			blurIteration(_src, _w, _h, _stride, _radius, _totalCores, _coreIndex, _round);
 			return null;
 		}
 

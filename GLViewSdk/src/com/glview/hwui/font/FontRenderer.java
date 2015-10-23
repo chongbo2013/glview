@@ -3,6 +3,9 @@ package com.glview.hwui.font;
 import java.nio.ByteBuffer;
 import java.util.Vector;
 
+import android.graphics.Color;
+import android.support.v4.util.LongSparseArray;
+
 import com.glview.freetype.FreeType;
 import com.glview.freetype.FreeType.Face;
 import com.glview.freetype.FreeType.SizeMetrics;
@@ -17,11 +20,8 @@ import com.glview.hwui.packer.PackerRect;
 import com.glview.internal.util.GrowingArrayUtils;
 import com.glview.libgdx.graphics.opengl.GL20;
 import com.glview.stackblur.BlurProcess;
-import com.glview.stackblur.JavaBlurProcess;
+import com.glview.stackblur.NativeBlurProcess;
 import com.glview.text.TextUtils;
-
-import android.graphics.Color;
-import android.support.v4.util.LongSparseArray;
 
 public class FontRenderer {
 	
@@ -29,8 +29,10 @@ public class FontRenderer {
 	
 	FontRenderer() {}
 	
+	private final static FontRenderer sInstance = new FontRenderer();
+	
 	public static FontRenderer instance() {
-		return GammaFontRenderer.instance().getFontRenderer();
+		return sInstance;
 	}
 	
 	private boolean mInitialized;
@@ -39,7 +41,6 @@ public class FontRenderer {
 	int mSmallCacheHeight = 512;
 	int mLargeCacheWidth = 2048;
 	int mLargeCacheHeight = 1024;
-	byte[] mGammaTable;
 	byte[] mBuffer = new byte[2048];
 	
 	class FontCaches {
@@ -54,11 +55,7 @@ public class FontRenderer {
     
     GLCanvas mCanvas = null;
     
-    BlurProcess mBlurProcess = new JavaBlurProcess();
-    
-    void setGammaTable(byte[] gammaTable) {
-        mGammaTable = gammaTable;
-    }
+    BlurProcess mBlurProcess = new NativeBlurProcess();
     
     public void release() {
     	clearCacheTextures(mCacheTextures);
@@ -299,25 +296,12 @@ public class FontRenderer {
 				ByteBuffer byteBuffer = cacheTexture.getPixelBuffer().map();
 				ByteBuffer buffer = bitmap.getBuffer();
 				int pitch = bitmap.getPitch();
-				if (mGammaTable != null) {
-					for (int i = 0; i < rect.height(); i ++) {
-						for (int j = 0; j < rect.width(); j ++) {
-							if (i < border || i >= rect.height() - border || j < border || j >= rect.width() - border) {
-								byteBuffer.put((i + rect.rect().top) * cacheTexture.mWidth + j + rect.rect().left, (byte) 0);
-							} else {
-								int t = buffer.get((i - border) * pitch + j - border) & 0xFF;
-								byteBuffer.put((i + rect.rect().top) * cacheTexture.mWidth + j + rect.rect().left, mGammaTable[t]);
-							}
-						}
-					}
-				} else {
-					for (int i = 0; i < rect.height(); i ++) {
-						for (int j = 0; j < rect.width(); j ++) {
-							if (i < border || i >= rect.height() - border || j < border || j >= rect.width() - border) {
-								byteBuffer.put((i + rect.rect().top) * cacheTexture.mWidth + j + rect.rect().left, (byte) 0);
-							} else {
-								byteBuffer.put((i + rect.rect().top) * cacheTexture.mWidth + j + rect.rect().left, buffer.get((i - border) * pitch + j - border));
-							}
+				for (int i = 0; i < rect.height(); i ++) {
+					for (int j = 0; j < rect.width(); j ++) {
+						if (i < border || i >= rect.height() - border || j < border || j >= rect.width() - border) {
+							byteBuffer.put((i + rect.rect().top) * cacheTexture.mWidth + j + rect.rect().left, (byte) 0);
+						} else {
+							byteBuffer.put((i + rect.rect().top) * cacheTexture.mWidth + j + rect.rect().left, buffer.get((i - border) * pitch + j - border));
 						}
 					}
 				}
@@ -333,6 +317,9 @@ public class FontRenderer {
 		return null;
 	}
 	
+	/*
+	 * TODO 较耗时，需要优化。可以考虑将模糊操作通过其他工作线程处理
+	 */
 	private FontRect cacheBitmapShadow(FontCaches caches, int w, int h, int shadowRadius, FreeType.GlyphSlot slot, FreeType.Glyph glyph, FreeType.Bitmap bitmap, boolean c) {
 		w = w + shadowRadius * 2;
 		h = h + shadowRadius * 2;
@@ -350,29 +337,16 @@ public class FontRenderer {
 				if (mBuffer.length < size) {
 					mBuffer = new byte[GrowingArrayUtils.growSize(size)];
 				}
-				if (mGammaTable != null) {
-					for (int i = 0; i < h; i ++) {
-						for (int j = 0; j < w; j ++) {
-							if (i < shadowRadius || i >= rect.height() - shadowRadius || j < shadowRadius || j >= rect.width() - shadowRadius) {
-								mBuffer[i * w + j] = 0;
-							} else {
-								int t = buffer.get((i - shadowRadius) * pitch + j - shadowRadius) & 0xFF;
-								mBuffer[i * w + j] = mGammaTable[t];
-							}
-						}
-					}
-				} else {
-					for (int i = 0; i < h; i ++) {
-						for (int j = 0; j < w; j ++) {
-							if (i < shadowRadius || i >= rect.height() - shadowRadius || j < shadowRadius || j >= rect.width() - shadowRadius) {
-								mBuffer[i* w + j] = (byte) 0;
-							} else {
-								mBuffer[i * w + j] = buffer.get((i - shadowRadius) * pitch + j - shadowRadius);
-							}
+				for (int i = 0; i < h; i ++) {
+					for (int j = 0; j < w; j ++) {
+						if (i < shadowRadius || i >= rect.height() - shadowRadius || j < shadowRadius || j >= rect.width() - shadowRadius) {
+							mBuffer[i* w + j] = (byte) 0;
+						} else {
+							mBuffer[i * w + j] = buffer.get((i - shadowRadius) * pitch + j - shadowRadius);
 						}
 					}
 				}
-				mBlurProcess.blur(mBuffer, w, h, shadowRadius);
+				mBlurProcess.blur(mBuffer, w, h, w, shadowRadius);
 				for (int i = 0; i < h; i ++) {
 					for (int j = 0; j < w; j ++) {
 						byteBuffer.put((i + rect.rect().top) * cacheTexture.mWidth + j + rect.rect().left, mBuffer[i * w + j]);

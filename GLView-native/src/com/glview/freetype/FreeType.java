@@ -18,6 +18,8 @@ package com.glview.freetype;
 
 import java.nio.ByteBuffer;
 
+import android.util.Log;
+
 import com.glview.Lib;
 
 public class FreeType {
@@ -94,7 +96,7 @@ public class FreeType {
 	
 	public static class Face extends Pointer {
 		Library library;
-		ByteBuffer buffer;
+		public final ByteBuffer buffer;
 		
 		public Face (long address, Library library, ByteBuffer buffer) {
 			super(address);

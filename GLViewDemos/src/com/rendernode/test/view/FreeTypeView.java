@@ -15,6 +15,7 @@ import com.glview.widget.TextView;
 public class FreeTypeView extends FrameLayout {
 	
 	String s = "哎呦我去，这 是怎么个情\n 况                Helloeverybody       1234567890, thisislijingspeaking, whoareyoune";
+//	String s = "我";
 	
 	GLPaint mPaint = new GLPaint();
 	TextPaint mAndroidPaint = new TextPaint();
@@ -25,8 +26,8 @@ public class FreeTypeView extends FrameLayout {
 		super(context);
 		setBackgroundColor(Color.WHITE);
 		mPaint.setColor(Color.BLACK);
-		mPaint.setTextSize(60);
-		mPaint.setShadowLayer(5, 5, 5, Color.RED);
+		mPaint.setTextSize(50);
+		mPaint.setShadowLayer(3, 3, 3, Color.RED);
 		TextView tv = new TextView(context);
 		tv.setTextSize(50);
 		tv.setText(s);
@@ -38,14 +39,7 @@ public class FreeTypeView extends FrameLayout {
 //			mLayout = BoringLayout.make(s, mPaint, 1000, Layout.Alignment.ALIGN_NORMAL, 1, 0, metrics, false, TextUtils.TruncateAt.END, 1000, true);
 //		}
 		mLayout = new StaticLayout(s, mPaint, 900, Layout.Alignment.ALIGN_NORMAL, 1f, 0, false, true);
-		for (int i = 0; i < mLayout.getLineCount(); i ++) {
-			Log.d("lijing", "lineStart=" + mLayout.getLineStart(i));
-		}
 		
-		android.text.StaticLayout sl = new android.text.StaticLayout(s, mAndroidPaint, 900, android.text.Layout.Alignment.ALIGN_NORMAL, 1f, 0, false); 
-		for (int i = 0; i < mLayout.getLineCount(); i ++) {
-			Log.d("lijing", "lineStart2=" + mLayout.getLineStart(i));
-		}
 	}
 	
 	@Override

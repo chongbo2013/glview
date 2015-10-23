@@ -11,6 +11,7 @@ LOCAL_ARM_MODE  := arm
  
 LOCAL_SRC_FILES := com_glview_freetype_FreeType.cpp\
 	com_glview_utils_BufferUtils.cpp\
+	com_glview_blur_Blur.cpp\
 	freetype-2.6.1/src/autofit/autofit.c\
 	freetype-2.6.1/src/base/ftbase.c\
 	freetype-2.6.1/src/base/ftbbox.c\
