@@ -1,5 +1,7 @@
 package com.glview.hwui;
 
+import android.opengl.Matrix;
+
 import com.glview.App;
 import com.glview.graphics.Bitmap;
 import com.glview.graphics.Rect;
@@ -18,8 +20,6 @@ import com.glview.libgdx.graphics.glutils.ShaderProgram;
 import com.glview.libgdx.graphics.opengl.GL20;
 import com.glview.util.MatrixUtil;
 import com.glview.util.Utils;
-
-import android.opengl.Matrix;
 
 /**
  * This canvas use OpenGL ES 2.0
@@ -661,6 +661,7 @@ class GL20Canvas extends StatefullBaseCanvas implements InnerGLCanvas {
 	    }
 	    
 	    if (restoreClip) {
+	    	flushFont();
 	    	dirtyClip();
 	    }
 	};
@@ -670,7 +671,6 @@ class GL20Canvas extends StatefullBaseCanvas implements InnerGLCanvas {
 	///////////////////////////////////////////////////////////////////////////////
 	Rect mTmpClipRect = new Rect();
 	void setScissorFromClip() {
-		flushFont();
 	    Rect clip = currentClipRect();
 	    if (mCaches.setScissor(clip.left, clip.top, clip.width(), clip.height())) {
 	    }
@@ -680,6 +680,7 @@ class GL20Canvas extends StatefullBaseCanvas implements InnerGLCanvas {
 	@Override
 	public void clipRect(float left, float top, float right, float bottom) {
 		flushBatch();
+		flushFont();
 		super.clipRect(left, top, right, bottom);
 		if (mDirtyClip) {
 			Caches.getInstance().enableScissor();
