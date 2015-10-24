@@ -15,6 +15,12 @@ public class ClipRectOp extends StateOp {
 		op.mRect.set(rect);
 		return op;
 	}
+	
+	public static ClipRectOp obtain(float left, float top, float right, float bottom) {
+		ClipRectOp op = (ClipRectOp) OpFactory.get().poll(ClipRectOp.class);
+		op.mRect.set((int) left, (int) top, (int) right, (int) bottom);
+		return op;
+	}
 
 	@Override
 	void applyState(GLCanvas canvas) {

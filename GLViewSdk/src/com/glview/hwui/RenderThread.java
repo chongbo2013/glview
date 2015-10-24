@@ -6,6 +6,8 @@ import android.os.StrictMode;
 import android.os.StrictMode.ThreadPolicy;
 import android.util.Log;
 
+import com.glview.App;
+import com.glview.libgdx.graphics.opengl.AndroidGL20;
 import com.glview.thread.Looper;
 
 class RenderThread extends Thread {
@@ -63,6 +65,7 @@ class RenderThread extends Thread {
 //			Looper.prepare();
 //		}
 		Looper.prepare1();
+		App.setGL20(new AndroidGL20());
 		synchronized (this) {
             mLooper = Looper.myLooper();
             notifyAll();

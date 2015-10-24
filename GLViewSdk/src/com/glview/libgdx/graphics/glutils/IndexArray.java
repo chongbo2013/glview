@@ -20,7 +20,7 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 
-import com.glview.libgdx.graphics.utils.BufferUtils;
+import com.glview.utils.BufferUtils;
 
 public class IndexArray implements IndexData {
 	final static IntBuffer tmpHandle = BufferUtils.newIntBuffer(1);
@@ -32,7 +32,7 @@ public class IndexArray implements IndexData {
 	 * 
 	 * @param maxIndices the maximum number of indices this buffer can hold */
 	public IndexArray (int maxIndices) {
-		byteBuffer = BufferUtils.newUnsafeByteBuffer(maxIndices * 2);
+		byteBuffer = BufferUtils.newByteBuffer(maxIndices * 2);
 		buffer = byteBuffer.asShortBuffer();
 		buffer.flip();
 		byteBuffer.flip();
@@ -92,6 +92,6 @@ public class IndexArray implements IndexData {
 
 	/** Disposes this IndexArray and all its associated OpenGL resources. */
 	public void dispose () {
-		BufferUtils.disposeUnsafeByteBuffer(byteBuffer);
+//		BufferUtils.disposeUnsafeByteBuffer(byteBuffer);
 	}
 }

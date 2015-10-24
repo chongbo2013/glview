@@ -31,9 +31,9 @@ import com.glview.libgdx.graphics.math.Matrix4;
 import com.glview.libgdx.graphics.math.Vector2;
 import com.glview.libgdx.graphics.math.Vector3;
 import com.glview.libgdx.graphics.opengl.GL20;
-import com.glview.libgdx.graphics.utils.BufferUtils;
 import com.glview.libgdx.graphics.utils.Disposable;
 import com.glview.libgdx.graphics.utils.ObjectIntMap;
+import com.glview.utils.BufferUtils;
 
 /** <p>
  * A shader program encapsulates a vertex and fragment shader pair linked to form a shader program useable with OpenGL ES 2.0.

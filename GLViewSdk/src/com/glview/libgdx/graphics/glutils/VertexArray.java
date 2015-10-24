@@ -24,7 +24,7 @@ import com.glview.libgdx.graphics.VertexAttribute;
 import com.glview.libgdx.graphics.VertexAttributes;
 import com.glview.libgdx.graphics.VertexAttributes.Usage;
 import com.glview.libgdx.graphics.opengl.GL20;
-import com.glview.libgdx.graphics.utils.BufferUtils;
+import com.glview.utils.BufferUtils;
 
 /** <p>
  * Convenience class for working with OpenGL vertex arrays. It interleaves all data in the order you specified in the constructor
@@ -56,7 +56,7 @@ public class VertexArray implements VertexData {
 	 * @param attributes the {@link VertexAttributes} */
 	public VertexArray (int numVertices, VertexAttributes attributes) {
 		this.attributes = attributes;
-		byteBuffer = BufferUtils.newUnsafeByteBuffer(this.attributes.vertexSize * numVertices);
+		byteBuffer = BufferUtils.newByteBuffer(this.attributes.vertexSize * numVertices);
 		buffer = byteBuffer.asFloatBuffer();
 		buffer.flip();
 		byteBuffer.flip();
@@ -65,7 +65,7 @@ public class VertexArray implements VertexData {
 	/** {@inheritDoc} */
 	@Override
 	public void dispose () {
-		BufferUtils.disposeUnsafeByteBuffer(byteBuffer);
+//		BufferUtils.disposeUnsafeByteBuffer(byteBuffer);
 	}
 
 	/** {@inheritDoc} */

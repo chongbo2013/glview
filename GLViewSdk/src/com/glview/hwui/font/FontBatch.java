@@ -31,7 +31,11 @@ class FontBatch implements Disposable {
 	
 	Caches mCaches;
 	
-	float[] temp = new float[16];
+	float[] mIdentityMatrix = new float[16];
+	float[] mTmpPoint = new float[2];
+	float mPackedColor;
+	float mCachedAlpha;
+	int mCachedColor;
 	
 	public FontBatch(FontRenderer fontRenderer, CacheTexture texture) {
 		this(fontRenderer, texture, 1000);
@@ -45,7 +49,7 @@ class FontBatch implements Disposable {
 		mInvTexWidth = 1.0f / texture.getWidth();
 		mInvTexHeight = 1.0f / texture.getHeight();
 		
-		Matrix.setIdentityM(temp, 0);
+		Matrix.setIdentityM(mIdentityMatrix, 0);
 		
 		mCaches = Caches.getInstance();
 		
@@ -82,6 +86,10 @@ class FontBatch implements Disposable {
 		mMesh.dispose();
 	}
 	
+	public boolean full() {
+		return this.mIndex == this.mVertices.length;
+	}
+	
 	public void draw(float x, float y, float width, float height, float srcX, float srcY, float srcWidth, float srcHeight, float[] transformation, float alpha, int color, GLPaint paint) {
 		float[] vertices = this.mVertices;
 
@@ -96,16 +104,21 @@ class FontBatch implements Disposable {
 		final float fx2 = x + width;
 		final float fy2 = y + height;
 		
-		float[] pt = MatrixUtil.mapPoint(transformation, x, y);
+		float[] pt = MatrixUtil.mapPoint(transformation, mTmpPoint, x, y);
 		float x1 = pt[0], y1 = pt[1];
-		pt = MatrixUtil.mapPoint(transformation, x, fy2);
+		pt = MatrixUtil.mapPoint(transformation, mTmpPoint, x, fy2);
 		float x2 = pt[0], y2 = pt[1];
-		pt = MatrixUtil.mapPoint(transformation, fx2, fy2);
+		pt = MatrixUtil.mapPoint(transformation, mTmpPoint, fx2, fy2);
 		float x3 = pt[0], y3 = pt[1];
-		pt = MatrixUtil.mapPoint(transformation,fx2, y);
+		pt = MatrixUtil.mapPoint(transformation, mTmpPoint, fx2, y);
 		float x4 = pt[0], y4 = pt[1];
 
-		float c = NumberUtils.intToFloatColor(packColor(alpha, color));
+		if (alpha != mCachedAlpha || color != mCachedColor) {
+			mCachedAlpha = alpha;
+			mCachedColor = color;
+			mPackedColor = NumberUtils.intToFloatColor(packColor(alpha, color));
+		}
+		float c = mPackedColor;
 		int idx = this.mIndex;
 		vertices[idx++] = x1;
 		vertices[idx++] = y1;
@@ -190,7 +203,7 @@ class FontBatch implements Disposable {
 		mCaches.useProgram(program);
 		mDefaultShader.setupColor(1, 1, 1, 1);
 		if (mFontRenderer.getGLCanvas() != null) {
-			mFontRenderer.getGLCanvas().applyMatrix(mDefaultShader, temp);
+			mFontRenderer.getGLCanvas().applyMatrix(mDefaultShader, mIdentityMatrix);
 		}
 		mDefaultShader.setupCustomValues();
 		

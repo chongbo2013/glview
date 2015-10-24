@@ -183,6 +183,7 @@ public class FontRenderer {
 		int shadowRadius = (int) (paint.getShadowRadius() + 0.5f);
 		int shadowColor = paint.getShadowColor();
 		boolean hasShadow = paint.hasShadow();
+		alpha = alpha * paint.getAlpha() / 255;
 		synchronized (face) {
 			face.setPixelSizes(0, textSize);
 			long k = typeface.index() * 10000L + textSize;
@@ -221,7 +222,7 @@ public class FontRenderer {
 					shadowR = mShadowCacheTextures.mCacheRects.get(key + shadowRadius);
 				}
 				if (r == null || (hasShadow && shadowR == null)) {
-					if (!face.loadChar(c, FreeType.FT_LOAD_DEFAULT)) {
+					if (!face.loadGlyph(charIndex, FreeType.FT_LOAD_DEFAULT)) {
 						continue;
 					}
 					FreeType.GlyphSlot slot = face.getGlyph();
@@ -255,15 +256,21 @@ public class FontRenderer {
 				if (r != null) {
 					if (shadowR != null) {
 						shadowR.mTexture.allocateMesh();
+						if (shadowR.mTexture.mFontBatch.full()) {
+							flushBatch();
+						}
 						shadowR.mTexture.mFontBatch.draw(x + shadowR.mLeft - shadowRadius + paint.getShadowDx(), 
 								baseline - shadowR.mTop - shadowRadius + paint.getShadowDy(), shadowR.mRect.width(), shadowR.mRect.height(), 
 								shadowR.mRect.rect().left, shadowR.mRect.rect().top, shadowR.mRect.width(), shadowR.mRect.height(), 
-								matrix, alpha * paint.getAlpha() / 255, shadowColor, paint);
+								matrix, alpha, shadowColor, paint);
 					}
 					r.mTexture.allocateMesh();
+					if (r.mTexture.mFontBatch.full()) {
+						flushBatch();
+					}
 					r.mTexture.mFontBatch.draw(x + r.mLeft, baseline - r.mTop, r.mRect.width(), r.mRect.height(), 
 							r.mRect.rect().left, r.mRect.rect().top, r.mRect.width(), r.mRect.height(), 
-							matrix, alpha * paint.getAlpha() / 255, paint.getColor(), paint);
+							matrix, alpha, paint.getColor(), paint);
 					x += r.mGlyphSlot.getAdvanceX();
 				}
 			}

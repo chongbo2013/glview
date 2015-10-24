@@ -231,6 +231,7 @@ class GL20Canvas extends StatefullBaseCanvas implements InnerGLCanvas {
 
 	@Override
 	public void beginFrame() {
+		setupDraw();
 		mGL.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		mGL.glClearDepthf(1f);
 		mGL.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
@@ -669,7 +670,6 @@ class GL20Canvas extends StatefullBaseCanvas implements InnerGLCanvas {
 	///////////////////////////////////////////////////////////////////////////////
 	//Clipping
 	///////////////////////////////////////////////////////////////////////////////
-	Rect mTmpClipRect = new Rect();
 	void setScissorFromClip() {
 	    Rect clip = currentClipRect();
 	    if (mCaches.setScissor(clip.left, clip.top, clip.width(), clip.height())) {

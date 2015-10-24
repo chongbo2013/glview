@@ -163,6 +163,11 @@ class GLRecordingCanvas extends AbsGLCanvas implements Poolable {
 	}
 	
 	@Override
+	public void clipRect(float left, float top, float right, float bottom) {
+		addStateOp(ClipRectOp.obtain(left, top, right, bottom));
+	}
+	
+	@Override
 	public int save(int saveFlags) {
 		addStateOp(SaveOp.obtain(saveFlags));
 		return 0;

@@ -4,52 +4,43 @@
     glview:layout_width="match_parent"
     glview:layout_height="match_parent"
     glview:gravity="center"
-    glview:orientation="horizontal" >
+    glview:clipToPadding="true"
+    glview:orientation="vertical" >
 
     <LinearLayout 
         glview:layout_width="wrap_content"
         glview:layout_height="wrap_content"
         glview:orientation="vertical" >
         <Button 
-	        glview:layout_width="wrap_content"
+	        glview:layout_width="200dp"
 	        glview:layout_height="300dp"
 	        glview:textSize="@dimen/text_size_1"
 	        glview:padding="10dp"
 	        glview:elevation="10dp"
 	        glview:background="@drawable/btn_default"
-	        glview:clickable="true"
-	        glview:text="Text1" />
+	        glview:singleLine="true"
+	        glview:focusable="true"
+	        glview:focusableInTouchMode="true"
+	        glview:ellipsize="marquee"
+	        glview:marqueeRepeatLimit="marquee_forever"
+	        glview:text="Text1Text1Text1Text1Text1Text1Text1Text1Text1Text1" />
     </LinearLayout>
     <LinearLayout 
         glview:layout_width="wrap_content"
         glview:layout_height="wrap_content"
         glview:orientation="vertical" >
         <Button 
-	        glview:layout_width="wrap_content"
-	        glview:layout_height="100dp"
+	        glview:layout_width="200dp"
+	        glview:layout_height="300dp"
 	        glview:textSize="@dimen/text_size_1"
 	        glview:padding="10dp"
 	        glview:elevation="10dp"
 	        glview:background="@drawable/btn_default"
-	        glview:clickable="true"
-	        glview:text="Text2" />
-        <Button 
-	        glview:layout_width="wrap_content"
-	        glview:layout_height="100dp"
-	        glview:textSize="@dimen/text_size_1"
-	        glview:padding="10dp"
-	        glview:elevation="10dp"
-	        glview:background="@drawable/btn_default"
-	        glview:clickable="true"
-	        glview:text="Text3" />
-        <Button 
-	        glview:layout_width="wrap_content"
-	        glview:layout_height="100dp"
-	        glview:textSize="@dimen/text_size_1"
-	        glview:padding="10dp"
-	        glview:elevation="10dp"
-	        glview:background="@drawable/btn_default"
-	        glview:clickable="true"
-	        glview:text="Text4" />
+	        glview:singleLine="true"
+	        glview:focusable="true"
+	        glview:focusableInTouchMode="true"
+	        glview:ellipsize="marquee"
+	        glview:marqueeRepeatLimit="marquee_forever"
+	        glview:text="Text1Text1Text1Text1Text1Text1Text1Text1Text1Text1" />
     </LinearLayout>
 </LinearLayout>

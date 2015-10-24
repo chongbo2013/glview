@@ -1,27 +1,27 @@
 package com.glview;
 
-import com.glview.libgdx.graphics.opengl.AndroidGL20;
 import com.glview.libgdx.graphics.opengl.GL;
 import com.glview.libgdx.graphics.opengl.GL20;
 
 public class App {
 	
-	static ThreadLocal<GL20> sGL20ThreadInstance = new ThreadLocal<GL20>() {
-		protected GL20 initialValue() {
-			return new AndroidGL20();
-		};
-	};
+	private static GL20 sGL20Instance;
 	
 	public static GL20 getGL20() {
-		return sGL20ThreadInstance.get();
+		return sGL20Instance;
 	}
 	
 	public static GL getGL() {
-		return sGL20ThreadInstance.get();
+		return sGL20Instance;
 	}
 	
+	/**
+	 * Dont call. 
+	 * @hide
+	 * @param gl
+	 */
 	public static void setGL20(GL20 gl) {
-		sGL20ThreadInstance.set(gl);
+		sGL20Instance = gl;
 	}
 
 }

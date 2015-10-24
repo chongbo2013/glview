@@ -24,7 +24,7 @@ import com.glview.App;
 import com.glview.exception.GLViewRuntimeException;
 import com.glview.hwui.GLId;
 import com.glview.libgdx.graphics.opengl.GL20;
-import com.glview.libgdx.graphics.utils.BufferUtils;
+import com.glview.utils.BufferUtils;
 
 /** <p>
  * In IndexBufferObject wraps OpenGL's index buffer functionality to be used in conjunction with VBOs. This class can be
@@ -68,7 +68,7 @@ public class IndexBufferObject implements IndexData {
 // byteBuffer.order(ByteOrder.nativeOrder());
 // isDirect = false;
 // } else {
-		byteBuffer = BufferUtils.newUnsafeByteBuffer(maxIndices * 2);
+		byteBuffer = BufferUtils.newByteBuffer(maxIndices * 2);
 		isDirect = true;
 // }
 		buffer = byteBuffer.asShortBuffer();
@@ -82,7 +82,7 @@ public class IndexBufferObject implements IndexData {
 	 * 
 	 * @param maxIndices the maximum number of indices this buffer can hold */
 	public IndexBufferObject (int maxIndices) {
-		byteBuffer = BufferUtils.newUnsafeByteBuffer(maxIndices * 2);
+		byteBuffer = BufferUtils.newByteBuffer(maxIndices * 2);
 		this.isDirect = true;
 
 		buffer = byteBuffer.asShortBuffer();
@@ -195,6 +195,6 @@ public class IndexBufferObject implements IndexData {
 			
 			bufferHandle = 0;
 		}
-		BufferUtils.disposeUnsafeByteBuffer(byteBuffer);
+//		BufferUtils.disposeUnsafeByteBuffer(byteBuffer);
 	}
 }

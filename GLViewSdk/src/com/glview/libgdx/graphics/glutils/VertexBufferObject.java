@@ -27,7 +27,7 @@ import com.glview.libgdx.graphics.VertexAttribute;
 import com.glview.libgdx.graphics.VertexAttributes;
 import com.glview.libgdx.graphics.VertexAttributes.Usage;
 import com.glview.libgdx.graphics.opengl.GL20;
-import com.glview.libgdx.graphics.utils.BufferUtils;
+import com.glview.utils.BufferUtils;
 
 /** <p>
  * A {@link VertexData} implementation based on OpenGL vertex buffer objects.
@@ -82,7 +82,7 @@ public class VertexBufferObject implements VertexData {
 		this.isStatic = isStatic;
 		this.attributes = attributes;
 
-		byteBuffer = BufferUtils.newUnsafeByteBuffer(this.attributes.vertexSize * numVertices);
+		byteBuffer = BufferUtils.newByteBuffer(this.attributes.vertexSize * numVertices);
 		buffer = byteBuffer.asFloatBuffer();
 		buffer.flip();
 		byteBuffer.flip();
@@ -240,6 +240,6 @@ public class VertexBufferObject implements VertexData {
 			gl.glDeleteBuffers(1, tmpHandle);
 			bufferHandle = 0;
 		}
-		BufferUtils.disposeUnsafeByteBuffer(byteBuffer);
+//		BufferUtils.disposeUnsafeByteBuffer(byteBuffer);
 	}
 }

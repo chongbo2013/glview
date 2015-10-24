@@ -1,5 +1,7 @@
 package com.rendernode.test.android.view;
 
+import com.glview.util.FPSUtils;
+
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -27,12 +29,6 @@ public class MyButton extends Button {
 		super(context, attrs, defStyleAttr);
 		init();
 	}
-
-	public MyButton(Context context, AttributeSet attrs, int defStyleAttr,
-			int defStyleRes) {
-		super(context, attrs, defStyleAttr, defStyleRes);
-		init();
-	}
 	
 	static Typeface sTypeface;
 	
@@ -50,11 +46,15 @@ public class MyButton extends Button {
 		mPaint1.setAntiAlias(true);
 	}
 	
+	FPSUtils fps = new FPSUtils(this);
+	
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
 //		canvas.drawText("Test111", 0, 100, mPaint);
 //		canvas.drawText("Test111", 0, 300, mPaint1);
+		invalidate();
+		fps.fps();
 	}
 
 }

@@ -26,6 +26,11 @@ public class MatrixUtil {
 	
 	public static float[] mapPoint(float[] m, float x, float y) {
 		final float[] r = sMapPointsBuffer.get();
+        return mapPoint(m, r, x, y);
+	}
+	
+	public static float[] mapPoint(float[] m, float[] dst, float x, float y) {
+		final float[] r = dst;
         // Multiply m and (x1 y1 0 1) to produce (x3 y3 z3 w3). z3 is unused.
         float x3 = m[0] * x + m[4] * y + m[12];
         float y3 = m[1] * x + m[5] * y + m[13];

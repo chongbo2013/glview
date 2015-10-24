@@ -2405,12 +2405,24 @@ public class View implements KeyEvent.Callback, Drawable.Callback{
     }
 
     protected void drawBackground(GLCanvas canvas) {
-        if (mBackground != null) {
-        	if (mBackgroundSizeChanged) {
-        		mBackground.setBounds(0, 0,  mRight - mLeft, mBottom - mTop);
-        		mBackgroundSizeChanged = false;
-        	}
-        	mBackground.draw(canvas);
+        final Drawable background = mBackground;
+        if (background == null) {
+            return;
+        }
+
+        if (mBackgroundSizeChanged) {
+            background.setBounds(0, 0,  mRight - mLeft, mBottom - mTop);
+            mBackgroundSizeChanged = false;
+        }
+
+        final int scrollX = mScrollX;
+        final int scrollY = mScrollY;
+        if ((scrollX | scrollY) == 0) {
+            background.draw(canvas);
+        } else {
+            canvas.translate(scrollX, scrollY);
+            background.draw(canvas);
+            canvas.translate(-scrollX, -scrollY);
         }
     }
     

@@ -2,6 +2,8 @@ package com.glview.hwui;
 
 import java.nio.IntBuffer;
 
+import android.util.Log;
+
 import com.glview.App;
 import com.glview.hwui.cache.FboCache;
 import com.glview.hwui.cache.MeshCache;
@@ -11,8 +13,8 @@ import com.glview.hwui.cache.Stencil;
 import com.glview.hwui.cache.TextureCache;
 import com.glview.libgdx.graphics.glutils.ShaderProgram;
 import com.glview.libgdx.graphics.opengl.GL20;
-import com.glview.libgdx.graphics.utils.BufferUtils;
 import com.glview.thread.Looper;
+import com.glview.utils.BufferUtils;
 
 /**
  * @hide

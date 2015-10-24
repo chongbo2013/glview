@@ -26,8 +26,8 @@ public class FreeTypeView extends FrameLayout {
 		super(context);
 		setBackgroundColor(Color.WHITE);
 		mPaint.setColor(Color.BLACK);
-		mPaint.setTextSize(30);
-		mPaint.setShadowLayer(15, 3, 3, Color.RED);
+		mPaint.setTextSize(150);
+		mPaint.setShadowLayer(5, 3, 3, Color.RED);
 		TextView tv = new TextView(context);
 		tv.setTextSize(50);
 		tv.setText(s);

@@ -1,5 +1,15 @@
 package com.glview.widget;
 
+import java.lang.ref.WeakReference;
+
+import android.content.Context;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
+import android.graphics.Color;
+import android.text.GetChars;
+import android.util.AttributeSet;
+import android.util.TypedValue;
+
 import com.glview.content.GLContext;
 import com.glview.graphics.Rect;
 import com.glview.graphics.Typeface;
@@ -13,19 +23,14 @@ import com.glview.text.TextDirectionHeuristic;
 import com.glview.text.TextDirectionHeuristics;
 import com.glview.text.TextUtils;
 import com.glview.text.TextUtils.TruncateAt;
+import com.glview.thread.Handler;
+import com.glview.thread.Looper;
 import com.glview.util.FastMath;
 import com.glview.view.Gravity;
 import com.glview.view.View;
 import com.glview.view.ViewGroup.LayoutParams;
 import com.glview.view.ViewTreeObserver;
-
-import android.content.Context;
-import android.content.res.Resources;
-import android.content.res.TypedArray;
-import android.graphics.Color;
-import android.text.GetChars;
-import android.util.AttributeSet;
-import android.util.TypedValue;
+import com.glview.view.animation.AnimationUtils;
 
 public class TextView extends View implements ViewTreeObserver.OnPreDrawListener {
 	
@@ -222,7 +227,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     
     private CharWrapper mCharWrapper;
     
-//    private Marquee mMarquee;
+    private Marquee mMarquee;
     private boolean mRestartMarquee;
     private int mMarqueeRepeatLimit = 3;
 
@@ -356,7 +361,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 			} else if (attr == com.glview.R.styleable.TextView_ellipsize) {
 				ellipsize = a.getInt(attr, ellipsize);
 			} else if (attr == com.glview.R.styleable.TextView_marqueeRepeatLimit) {
-				// setMarqueeRepeatLimit(a.getInt(attr, mMarqueeRepeatLimit));
+				 setMarqueeRepeatLimit(a.getInt(attr, mMarqueeRepeatLimit));
 			} else if (attr == com.glview.R.styleable.TextView_includeFontPadding) {
 				// if (!a.getBoolean(attr, true)) {
 				// setIncludeFontPadding(false);
@@ -418,6 +423,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 	        	 setEllipsize(TextUtils.TruncateAt.END);
 	            break;
 	        case 4:
+	        	mMarqueeFadeMode = MARQUEE_FADE_NORMAL;
 	        	 setEllipsize(TextUtils.TruncateAt.MARQUEE);
 	            break;
 	    }
@@ -1847,14 +1853,49 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 	//interface 
 	
 	@Override
-	protected void onFocusChanged(boolean gainFocus, int direction,
-			Rect previouslyFocusedRect) {
-		super.onFocusChanged(gainFocus, direction, previouslyFocusedRect);
+	protected void onFocusChanged(boolean focused, int direction, Rect previouslyFocusedRect) {
+		startStopMarquee(focused);
+		super.onFocusChanged(focused, direction, previouslyFocusedRect);
 	}
 	
     public void setEllipsize(TextUtils.TruncateAt where) {
-        // TruncateAt is an enum. != comparison is ok between these singleton objects.
-    	mEllipsize = where;
+    	// TruncateAt is an enum. != comparison is ok between these singleton objects.
+        if (mEllipsize != where) {
+            mEllipsize = where;
+
+            if (mLayout != null) {
+                nullLayouts();
+                requestLayout();
+                invalidate();
+            }
+        }
+    }
+    
+    /**
+     * Sets how many times to repeat the marquee animation. Only applied if the
+     * TextView has marquee enabled. Set to -1 to repeat indefinitely.
+     *
+     * @see #getMarqueeRepeatLimit()
+     *
+     * @attr ref android.R.styleable#TextView_marqueeRepeatLimit
+     */
+    public void setMarqueeRepeatLimit(int marqueeLimit) {
+        mMarqueeRepeatLimit = marqueeLimit;
+    }
+
+    /**
+     * Gets the number of times the marquee animation is repeated. Only meaningful if the
+     * TextView has marquee enabled.
+     *
+     * @return the number of times the marquee animation is repeated. -1 if the animation
+     * repeats indefinitely
+     *
+     * @see #setMarqueeRepeatLimit(int)
+     *
+     * @attr ref android.R.styleable#TextView_marqueeRepeatLimit
+     */
+    public int getMarqueeRepeatLimit() {
+        return mMarqueeRepeatLimit;
     }
     
     /**
@@ -2086,8 +2127,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     shouldEllipsize, oppositeEllipsize, effectiveEllipsize != mEllipsize);
         }
 
-        shouldEllipsize = mEllipsize != null;
-
         if (bringIntoView || (testDirChange && oldDir != mLayout.getParagraphDirection(0))) {
             registerForPreDraw();
         }
@@ -2189,6 +2228,21 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         return (int) Math.ceil(max);
     }
+    
+    @Override
+    public void setSelected(boolean selected) {
+        boolean wasSelected = isSelected();
+
+        super.setSelected(selected);
+
+        if (selected != wasSelected && mEllipsize == TextUtils.TruncateAt.MARQUEE) {
+            if (selected) {
+                startMarquee();
+            } else {
+                stopMarquee();
+            }
+        }
+    }
 	
 	private static final BoringLayout.Metrics UNKNOWN_BORING = new BoringLayout.Metrics();
 	
@@ -2203,7 +2257,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         int height;
 
         BoringLayout.Metrics boring = UNKNOWN_BORING;
-        BoringLayout.Metrics hintBoring = UNKNOWN_BORING;
 
         if (mTextDir == null) {
             mTextDir = getTextDirectionHeuristic();
@@ -2318,7 +2371,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             unpaddedHeight = Math.min(unpaddedHeight, mLayout.getLineTop(mMaximum));
         }
 
-        scrollTo(0, 0);
+        /*
+         * We didn't let makeNewLayout() register to bring the cursor into view,
+         * so do it here if there is any possibility that it is needed.
+         */
+        if (mLayout.getWidth() > unpaddedWidth ||
+            mLayout.getHeight() > unpaddedHeight) {
+            registerForPreDraw();
+        } else {
+            scrollTo(0, 0);
+        }
 
         setMeasuredDimension(width, height);
 	}
@@ -2480,9 +2542,36 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private void startMarquee() {
+        if ((mMarquee == null || mMarquee.isStopped()) && (isFocused() || isSelected()) &&
+                getLineCount() == 1 && canMarquee()) {
+
+            if (mMarqueeFadeMode == MARQUEE_FADE_SWITCH_SHOW_ELLIPSIS) {
+                mMarqueeFadeMode = MARQUEE_FADE_SWITCH_SHOW_FADE;
+                final Layout tmp = mLayout;
+                mLayout = mSavedMarqueeModeLayout;
+                mSavedMarqueeModeLayout = tmp;
+                requestLayout();
+                invalidate();
+            }
+
+            if (mMarquee == null) mMarquee = new Marquee(this);
+            mMarquee.start(mMarqueeRepeatLimit);
+        }
     }
 
     private void stopMarquee() {
+    	if (mMarquee != null && !mMarquee.isStopped()) {
+            mMarquee.stop();
+        }
+
+        if (mMarqueeFadeMode == MARQUEE_FADE_SWITCH_SHOW_FADE) {
+            mMarqueeFadeMode = MARQUEE_FADE_SWITCH_SHOW_ELLIPSIS;
+            final Layout tmp = mSavedMarqueeModeLayout;
+            mSavedMarqueeModeLayout = mLayout;
+            mLayout = tmp;
+            requestLayout();
+            invalidate();
+        }
     }
 
     private void startStopMarquee(boolean start) {
@@ -2674,33 +2763,42 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
 //        mTextPaint.setColor(color);
 //        mTextPaint.drawableState = getDrawableState();
+        
+        boolean marquee = mEllipsize == TextUtils.TruncateAt.MARQUEE &&
+                mMarqueeFadeMode != MARQUEE_FADE_SWITCH_SHOW_ELLIPSIS;
 
-        canvas.save();
+        if (marquee) {
+        	canvas.save(GLCanvas.SAVE_FLAG_ALL);
+        } else {
+        	canvas.save();
+        }
         /*  Would be faster if we didn't have to do this. Can we chop the
             (displayable) text so that we don't need to do this ever?
         */
 
         int extendedPaddingTop = getExtendedPaddingTop();
         int extendedPaddingBottom = getExtendedPaddingBottom();
-
-        final int vspace = mBottom - mTop - compoundPaddingBottom - compoundPaddingTop;
-        final int maxScrollY = mLayout.getHeight() - vspace;
-
-        float clipLeft = compoundPaddingLeft + scrollX;
-        float clipTop = (scrollY == 0) ? 0 : extendedPaddingTop + scrollY;
-        float clipRight = right - left - compoundPaddingRight + scrollX;
-        float clipBottom = bottom - top + scrollY -
-                ((scrollY == maxScrollY) ? 0 : extendedPaddingBottom);
-
-        if (mShadowRadius != 0) {
-            clipLeft += Math.min(0, mShadowDx - mShadowRadius);
-            clipRight += Math.max(0, mShadowDx + mShadowRadius);
-
-            clipTop += Math.min(0, mShadowDy - mShadowRadius);
-            clipBottom += Math.max(0, mShadowDy + mShadowRadius);
+        
+        if (marquee) {
+	        final int vspace = mBottom - mTop - compoundPaddingBottom - compoundPaddingTop;
+	        final int maxScrollY = mLayout.getHeight() - vspace;
+	
+	        float clipLeft = compoundPaddingLeft + scrollX;
+	        float clipTop = (scrollY == 0) ? 0 : extendedPaddingTop + scrollY;
+	        float clipRight = right - left - compoundPaddingRight + scrollX;
+	        float clipBottom = bottom - top + scrollY -
+	                ((scrollY == maxScrollY) ? 0 : extendedPaddingBottom);
+	
+	        if (mShadowRadius != 0) {
+	            clipLeft += Math.min(0, mShadowDx - mShadowRadius);
+	            clipRight += Math.max(0, mShadowDx + mShadowRadius);
+	
+	            clipTop += Math.min(0, mShadowDy - mShadowRadius);
+	            clipBottom += Math.max(0, mShadowDy + mShadowRadius);
+	        }
+	
+	        canvas.clipRect(clipLeft, clipTop, clipRight, clipBottom);
         }
-
-        canvas.clipRect(clipLeft, clipTop, clipRight, clipBottom);
 
         int voffsetText = 0;
         int voffsetCursor = 0;
@@ -2725,21 +2823,20 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 canvas.translate(layout.getParagraphDirection(0) * dx, 0.0f);
             }
 
-//            if (mMarquee != null && mMarquee.isRunning()) {
-//                final float dx = -mMarquee.getScroll();
-//                canvas.translate(layout.getParagraphDirection(0) * dx, 0.0f);
-//            }
+            if (mMarquee != null && mMarquee.isRunning()) {
+                final float dx = -mMarquee.getScroll();
+                canvas.translate(layout.getParagraphDirection(0) * dx, 0.0f);
+            }
         }
 
-        final int cursorOffsetVertical = voffsetCursor - voffsetText;
-
         layout.draw(canvas);
-        
-//        if (mMarquee != null && mMarquee.shouldDrawGhost()) {
-//            final float dx = mMarquee.getGhostOffset();
-//            canvas.translate(layout.getParagraphDirection(0) * dx, 0.0f);
+
+        if (mMarquee != null && mMarquee.shouldDrawGhost()) {
+            final float dx = mMarquee.getGhostOffset();
+            canvas.translate(layout.getParagraphDirection(0) * dx, 0.0f);
 //            layout.draw(canvas, highlight, mHighlightPaint, cursorOffsetVertical);
-//        }
+            layout.draw(canvas);
+        }
 
         canvas.restore();
 	}
@@ -2950,6 +3047,159 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
 
             System.arraycopy(mChars, start + mStart, buf, off, end - start);
+        }
+    }
+    
+    private static final class Marquee {
+        // TODO: Add an option to configure this
+        private static final float MARQUEE_DELTA_MAX = 0.07f;
+        private static final int MARQUEE_DELAY = 1200;
+        private static final int MARQUEE_RESTART_DELAY = 1200;
+        private static final int MARQUEE_DP_PER_SECOND = 30;
+
+        private static final byte MARQUEE_STOPPED = 0x0;
+        private static final byte MARQUEE_STARTING = 0x1;
+        private static final byte MARQUEE_RUNNING = 0x2;
+
+        private final WeakReference<TextView> mView;
+        private final Handler mHandler;
+
+        private byte mStatus = MARQUEE_STOPPED;
+        private final float mPixelsPerSecond;
+        private float mMaxScroll;
+        private float mMaxFadeScroll;
+        private float mGhostStart;
+        private float mGhostOffset;
+        private float mFadeStop;
+        private int mRepeatLimit;
+
+        private float mScroll;
+        private long mLastAnimationMs;
+
+        Marquee(TextView v) {
+            final float density = v.getContext().getResources().getDisplayMetrics().density;
+            mPixelsPerSecond = MARQUEE_DP_PER_SECOND * density;
+            mView = new WeakReference<TextView>(v);
+            mHandler = new Handler(Looper.getMainLooper());
+        }
+
+        private Runnable mTickCallback = new Runnable() {
+            @Override
+            public void run() {
+                tick();
+            }
+        };
+
+        private Runnable mStartCallback = new Runnable() {
+            @Override
+            public void run() {
+                mStatus = MARQUEE_RUNNING;
+                mLastAnimationMs = AnimationUtils.currentAnimationTimeMillis();
+                tick();
+            }
+        };
+
+        private Runnable mRestartCallback = new Runnable() {
+            @Override
+            public void run() {
+                if (mStatus == MARQUEE_RUNNING) {
+                    if (mRepeatLimit >= 0) {
+                        mRepeatLimit--;
+                    }
+                    start(mRepeatLimit);
+                }
+            }
+        };
+
+        void tick() {
+            if (mStatus != MARQUEE_RUNNING) {
+                return;
+            }
+
+            mHandler.removeCallbacks(mTickCallback);
+
+            final TextView textView = mView.get();
+            if (textView != null && (textView.isFocused() || textView.isSelected())) {
+                long currentMs = AnimationUtils.currentAnimationTimeMillis();
+                long deltaMs = currentMs - mLastAnimationMs;
+                mLastAnimationMs = currentMs;
+                float deltaPx = deltaMs / 1000f * mPixelsPerSecond;
+                mScroll += deltaPx;
+                if (mScroll > mMaxScroll) {
+                    mScroll = mMaxScroll;
+                    mHandler.postDelayed(mRestartCallback, MARQUEE_DELAY);
+                } else {
+                	mHandler.post(mTickCallback);
+                }
+                textView.invalidate();
+            }
+        }
+
+        void stop() {
+            mStatus = MARQUEE_STOPPED;
+            mHandler.removeCallbacks(mStartCallback);
+            mHandler.removeCallbacks(mRestartCallback);
+            mHandler.removeCallbacks(mTickCallback);
+            resetScroll();
+        }
+
+        private void resetScroll() {
+            mScroll = 0.0f;
+            final TextView textView = mView.get();
+            if (textView != null) textView.invalidate();
+        }
+
+        void start(int repeatLimit) {
+            if (repeatLimit == 0) {
+                stop();
+                return;
+            }
+            mRepeatLimit = repeatLimit;
+            final TextView textView = mView.get();
+            if (textView != null && textView.mLayout != null) {
+                mStatus = MARQUEE_STARTING;
+                mScroll = 0.0f;
+                final int textWidth = textView.getWidth() - textView.getCompoundPaddingLeft() -
+                        textView.getCompoundPaddingRight();
+                final float lineWidth = textView.mLayout.getLineWidth(0);
+                final float gap = textWidth / 3.0f;
+                mGhostStart = lineWidth - textWidth + gap;
+                mMaxScroll = mGhostStart + textWidth;
+                mGhostOffset = lineWidth + gap;
+                mFadeStop = lineWidth + textWidth / 6.0f;
+                mMaxFadeScroll = mGhostStart + lineWidth + lineWidth;
+
+                textView.invalidate();
+                mHandler.post(mStartCallback);
+            }
+        }
+
+        float getGhostOffset() {
+            return mGhostOffset;
+        }
+
+        float getScroll() {
+            return mScroll;
+        }
+
+        float getMaxFadeScroll() {
+            return mMaxFadeScroll;
+        }
+
+        boolean shouldDrawLeftFade() {
+            return mScroll <= mFadeStop;
+        }
+
+        boolean shouldDrawGhost() {
+            return mStatus == MARQUEE_RUNNING && mScroll > mGhostStart;
+        }
+
+        boolean isRunning() {
+            return mStatus == MARQUEE_RUNNING;
+        }
+
+        boolean isStopped() {
+            return mStatus == MARQUEE_STOPPED;
         }
     }
 }

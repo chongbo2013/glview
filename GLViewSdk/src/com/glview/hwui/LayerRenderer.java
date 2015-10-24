@@ -2,13 +2,13 @@ package com.glview.hwui;
 
 import java.nio.IntBuffer;
 
-import android.graphics.Color;
 import android.graphics.Bitmap.Config;
+import android.graphics.Color;
 import android.opengl.Matrix;
 
 import com.glview.graphics.Bitmap;
 import com.glview.libgdx.graphics.opengl.GL20;
-import com.glview.libgdx.graphics.utils.BufferUtils;
+import com.glview.utils.BufferUtils;
 
 
 public class LayerRenderer extends GL20Canvas {

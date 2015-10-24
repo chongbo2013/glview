@@ -21,13 +21,12 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 import com.glview.App;
-import com.glview.exception.GLViewRuntimeException;
 import com.glview.hwui.GLId;
 import com.glview.libgdx.graphics.VertexAttribute;
 import com.glview.libgdx.graphics.VertexAttributes;
 import com.glview.libgdx.graphics.VertexAttributes.Usage;
 import com.glview.libgdx.graphics.opengl.GL20;
-import com.glview.libgdx.graphics.utils.BufferUtils;
+import com.glview.utils.BufferUtils;
 
 /** <p>
  * A {@link VertexData} implementation based on OpenGL vertex buffer objects.

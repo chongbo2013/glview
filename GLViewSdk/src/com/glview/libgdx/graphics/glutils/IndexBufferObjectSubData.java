@@ -24,7 +24,7 @@ import com.glview.App;
 import com.glview.exception.GLViewRuntimeException;
 import com.glview.hwui.GLId;
 import com.glview.libgdx.graphics.opengl.GL20;
-import com.glview.libgdx.graphics.utils.BufferUtils;
+import com.glview.utils.BufferUtils;
 
 /** <p>
  * In IndexBufferObject wraps OpenGL's index buffer functionality to be used in conjunction with VBOs. This class can be

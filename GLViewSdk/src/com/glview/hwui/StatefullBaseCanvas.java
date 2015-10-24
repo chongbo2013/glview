@@ -11,7 +11,7 @@ abstract class StatefullBaseCanvas extends AbsGLCanvas {
 	
 	protected Snapshot mFirstSnapshot = new Snapshot();
 	protected Snapshot mSnapshot = mFirstSnapshot;
-	private int mSaveCount = 1;
+	protected int mSaveCount = 1;
 	protected boolean mDirtyClip = false;
 	
 	int mWidth;
@@ -281,7 +281,6 @@ abstract class StatefullBaseCanvas extends AbsGLCanvas {
 
 	    // subclass handles restore implementation
 	    onSnapshotRestored(toRemove, toRestore);
-	    
 	    toRemove.recycle();
 	}
 	

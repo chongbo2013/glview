@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Canvas;
 import android.os.Build;
 import android.os.SystemClock;
 import android.util.AttributeSet;
@@ -11,6 +12,8 @@ import android.util.Log;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.SurfaceView;
+import android.view.TextureView;
 
 import com.glview.R;
 import com.glview.animation.LayoutTransition;
@@ -1996,6 +1999,16 @@ public abstract class ViewGroup extends View{
     	final int childrenCount = mChildrenCount;
     	final View[] children = mChildren;
     	
+    	int flags = mGroupFlags;
+    	
+    	final boolean clipToPadding = (flags & CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK;
+        if (clipToPadding) {
+            canvas.save(GLCanvas.SAVE_FLAG_CLIP);
+            canvas.clipRect(mScrollX + mPaddingLeft, mScrollY + mPaddingTop,
+                    mScrollX + mRight - mLeft - mPaddingRight,
+                    mScrollY + mBottom - mTop - mPaddingBottom);
+        }
+    	
     	// Build Z-Sort children.
 		
         final long drawingTime = getDrawingTime();
@@ -2016,6 +2029,10 @@ public abstract class ViewGroup extends View{
         if (preorderedList != null) preorderedList.clear();
         
 		renderDisappearingChildren(canvas);
+		
+		if (clipToPadding) {
+            canvas.restore();
+        }
 		
 	}
     
