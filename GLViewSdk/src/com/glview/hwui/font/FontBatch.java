@@ -38,7 +38,7 @@ class FontBatch implements Disposable {
 	int mCachedColor;
 	
 	public FontBatch(FontRenderer fontRenderer, CacheTexture texture) {
-		this(fontRenderer, texture, 1000);
+		this(fontRenderer, texture, 2048);
 	}
 	
 	public FontBatch(FontRenderer fontRenderer, CacheTexture texture, int size) {

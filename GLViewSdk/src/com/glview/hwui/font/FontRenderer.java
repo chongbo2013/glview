@@ -287,6 +287,7 @@ public class FontRenderer {
 				cacheTexture.mFontBatch.flush();
 			}
 			cacheTexture.setDirty(false);
+			cacheTexture.mPacker.reset();
 		}
 		caches.mCacheRects.clear();
 	}

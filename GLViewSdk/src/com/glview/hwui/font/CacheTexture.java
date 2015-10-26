@@ -67,6 +67,7 @@ class CacheTexture {
 		if (mFontBatch != null) {
 			mFontBatch.dispose();
 		}
+		mPacker.reset();
 		mFontBatch = null;
 		mCaches.deleteTexture(mTexture);
 		mPixelBuffer = null;

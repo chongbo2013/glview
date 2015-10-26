@@ -189,7 +189,6 @@ public class JavaBlurProcess implements BlurProcess {
 				for(x = 0; x < w; x++)
 				{
 					src[dst_i] = (byte) (((sum_a * mul_sum) >>> shr_sum) & 0xff);
-					Log.d("Stackblur", "----" + src[dst_i]);
 					dst_i += 1;
 
 					sum_a -= sum_out_a;
